@@ -1,48 +1,59 @@
 :root {
-    --bg-dark: #0f172a;
-    --card-bg: #1e293b;
+    --bg: #0f172a;
+    --card: #1e293b;
     --accent: #38bdf8;
-    --text-main: #f1f5f9;
-    --text-dim: #94a3b8;
-    --btn-glow: rgba(56, 189, 248, 0.4);
+    --text: #f1f5f9;
+    --border: #334155;
 }
 
 body { 
-    font-family: 'Segoe UI', Roboto, sans-serif; 
-    background: var(--bg-dark); 
-    color: var(--text-main);
-    display: flex; justify-content: center; padding: 40px 20px;
+    font-family: 'Inter', sans-serif; 
+    background: var(--bg); 
+    color: var(--text);
+    display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;
 }
 
 .calculator-card { 
-    background: var(--card-bg); 
-    padding: 40px; border-radius: 24px; 
-    box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 20px var(--btn-glow);
-    width: 100%; max-width: 500px;
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--card); 
+    padding: 40px; border-radius: 20px; 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    width: 90%; max-width: 450px;
+    border: 1px solid var(--border);
 }
 
+.brand-header { text-align: center; margin-bottom: 30px; }
 .brand-header h1 { 
-    font-size: 2.5rem; color: var(--accent); 
-    text-shadow: 0 0 10px var(--accent);
+    font-size: 3rem; color: var(--accent); margin: 0;
+    text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+    letter-spacing: 1px;
 }
+.brand-header p { font-size: 10px; color: var(--accent); opacity: 0.8; margin-top: 5px; }
+
+.field-label { font-size: 11px; color: var(--accent); margin: 10px 0 5px 5px; text-transform: uppercase; }
 
 input {
-    background: #0f172a; border: 1px solid #334155;
-    color: white; padding: 12px; border-radius: 12px; width: 100%;
-    margin-bottom: 15px; box-sizing: border-box;
+    background: #020617; border: 1px solid var(--border);
+    color: white; padding: 14px; border-radius: 10px; width: 100%;
+    box-sizing: border-box; font-size: 16px;
 }
 
 .btn-calc {
-    background: linear-gradient(135deg, #0ea5e9, #2563eb);
-    color: white; border: none; padding: 16px; border-radius: 12px;
-    cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s;
+    background: var(--accent); color: var(--bg); border: none; 
+    padding: 16px; border-radius: 10px; width: 100%; font-weight: 800;
+    cursor: pointer; margin-top: 20px; transition: 0.3s;
 }
 
 .btn-pdf {
-    background: transparent; border: 2px solid var(--accent);
-    color: var(--accent); margin-top: 15px; width: 100%; padding: 15px;
-    border-radius: 12px; cursor: pointer; font-weight: bold;
+    background: transparent; border: 1px solid var(--accent);
+    color: var(--accent); padding: 16px; border-radius: 10px; width: 100%;
+    cursor: pointer; margin-top: 10px; font-weight: 700;
 }
 
-.btn-pdf:hover { background: var(--accent); color: var(--bg-dark); }
+.result-box { 
+    text-align: center; background: rgba(0,0,0,0.2); 
+    margin: 20px 0; padding: 15px; border-radius: 10px; border: 1px dashed var(--accent);
+}
+#score { font-size: 36px; font-weight: 900; color: white; }
+
+.footer-note { text-align: center; font-size: 10px; margin-top: 20px; color: #64748b; }
+.footer-note a { color: var(--accent); text-decoration: none; }
