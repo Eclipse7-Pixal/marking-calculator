@@ -12,88 +12,73 @@ function calculateScore() {
 }
 
 async function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const data = calculateScore();
-    
-    const student = document.getElementById('studentName').value || "Valued Student";
-    const test = document.getElementById('testName').value || "Evaluation Test";
-    const date = new Date().toLocaleString();
-    const reportID = "E7-" + Math.random().toString(36).substr(2, 6).toUpperCase();
-
-    // 1. BRANDED HEADER & LOGO
-    // Capitalized brand name as requested
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.setTextColor(0, 0, 0); 
-    doc.text("Eclipse7 DIGITAL", 105, 40, { align: "center" });
-
-    // Note: To use your specific logo, upload it to your GitHub repo 
-    // and replace 'logo.png' with your file path.
-    const logoImg = 'logo.png';
     try {
-        doc.addImage(logoImg, 'PNG', 85, 5, 40, 40);
-    } catch (e) {
-        console.log("Logo file not found in repository.");
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const data = calculateScore();
+        
+        const student = document.getElementById('studentName').value || "Student";
+        const test = document.getElementById('testName').value || "Examination";
+        const date = new Date().toLocaleString();
+        const reportID = "E7-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+        // 1. BRAND HEADER (Capitalized)
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        doc.text("Eclipse7 DIGITAL", 105, 40, { align: "center" });
+
+        // 2. IDENTITY SECTION
+        doc.line(20, 45, 190, 45);
+        doc.setFontSize(10);
+        doc.text(`Student: ${student}`, 20, 55);
+        doc.text(`Test: ${test}`, 20, 62);
+        doc.text(`ID: ${reportID}`, 150, 55);
+        doc.text(`Date: ${date}`, 150, 62);
+
+        // 3. DATA TABLE
+        doc.autoTable({
+            startY: 70,
+            head: [['Metric', 'Value']],
+            body: [
+                ['Attempted', data.attempted],
+                ['Correct', data.correct],
+                ['Wrong', data.wrong],
+                ['Ratio', `1/${data.ratio}`],
+                ['Score', data.finalScore.toFixed(2)]
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [41, 128, 185] }
+        });
+
+        const finalY = doc.lastAutoTable.finalY + 30;
+
+        // 4. PIE CHART (Simplified for Compatibility)
+        doc.setFontSize(12);
+        doc.text("Performance Chart", 20, finalY - 10);
+        doc.setLineWidth(0.5);
+        doc.circle(50, finalY + 20, 20); // The "Pie" base
+        doc.setFontSize(9);
+        doc.text(`- Correct: ${data.correct}`, 80, finalY + 15);
+        doc.text(`- Wrong: ${data.wrong}`, 80, finalY + 25);
+
+        // 5. CIRCULAR STAMP (Red)
+        doc.setDrawColor(192, 57, 43);
+        doc.setLineWidth(1);
+        doc.circle(160, finalY + 20, 20);
+        doc.circle(160, finalY + 20, 18);
+        doc.setFontSize(8);
+        doc.setTextColor(192, 57, 43);
+        doc.text("Eclipse7", 160, finalY + 18, { align: "center" });
+        doc.text("APPROVED", 160, finalY + 23, { align: "center" });
+
+        // 6. FOOTER
+        doc.setTextColor(150);
+        doc.setFontSize(8);
+        doc.text("Verify at eclipse7.odoo.com", 105, 285, { align: "center" });
+
+        doc.save(`${student}_Eclipse7_Report.pdf`);
+    } catch (error) {
+        console.error("PDF Error:", error);
+        alert("There was an error generating the PDF. Please ensure all fields are filled.");
     }
-
-    // 2. REPORT DETAILS
-    doc.setDrawColor(0, 0, 0);
-    doc.line(20, 50, 190, 50);
-    doc.setFontSize(11);
-    doc.text(`Student: ${student}`, 20, 60);
-    doc.text(`Exam: ${test}`, 20, 67);
-    doc.text(`Report ID: ${reportID}`, 140, 60);
-    doc.text(`Date: ${date}`, 140, 67);
-
-    // 3. SCORE TABLE
-    doc.autoTable({
-        startY: 75,
-        theme: 'grid',
-        headStyles: { fillColor: [0, 0, 0] },
-        body: [
-            ['Total Attempted', data.attempted],
-            ['Correct Responses', data.correct],
-            ['Incorrect Responses', data.wrong],
-            ['Final Score', data.finalScore.toFixed(2)]
-        ],
-    });
-
-    // 4. PERFORMANCE PIE CHART (Visual Logic)
-    const chartY = doc.lastAutoTable.finalY + 40;
-    const centerX = 60;
-    const radius = 25;
-    
-    // Draw Correct Slice (Green)
-    const correctAngle = (data.correct / data.attempted) * 2 * Math.PI;
-    doc.setDrawColor(40, 167, 69);
-    doc.setLineWidth(10);
-    doc.arc(centerX, chartY, radius, 0, correctAngle);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(0);
-    doc.text("Performance Breakdown:", 20, chartY - 30);
-    doc.text(`- Correct: ${data.correct}`, 100, chartY - 10);
-    doc.text(`- Incorrect: ${data.wrong}`, 100, chartY);
-
-    // 5. CIRCULAR BRAND STAMP
-    const stampY = chartY + 40;
-    // Outer Circle
-    doc.setDrawColor(192, 57, 43);
-    doc.setLineWidth(1);
-    doc.circle(160, stampY, 20);
-    // Inner Circle
-    doc.circle(160, stampY, 18);
-    
-    doc.setFontSize(7);
-    doc.setTextColor(192, 57, 43);
-    doc.setFont("helvetica", "bold");
-    doc.text("Eclipse7 APPROVED", 160, stampY, { align: "center", angle: -10 });
-
-    // 6. FOOTER
-    doc.setFontSize(8);
-    doc.setTextColor(150);
-    doc.text("Verify at eclipse7.odoo.com", 105, 285, { align: "center" });
-
-    doc.save(`${student}_Result.pdf`);
 }
