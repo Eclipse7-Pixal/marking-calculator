@@ -1,0 +1,20 @@
+:root { --primary: #2980b9; --success: #27ae60; --dark: #2c3e50; }
+body { font-family: 'Inter', sans-serif; background: #ecf0f1; display: flex; justify-content: center; padding: 40px 20px; }
+.calculator-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+
+.brand-header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+.brand-header h1 { margin: 0; color: var(--primary); letter-spacing: 1px; }
+.brand-header p { margin: 0; font-size: 12px; color: #7f8c8d; text-transform: uppercase; }
+
+.user-details input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+.input-group { margin-bottom: 15px; }
+label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: var(--dark); }
+input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+
+.btn-calc { width: 100%; padding: 15px; background: var(--dark); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+.btn-pdf { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+
+.result-display { text-align: center; background: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0; border: 1px dashed #cbd5e0; }
+#score { font-size: 32px; font-weight: bold; color: var(--primary); }
+.footer-link { text-align: center; margin-top: 20px; font-size: 11px; }
+.footer-link a { color: var(--primary); text-decoration: none; }
