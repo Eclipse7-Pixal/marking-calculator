@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eclipse7 | Official Marking Calculator</title>
+    <title>Eclipse7 | AI Scoring Analytics</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
@@ -11,41 +11,35 @@
 <body>
     <div class="calculator-card">
         <div class="brand-header">
-            <h1>eclipse7</h1>
-            <p>Certified Scoring Module</p>
+            <h1>Eclipse7</h1>
+            <p>INTELLIGENT SCORING MODULE</p>
         </div>
 
-        <div class="user-details">
-            <input type="text" id="studentName" placeholder="Full Student Name">
-            <input type="text" id="testName" placeholder="Exam/Test Title">
-        </div>
-
-        <div class="input-section">
-            <div class="input-group">
-                <label>Total Attempted</label>
-                <input type="number" id="attempted" placeholder="0">
-            </div>
-            <div class="input-group">
-                <label>Number of Wrong</label>
-                <input type="number" id="wrong" placeholder="0">
-            </div>
-            <div class="input-group">
-                <label>Negative Ratio (e.g., 3 for 1/3)</label>
-                <input type="number" id="ratio" value="3">
-            </div>
+        <div class="input-container">
+            <input type="text" id="studentName" placeholder="Candidate Full Name">
+            <input type="text" id="testName" placeholder="Examination Title">
+            
+            <div class="field-label">Total Attempted</div>
+            <input type="number" id="attempted" placeholder="0">
+            
+            <div class="field-label">Incorrect Responses</div>
+            <input type="number" id="wrong" placeholder="0">
+            
+            <div class="field-label">Negative Ratio (e.g., 4 for 1/4)</div>
+            <input type="number" id="ratio" value="4">
         </div>
 
         <button class="btn-calc" onclick="calculateScore()">Calculate Final Score</button>
         
-        <div class="result-display">
-            <small>Final Calculated Marks</small>
+        <div class="result-box">
+            <small>COMPUTED SCORE</small>
             <div id="score">0.00</div>
         </div>
 
         <button class="btn-pdf" onclick="downloadPDF()">Download Verified Report</button>
         
-        <div class="footer-link">
-            <a href="https://eclipse7.odoo.com/" target="_blank">Verified by eclipse7.odoo.com</a>
+        <div class="footer-note">
+            Official System of <a href="https://eclipse7.odoo.com/" target="_blank">Eclipse7 Digital</a>
         </div>
     </div>
     <script src="script.js"></script>
