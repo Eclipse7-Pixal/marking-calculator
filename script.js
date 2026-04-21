@@ -24,31 +24,31 @@ async function downloadPDF() {
         const doc = new jsPDF();
         const data = calculateScore();
         const student = document.getElementById('studentName').value || "Candidate";
+        const testName = document.getElementById('testName').value || "General Assessment"; // Test name input
         const dateStr = new Date().toLocaleString();
 
         // 1. BRANDED HEADER (MATCHING THE PAGE LAYOUT)
-        doc.setFillColor(15, 23, 42); // Dark Navy background
+        doc.setFillColor(15, 23, 42); 
         doc.rect(0, 0, 210, 45, 'F');
         
-        // Main Heading
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(22);
         doc.setFont("helvetica", "bold");
         doc.text("Negative Marking Calculator", 105, 20, { align: "center" });
         
-        // Subheading
         doc.setFontSize(14);
-        doc.setTextColor(56, 189, 248); // Bright Blue
+        doc.setTextColor(56, 189, 248);
         doc.setFont("helvetica", "normal");
         doc.text("Powered by ECLIPSE7", 105, 30, { align: "center" });
 
-        // 2. DATA TABLE
+        // 2. DATA TABLE (WITH TEST NAME ADDED)
         doc.autoTable({
             startY: 55,
             theme: 'grid',
             headStyles: { fillColor: [15, 23, 42] },
             body: [
                 ['Student Name', student],
+                ['Test Name', testName], // Added as requested
                 ['Total Questions', data.totalQs],
                 ['Maximum Marks', data.maxMarks],
                 ['Correct Answers', data.correct],
@@ -59,7 +59,7 @@ async function downloadPDF() {
             ],
         });
 
-        // 3. STABLE BAR GRAPH
+        // 3. STABLE PERFORMANCE BAR GRAPH (WITH SKIPPED BAR ADDED)
         const graphY = doc.lastAutoTable.finalY + 25;
         doc.setTextColor(0);
         doc.setFontSize(14);
@@ -79,8 +79,13 @@ async function downloadPDF() {
         doc.rect(50, graphY + 25, (data.wrong / total) * maxWidth, 8, 'F');
         doc.text(`Wrong (${data.wrong})`, 20, graphY + 31);
 
+        // Skipped Bar (Grey) - Added as requested
+        doc.setFillColor(200, 200, 200);
+        doc.rect(50, graphY + 40, (data.unattempted / total) * maxWidth, 8, 'F');
+        doc.text(`Skipped (${data.unattempted})`, 20, graphY + 46);
+
         // 4. RECOMMENDATIONS (EXACT PHRASING)
-        const recY = graphY + 60;
+        const recY = graphY + 65;
         doc.setFontSize(12);
         doc.setTextColor(0);
         doc.text("Recommendations:", 20, recY);
