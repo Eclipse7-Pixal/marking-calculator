@@ -19,11 +19,14 @@
             <input type="text" id="studentName" placeholder="Candidate Full Name">
             <input type="text" id="testName" placeholder="Examination Title">
             
+            <div class="field-label">Total Questions in Test</div>
+            <input type="number" id="totalQs" placeholder="e.g., 100">
+
             <div class="field-label">Total Attempted</div>
-            <input type="number" id="attempted" value="0">
+            <input type="number" id="attempted" placeholder="0">
             
             <div class="field-label">Incorrect Responses</div>
-            <input type="number" id="wrong" value="0">
+            <input type="number" id="wrong" placeholder="0">
             
             <div class="field-label">Negative Ratio (e.g., 4 for 1/4)</div>
             <input type="number" id="ratio" value="4">
@@ -39,7 +42,7 @@
         <button class="btn-pdf" onclick="downloadPDF()">Download Verified Report</button>
         
         <div class="footer-note">
-            Official System of <a href="https://eclipse7.odoo.com/" target="_blank">Eclipse7 Digital</a> [cite: 10, 21]
+            Official System of <a href="https://eclipse7.odoo.com/" target="_blank">Eclipse7 Digital</a>
         </div>
     </div>
     <script src="script.js"></script>
