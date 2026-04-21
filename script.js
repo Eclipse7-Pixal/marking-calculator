@@ -18,11 +18,11 @@ async function downloadPDF() {
         const data = calculateScore();
         
         const student = document.getElementById('studentName').value || "Candidate";
-        const test = document.getElementById('testName').value || "Assessment";
+        const test = document.getElementById('testName').value || "General Assessment";
         const reportID = "E7-" + Math.random().toString(36).substr(2, 6).toUpperCase();
         const date = new Date().toLocaleString();
 
-        // 1. HEADER
+        // 1. BRANDED HEADER
         doc.setFillColor(15, 23, 42); 
         doc.rect(0, 0, 210, 45, 'F');
         doc.setTextColor(56, 189, 248);
@@ -31,7 +31,7 @@ async function downloadPDF() {
         doc.setFontSize(10);
         doc.text("VERIFIED ACADEMIC PERFORMANCE ANALYTICS", 105, 33, { align: "center" });
 
-        // 2. DATA
+        // 2. CANDIDATE DATA
         doc.setTextColor(0);
         doc.text(`REPORT ID: ${reportID}`, 20, 55);
         doc.text(`DATE: ${date}`, 140, 55);
@@ -39,48 +39,51 @@ async function downloadPDF() {
         doc.text(`CANDIDATE: ${student}`, 20, 70);
         doc.text(`EXAMINATION: ${test}`, 20, 80);
 
-        // 3. TABLE
+        // 3. ANALYTICS TABLE
         doc.autoTable({
             startY: 90,
             theme: 'grid',
             headStyles: { fillColor: [15, 23, 42] },
             body: [
-                ['Total Attempted', data.attempted],
+                ['Total Questions Attempted', data.attempted],
                 ['Correct Responses', data.correct],
                 ['Incorrect Responses', data.wrong],
-                ['Negative Ratio', `1/${data.ratio}`],
-                ['FINAL SCORE', data.finalScore.toFixed(2)]
+                ['Negative Marking Ratio', `1 / ${data.ratio}`],
+                ['FINAL CALCULATED SCORE', data.finalScore.toFixed(2)]
             ],
         });
 
-        // 4. CHART (Arc Method)
+        // 4. PERFORMANCE CHART (Using stable Ellipse method)
         const chartY = doc.lastAutoTable.finalY + 35;
-        const total = data.attempted || 1;
-        const correctAngle = (data.correct / total) * 2 * Math.PI;
-
         doc.setFontSize(12);
-        doc.text("PERFORMANCE VISUALIZATION", 20, chartY - 20);
+        doc.text("PERFORMANCE OVERVIEW", 20, chartY - 20);
         
-        doc.setLineWidth(10);
-        doc.setDrawColor(34, 197, 94); // Green
-        doc.arc(50, chartY, 20, 0, correctAngle, true);
+        // Draw Chart Base
+        doc.setLineWidth(0.5);
+        doc.setDrawColor(200);
+        doc.ellipse(50, chartY, 20, 20, 'S'); 
         
-        doc.setDrawColor(239, 68, 68); // Red
-        doc.arc(50, chartY, 20, correctAngle, 2 * Math.PI, true);
+        doc.setFontSize(10);
+        doc.setTextColor(34, 197, 94);
+        doc.text(`Correct: ${data.correct}`, 85, chartY - 5);
+        doc.setTextColor(239, 68, 68);
+        doc.text(`Incorrect: ${data.wrong}`, 85, chartY + 5);
 
-        // 5. FOUNDER & CEO INFO
+        // 5. EXECUTIVE DETAILS
         const execY = chartY + 50;
+        doc.setTextColor(0);
         doc.setFontSize(11);
         doc.text("MR. PRASAD REDDY", 20, execY);
         doc.setFontSize(9);
         doc.text("Founder & CEO, Eclipse7", 20, execY + 5);
-        doc.line(20, execY + 10, 70, execY + 10);
-        doc.text("Authorized Digital Signature", 20, execY + 15);
+        doc.line(20, execY + 10, 80, execY + 10);
+        doc.text("Authorized Digital Endorsement", 20, execY + 15);
 
-        // 6. STAMP
+        // 6. OFFICIAL STAMP
         doc.setDrawColor(239, 68, 68);
-        doc.circle(160, execY + 10, 15);
-        doc.setFontSize(7);
+        doc.setLineWidth(1);
+        doc.ellipse(160, execY + 10, 18, 18, 'S');
+        doc.setFontSize(8);
         doc.setTextColor(239, 68, 68);
         doc.text("Eclipse7", 160, execY + 8, { align: "center" });
         doc.text("APPROVED", 160, execY + 13, { align: "center" });
@@ -88,11 +91,12 @@ async function downloadPDF() {
         // 7. CALL TO ACTION
         doc.setTextColor(37, 99, 235);
         doc.setFontSize(10);
-        doc.text("YOU SHOULD VISIT OUR SITE, IT WAS SPECIALLY MADE FOR YOU.", 105, 270, { align: "center" });
-
-        doc.save(`${student}_Eclipse7_Report.pdf`);
+        doc.setFont("helvetica", "bold");
+        doc.text("YOU SHOULD VISIT OUR SITE, IT WAS SPECIALLY MADE FOR YOU.", 105, 275, { align: "center" });
+        
+        doc.save(`${student}_Eclipse7_Verified_Report.pdf`);
     } catch (err) {
-        alert("PDF Error: " + err.message);
+        alert("System Error: Please ensure all fields are filled. Details: " + err.message);
         console.error(err);
     }
 }
