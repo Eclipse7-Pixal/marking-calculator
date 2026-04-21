@@ -1,106 +1,41 @@
-function calculateScore() {
-    const totalInTest = parseFloat(document.getElementById('totalQs').value) || 0;
-    const attempted = parseFloat(document.getElementById('attempted').value) || 0;
-    const wrong = parseFloat(document.getElementById('wrong').value) || 0;
-    const ratio = parseFloat(document.getElementById('ratio').value) || 0;
-    
-    const correct = attempted - wrong;
-    const unattempted = totalInTest - attempted;
-    const penalty = ratio > 0 ? (wrong / ratio) : 0;
-    const finalScore = correct - penalty;
-
-    document.getElementById('score').innerText = finalScore.toFixed(2);
-    return { totalInTest, attempted, wrong, correct, unattempted, finalScore, ratio };
-}
-
-async function downloadPDF() {
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const data = calculateScore();
-        
-        const student = document.getElementById('studentName').value || "Candidate";
-        const test = document.getElementById('testName').value || "Assessment";
-
-        // 1. HEADER & BRANDING
-        doc.setFillColor(15, 23, 42); 
-        doc.rect(0, 0, 210, 45, 'F');
-        doc.setTextColor(56, 189, 248);
-        doc.setFontSize(26);
-        doc.text("Eclipse7 DIGITAL", 105, 25, { align: "center" });
-        doc.setFontSize(10);
-        doc.text("VERIFIED ACADEMIC PERFORMANCE ANALYTICS", 105, 33, { align: "center" });
-
-        // 2. TABLES & DATA
-        doc.autoTable({
-            startY: 60,
-            theme: 'grid',
-            headStyles: { fillColor: [15, 23, 42] },
-            body: [
-                ['Candidate Name', student],
-                ['Examination', test],
-                ['Total Questions', data.totalInTest],
-                ['Total Attempted', data.attempted],
-                ['Correct Answers', data.correct],
-                ['Wrong Answers', data.wrong],
-                ['FINAL SCORE', data.finalScore.toFixed(2)]
-            ],
-        });
-
-        // 3. PIE CHART (SOLID PATH METHOD - NO ARC ERROR)
-        const chartY = doc.lastAutoTable.finalY + 40;
-        const centerX = 50;
-        const radius = 25;
-
-        doc.setTextColor(0);
-        doc.setFontSize(12);
-        doc.text("PERFORMANCE DISTRIBUTION", 20, chartY - 30);
-
-        // Function to draw a slice without using doc.arc
-        const drawSlice = (color, startAngle, endAngle) => {
-            doc.setFillColor(color[0], color[1], color[2]);
-            doc.lines(
-                [[radius * Math.cos(startAngle), radius * Math.sin(startAngle)]], 
-                centerX, chartY, [1, 1], 'F'
-            );
-            // Fallback: Professional colored circles if complex paths fail
-            doc.setDrawColor(color[0], color[1], color[2]);
-            doc.setLineWidth(15);
-            doc.circle(centerX, chartY, radius, 'S');
-        };
-
-        // Draw segments
-        drawSlice([34, 197, 94], 0, (data.correct / data.totalInTest) * 2 * Math.PI); // Green
-        drawSlice([239, 68, 68], 0.5, 1); // Red (Visual indicator)
-
-        // 4. CEO & FOUNDER CUSTOM STAMP
-        const execY = chartY + 50;
-        doc.setFontSize(11);
-        doc.text("MR. PRASAD REDDY", 20, execY);
-        doc.setFontSize(9);
-        doc.text("Founder & CEO, Eclipse7", 20, execY + 5);
-        doc.line(20, execY + 10, 80, execY + 10);
-
-        // INTEGRATING YOUR UPLOADED STAMP
-        // If you have the image file in your repo, use: doc.addImage('stamp.png', 'PNG', 140, execY - 10, 40, 40);
-        // For now, I'm using a high-detail vector circle to ensure the code never breaks.
-        doc.setDrawColor(200, 0, 0);
-        doc.setLineWidth(1);
-        doc.circle(160, execY + 10, 20, 'S');
-        doc.circle(160, execY + 10, 18, 'S');
-        doc.setFontSize(7);
-        doc.setTextColor(200, 0, 0);
-        doc.text("PRASAD REDDY", 160, execY + 8, { align: "center" });
-        doc.text("CEO & FOUNDER", 160, execY + 13, { align: "center" });
-        doc.text("ECLIPSE7 VERIFIED", 160, execY + 18, { align: "center" });
-
-        // 5. FOOTER
-        doc.setTextColor(37, 99, 235);
-        doc.setFont("helvetica", "bold");
-        doc.text("YOU SHOULD VISIT OUR SITE, IT WAS SPECIALLY MADE FOR YOU.", 105, 280, { align: "center" });
-
-        doc.save(`${student}_Eclipse7_Report.pdf`);
-    } catch (err) {
-        alert("CRITICAL ERROR: " + err.message);
-    }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eclipse7 | Premium Analytics</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="calculator-card">
+        <div class="brand-header">
+            <h1>Eclipse7</h1>
+            <p>ADVANCED SCORING ANALYTICS</p>
+        </div>
+        <div class="input-container">
+            <input type="text" id="studentName" placeholder="Student Full Name">
+            <input type="text" id="testName" placeholder="Test Name/Series">
+            <div class="field-label">Total Questions in Paper</div>
+            <input type="number" id="totalQs" placeholder="e.g. 100">
+            <div class="field-label">Questions Attempted</div>
+            <input type="number" id="attempted" placeholder="0">
+            <div class="field-label">Wrong Answers</div>
+            <input type="number" id="wrong" placeholder="0">
+            <div class="field-label">Negative Marking Ratio</div>
+            <input type="number" id="ratio" value="4">
+        </div>
+        <button class="btn-calc" onclick="calculateScore()">Calculate Final Score</button>
+        <div class="result-box">
+            <small>FINAL SCORE</small>
+            <div id="score">0.00</div>
+        </div>
+        <button class="btn-pdf" onclick="downloadPDF()">Download Verified Report</button>
+        <div class="footer-note">
+            Verification Portal: <a href="https://eclipse7.odoo.com/" target="_blank">eclipse7.odoo.com</a>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
