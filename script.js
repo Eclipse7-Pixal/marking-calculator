@@ -26,7 +26,7 @@ async function downloadPDF() {
         const student = document.getElementById('studentName').value || "Candidate";
         const dateStr = new Date().toLocaleString();
 
-        // 1. BRANDED HEADER
+        // 1. HEADER
         doc.setFillColor(15, 23, 42); 
         doc.rect(0, 0, 210, 40, 'F');
         doc.setTextColor(56, 189, 248);
@@ -50,46 +50,33 @@ async function downloadPDF() {
             ],
         });
 
-        // 3. PIE DIAGRAM (FIXED DRAWING LOGIC)
-        const chartY = doc.lastAutoTable.finalY + 45;
-        const centerX = 55;
-        const radius = 25;
+        // 3. STABLE BAR GRAPH (Replaces Pie Diagram)
+        const graphY = doc.lastAutoTable.finalY + 25;
         doc.setTextColor(0);
         doc.setFontSize(14);
-        doc.text("PERFORMANCE PIE CHART", 20, chartY - 30);
+        doc.text("PERFORMANCE BAR GRAPH", 20, graphY);
 
+        const maxWidth = 120; // Max width of the bars
         const total = data.totalQs || 1;
-        
-        // Base: Draw Unattempted first (Grey Circle)
-        doc.setFillColor(210, 210, 210);
-        doc.circle(centerX, chartY, radius, 'F');
 
-        // Draw Slices using sector (Angles are in degrees)
-        let startAngle = 0;
-
-        // Correct Slice (Green)
-        if (data.correct > 0) {
-            const correctAngle = (data.correct / total) * 360;
-            doc.setFillColor(34, 197, 94);
-            doc.sector(centerX, chartY, radius, startAngle, startAngle + correctAngle, 'F');
-            startAngle += correctAngle;
-        }
-
-        // Wrong Slice (Red)
-        if (data.wrong > 0) {
-            const wrongAngle = (data.wrong / total) * 360;
-            doc.setFillColor(239, 68, 68);
-            doc.sector(centerX, chartY, radius, startAngle, startAngle + wrongAngle, 'F');
-        }
-
-        // Legend
+        // Correct Bar (Green)
+        doc.setFillColor(34, 197, 94);
+        doc.rect(50, graphY + 10, (data.correct / total) * maxWidth, 8, 'F');
         doc.setFontSize(10);
-        doc.setTextColor(34, 197, 94); doc.text(`Correct: ${data.correct}`, 110, chartY - 5);
-        doc.setTextColor(239, 68, 68); doc.text(`Incorrect: ${data.wrong}`, 110, chartY + 5);
-        doc.setTextColor(150); doc.text(`Unattempted: ${data.unattempted}`, 110, chartY + 15);
+        doc.text(`Correct (${data.correct})`, 20, graphY + 16);
 
-        // 4. RECOMMENDATIONS (EXACT SENTENCE REPLACEMENT)
-        const recY = chartY + 40;
+        // Wrong Bar (Red)
+        doc.setFillColor(239, 68, 68);
+        doc.rect(50, graphY + 25, (data.wrong / total) * maxWidth, 8, 'F');
+        doc.text(`Wrong (${data.wrong})`, 20, graphY + 31);
+
+        // Unattempted Bar (Grey)
+        doc.setFillColor(200, 200, 200);
+        doc.rect(50, graphY + 40, (data.unattempted / total) * maxWidth, 8, 'F');
+        doc.text(`Skipped (${data.unattempted})`, 20, graphY + 46);
+
+        // 4. RECOMMENDATIONS (STRICT SENTENCE MATCH)
+        const recY = graphY + 70;
         doc.setTextColor(0);
         doc.setFontSize(12);
         doc.text("Recommendations:", 20, recY);
@@ -98,13 +85,15 @@ async function downloadPDF() {
         const unP = ((data.unattempted / total) * 100).toFixed(2);
         const boost = ((data.unattempted * data.marksPerCorrect / (data.maxMarks || 1)) * 100).toFixed(2);
 
-        // Exact sentences you requested
+        // Sentence 1 Exactly
         doc.text(`1. Spend more time reviewing: You left ${data.unattempted} (${unP}%) of the questions unattempted.`, 20, recY + 10);
+        
+        // Sentence 2 Exactly (Split for PDF width)
         doc.text(`2. Switch focus to unattempted: Solving ${data.unattempted} more questions correctly could boost your percentage by`, 20, recY + 18);
         doc.text(`approximately ${boost}%.`, 20, recY + 24);
 
-        // 5. CEO FOUNDER & RULE
-        const footerY = 245;
+        // 5. CEO FOOTER & RULE
+        const footerY = 255;
         doc.setFontSize(11);
         doc.text("MR. PRASAD REDDY", 20, footerY);
         doc.setFontSize(9);
@@ -122,11 +111,12 @@ async function downloadPDF() {
         }
 
         doc.setTextColor(37, 99, 235);
-        doc.text("Visit: https://eclipse7.odoo.com/", 105, 275, { align: "center" });
+        doc.text("Visit: https://eclipse7.odoo.com/", 105, 280, { align: "center" });
         doc.setTextColor(150);
-        doc.text(`Issued on: ${dateStr}`, 105, 282, { align: "center" });
+        doc.setFontSize(8);
+        doc.text(`Issued on: ${dateStr}`, 105, 287, { align: "center" });
 
-        doc.save(`${student}_Report.pdf`);
+        doc.save(`${student}_Eclipse7_Report.pdf`);
     } catch (err) {
         alert("Download failed: " + err.message);
     }
