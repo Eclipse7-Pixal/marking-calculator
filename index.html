@@ -4,81 +4,175 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strategic Scoring Engine | ECLIPSE7</title>
-    <link rel="icon" type="image/png" href="logo.png">
     <style>
-        :root { --neon-blue: #38bdf8; --deep-slate: #0f172a; --glass-bg: rgba(255, 255, 255, 0.03); --glass-border: rgba(255, 255, 255, 0.1); }
-        body { background-color: var(--deep-slate); color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .calculator-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); padding: 40px; border-radius: 24px; width: 100%; max-width: 450px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        h1 { font-size: 1.8rem; margin-bottom: 5px; background: linear-gradient(to right, #fff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; }
-        .subtitle { text-align: center; color: #94a3b8; font-size: 0.65rem; letter-spacing: 1px; margin-bottom: 30px; text-transform: uppercase; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.75rem; color: #38bdf8; margin-bottom: 5px; font-weight: 600; }
-        input, select { width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border); border-radius: 8px; color: white; box-sizing: border-box; transition: all 0.3s ease; }
-        input:focus { border-color: var(--neon-blue); outline: none; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .ai-btn { width: 100%; padding: 15px; margin-top: 20px; border: none; border-radius: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: all 0.4s ease; }
-        .calc-btn { background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); color: white; box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); }
-        .calc-btn:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(56, 189, 248, 0.6); }
-        .download-btn { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); margin-top: 10px; }
-        .download-btn:hover { background: var(--neon-blue); color: var(--deep-slate); }
-        .result-box { background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--neon-blue); border-radius: 12px; padding: 20px; text-align: center; margin-top: 25px; }
-        .result-box h2 { margin: 0; color: var(--neon-blue); font-size: 2.2rem; }
+        :root {
+            --bg-deep: #050505;
+            --card-dark: #0d0d0d;
+            --accent-cyan: #00f2ff;
+            --text-dim: #9ca3af;
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #111, var(--bg-deep));
+            color: #e5e7eb;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .ai-container {
+            background: var(--card-dark);
+            border: 1px solid var(--glass-border);
+            padding: 35px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #fff, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .branding {
+            text-align: center;
+            font-size: 0.65rem;
+            color: var(--accent-cyan);
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+        input, select {
+            background: #151515;
+            border: 1px solid #222;
+            padding: 14px;
+            border-radius: 10px;
+            color: white;
+            font-size: 0.9rem;
+            width: 100%;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--accent-cyan); outline: none; box-shadow: 0 0 10px rgba(0, 242, 255, 0.1); }
+
+        label { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 5px; display: block; text-transform: uppercase; }
+
+        /* AI BUTTON STYLES */
+        .btn-core {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            border: none;
+            margin-top: 15px;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-execute {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn-execute:hover {
+            background: var(--accent-cyan);
+            transform: scale(1.02);
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);
+        }
+
+        .btn-dossier {
+            background: transparent;
+            color: #fff;
+            border: 1px solid #333;
+        }
+
+        .btn-dossier:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+        .score-display {
+            background: #000;
+            border: 1px solid #1a1a1a;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .score-val { font-size: 2.8rem; font-weight: 300; color: var(--accent-cyan); }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-<div class="calculator-card">
+
+<div class="ai-container">
     <h1>Strategic Scoring Engine</h1>
-    <p class="subtitle">POWERED BY ECLIPSE7 AI MADE BY SAIPRASAD BARURE</p>
+    <p class="branding">POWERED BY ECLIPSE7 AI | BY SAIPRASAD BARURE</p>
 
-    <div class="input-group">
-        <input type="text" id="studentName" placeholder="Full Student Identity">
-        <input type="text" id="testName" placeholder="Assessment Name (e.g. NEET-26/JEE-26)">
+    <div class="input-row">
+        <input type="text" id="studentName" placeholder="STUDENT IDENTITY">
+        <input type="text" id="testName" placeholder="ASSESSMENT TAG">
     </div>
 
-    <div class="grid-2">
-        <div class="input-group"><label>Question Count</label><input type="number" id="totalQs" value="75"></div>
-        <div class="input-group"><label>Maximum Marks</label><input type="number" id="maxMarks" value="300"></div>
-    </div>
-    <div class="grid-2">
-        <div class="input-group"><label>Total Attempts</label><input type="number" id="attempted"></div>
-        <div class="input-group"><label>Total Inaccuracies</label><input type="number" id="wrong"></div>
+    <div class="input-row">
+        <div><label>Questions</label><input type="number" id="totalQs" value="75"></div>
+        <div><label>Max Marks</label><input type="number" id="maxMarks" value="300"></div>
     </div>
 
-    <div class="input-group">
-        <label>Intelligence Depth</label>
-        <select id="reportType" onchange="toggleSubjectInputs()">
-            <option value="overall">Standard Analysis</option>
-            <option value="subjectwise">Subject-wise Analysis</option>
-        </select>
+    <div class="input-row">
+        <div><label>Attempts</label><input type="number" id="attempted"></div>
+        <div><label>Inaccuracies</label><input type="number" id="wrong"></div>
     </div>
 
-    <div id="subjectSection" style="display: none; margin-bottom: 20px;">
-        <div class="grid-2" style="grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 8px;">
-            <input type="number" id="phyT" placeholder="Phy T">
-            <input type="number" id="phyC" placeholder="Phy C">
-            <input type="number" id="phyW" placeholder="Phy W">
+    <select id="reportType" onchange="toggleSubjectInputs()" style="margin-top: 10px;">
+        <option value="overall">OVERALL ANALYTICS</option>
+        <option value="subjectwise">DETAILED SUBJECT BREAKDOWN</option>
+    </select>
+
+    <div id="subjectSection" style="display: none; margin-top: 15px;">
+        <div class="input-row" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 8px;">
+            <input type="number" id="phyT" placeholder="PHY T">
+            <input type="number" id="phyC" placeholder="PHY C">
+            <input type="number" id="phyW" placeholder="PHY W">
         </div>
-        <div class="grid-2" style="grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 8px;">
-            <input type="number" id="chemT" placeholder="Chem T">
-            <input type="number" id="chemC" placeholder="Chem C">
-            <input type="number" id="chemW" placeholder="Chem W">
+        <div class="input-row" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 8px;">
+            <input type="number" id="chemT" placeholder="CHEM T">
+            <input type="number" id="chemC" placeholder="CHEM C">
+            <input type="number" id="chemW" placeholder="CHEM W">
         </div>
-        <div class="grid-2" style="grid-template-columns: 1fr 1fr 1fr; gap: 5px;">
+        <div class="input-row" style="grid-template-columns: 1fr 1fr 1fr;">
             <input type="number" id="mathBioT" placeholder="M/B T">
             <input type="number" id="mathBioC" placeholder="M/B C">
             <input type="number" id="mathBioW" placeholder="M/B W">
         </div>
     </div>
 
-    <button onclick="calculateScore()" class="ai-btn calc-btn">Check Score</button>
-    <div class="result-box">
-        <p style="font-size: 0.7rem; margin-bottom: 5px;">VERIFIED SCORE</p>
-        <h2 id="score">0.00</h2>
+    <button onclick="calculateScore()" class="btn-core btn-execute">Execute Verification</button>
+
+    <div class="score-display">
+        <label>Calculated Metric</label>
+        <div id="score" class="score-val">0.00</div>
     </div>
-    <button onclick="downloadPDF()" class="ai-btn download-btn">Generate Official Report</button>
+
+    <button onclick="downloadPDF()" class="btn-core btn-dossier">Export Intelligence Dossier</button>
 </div>
+
 <script src="script.js"></script>
 </body>
 </html>
