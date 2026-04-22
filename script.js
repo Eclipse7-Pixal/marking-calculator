@@ -1,92 +1,140 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Negative Marking Calculator | ECLIPSE7</title>
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-</head>
-<body>
+function toggleSubjectInputs() {
+    const type = document.getElementById('reportType').value;
+    const section = document.getElementById('subjectSection');
+    section.style.display = type === 'subjectwise' ? 'block' : 'none';
+}
 
-<div class="calculator-card">
-    <h1>Negative Marking Calculator</h1>
-    <p class="subtitle">Powered by ECLIPSE7</p>
+function calculateScore() {
+    const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
+    const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
+    const attempted = parseFloat(document.getElementById('attempted').value) || 0;
+    const wrong = parseFloat(document.getElementById('wrong').value) || 0;
+    const ratio = parseFloat(document.getElementById('ratio').value) || 4;
+    
+    const correct = attempted - wrong;
+    const unattempted = totalQs - attempted;
+    const marksPerCorrect = totalQs > 0 ? (maxMarks / totalQs) : 0;
+    const penaltyPerWrong = ratio > 0 ? (marksPerCorrect / ratio) : 0;
+    
+    const totalPenalty = wrong * penaltyPerWrong;
+    const finalScore = (correct * marksPerCorrect) - totalPenalty;
+    const percentage = maxMarks > 0 ? ((finalScore / maxMarks) * 100).toFixed(2) : 0;
 
-    <div class="input-group">
-        <input type="text" id="studentName" placeholder="Student Name">
-        <input type="text" id="testName" placeholder="Test Name (e.g., JEE Mock 1)">
-    </div>
+    document.getElementById('score').innerText = finalScore.toFixed(2);
+    return { totalQs, maxMarks, attempted, wrong, correct, unattempted, finalScore, percentage, totalPenalty };
+}
 
-    <div class="grid-2">
-        <div class="input-group">
-            <label>Total Questions</label>
-            <input type="number" id="totalQs" value="75">
-        </div>
-        <div class="input-group">
-            <label>Max Marks</label>
-            <input type="number" id="maxMarks" value="300">
-        </div>
-    </div>
+async function downloadPDF() {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const data = calculateScore();
+        const reportType = document.getElementById('reportType').value;
+        const student = (document.getElementById('studentName').value || "Candidate").toUpperCase();
+        const test = document.getElementById('testName').value || "Assessment";
+        const reportID = "E7-" + Math.random().toString(36).substr(2, 9).toUpperCase();
 
-    <div class="grid-2">
-        <div class="input-group">
-            <label>Questions Attempted</label>
-            <input type="number" id="attempted">
-        </div>
-        <div class="input-group">
-            <label>Wrong Answers</label>
-            <input type="number" id="wrong">
-        </div>
-    </div>
+        // --- BRANDED HEADER ---
+        doc.setFillColor(15, 23, 42);
+        doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(20);
+        doc.text("Negative Marking Calculator", 105, 15, { align: "center" });
+        doc.setFontSize(10);
+        doc.setTextColor(56, 189, 248);
+        doc.text(`Performance Report | Powered by ECLIPSE7`, 105, 25, { align: "center" });
+        doc.setFontSize(8);
+        doc.setTextColor(200, 200, 200);
+        doc.text(`REPORT ID: ${reportID}`, 190, 35, { align: "right" });
 
-    <div class="input-group">
-        <label>Negative Ratio (e.g., 4 for 1/4th)</label>
-        <input type="number" id="ratio" value="4">
-    </div>
+        // --- DATA TABLE ---
+        doc.autoTable({
+            startY: 45,
+            theme: 'grid',
+            styles: { fontSize: 9 },
+            headStyles: { fillColor: [15, 23, 42] },
+            body: [
+                ['Student Name', student],
+                ['Test Name', test],
+                ['Total Questions', data.totalQs],
+                ['Maximum Marks', data.maxMarks],
+                ['Correct Answers', data.correct],
+                ['Wrong Answers', data.wrong],
+                ['Penalty Marks', `- ${data.totalPenalty.toFixed(2)}`],
+                ['Final Score', data.finalScore.toFixed(2)],
+                ['Percentage', data.percentage + "%"]
+            ],
+        });
 
-    <div class="report-settings" style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1);">
-        <label style="color: #38bdf8; display: block; margin-bottom: 10px; font-weight: bold;">Report Analytics Type</label>
-        <select id="reportType" onchange="toggleSubjectInputs()" style="width: 100%; padding: 12px; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 6px;">
-            <option value="overall">Overall Performance Only</option>
-            <option value="subjectwise">Subject-wise Analysis (Detailed)</option>
-        </select>
+        let currentY = doc.lastAutoTable.finalY + 15;
 
-        <div id="subjectSection" style="display: none; margin-top: 20px;">
-            <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Subject Breakdown (Total | Correct | Wrong):</p>
+        // --- OVERALL GRAPH ---
+        doc.setFontSize(12);
+        doc.setTextColor(0);
+        doc.text("PERFORMANCE OVERVIEW", 20, currentY);
+        
+        const graphW = 100;
+        const total = data.totalQs || 1;
+        
+        drawBar(doc, 20, currentY + 8, (data.correct / total) * graphW, [34, 197, 94], `Correct (${data.correct})`);
+        drawBar(doc, 20, currentY + 16, (data.wrong / total) * graphW, [239, 68, 68], `Wrong (${data.wrong})`);
+        drawBar(doc, 20, currentY + 24, (data.unattempted / total) * graphW, [148, 163, 184], `Skipped (${data.unattempted})`);
+
+        currentY += 40;
+
+        // --- SUBJECT-WISE GRAPH (Same Page) ---
+        if (reportType === 'subjectwise') {
+            doc.setDrawColor(200);
+            doc.line(20, currentY - 5, 190, currentY - 5);
+            doc.text("SUBJECT-WISE ANALYSIS", 20, currentY);
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
-                <input type="number" id="phyT" placeholder="Phy Total">
-                <input type="number" id="phyC" placeholder="Phy Correct">
-                <input type="number" id="phyW" placeholder="Phy Wrong">
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
-                <input type="number" id="chemT" placeholder="Chem Total">
-                <input type="number" id="chemC" placeholder="Chem Correct">
-                <input type="number" id="chemW" placeholder="Chem Wrong">
-            </div>
+            const subjects = [
+                { n: "Physics", t: parseInt(document.getElementById('phyT').value) || 0, c: parseInt(document.getElementById('phyC').value) || 0, w: parseInt(document.getElementById('phyW').value) || 0 },
+                { n: "Chemistry", t: parseInt(document.getElementById('chemT').value) || 0, c: parseInt(document.getElementById('chemC').value) || 0, w: parseInt(document.getElementById('chemW').value) || 0 },
+                { n: "Math/Bio", t: parseInt(document.getElementById('mathBioT').value) || 0, c: parseInt(document.getElementById('mathBioC').value) || 0, w: parseInt(document.getElementById('mathBioW').value) || 0 }
+            ];
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
-                <input type="number" id="mathBioT" placeholder="M/B Total">
-                <input type="number" id="mathBioC" placeholder="M/B Correct">
-                <input type="number" id="mathBioW" placeholder="M/B Wrong">
-            </div>
-        </div>
-    </div>
+            subjects.forEach(s => {
+                if(s.t > 0) {
+                    doc.setFontSize(9);
+                    doc.text(`${s.n}: ${s.c}/${s.t} Correct`, 20, currentY + 8);
+                    const barScale = 120;
+                    doc.setFillColor(34, 197, 94);
+                    doc.rect(70, currentY + 5, (s.c / s.t) * barScale, 3, 'F');
+                    doc.setFillColor(239, 68, 68);
+                    doc.rect(70 + (s.c / s.t) * barScale, currentY + 5, (s.w / s.t) * barScale, 3, 'F');
+                    currentY += 12;
+                }
+            });
+        }
 
-    <button onclick="calculateScore()" class="calc-btn">Calculate Final Score</button>
+        // --- FOOTER & STAMP ---
+        const footerY = 265;
+        doc.setFontSize(10);
+        doc.setTextColor(0);
+        doc.text("MR. PRASAD REDDY", 20, footerY);
+        doc.setFontSize(8);
+        doc.text("Founder & CEO, ECLIPSE7", 20, footerY + 4);
+        doc.setTextColor(100);
+        doc.text("Strategic Oversight & Operational Integrity", 20, footerY + 8);
+        doc.line(20, footerY + 10, 80, footerY + 10);
+        
+        try {
+            // Using stamp.png from your repository
+            doc.addImage('stamp.png', 'PNG', 150, footerY - 15, 35, 35);
+        } catch (e) {
+            doc.setDrawColor(200, 0, 0);
+            doc.circle(165, footerY, 12, 'S');
+        }
 
-    <div class="result-box">
-        <p>FINAL SCORE</p>
-        <h2 id="score">0.00</h2>
-    </div>
+        doc.save(`${student.replace(/\s+/g, '_')}_Result.pdf`);
+    } catch (err) { console.error(err); }
+}
 
-    <button onclick="downloadPDF()" class="download-btn">Download Verified Report</button>
-</div>
-
-<script src="script.js"></script>
-</body>
-</html>
+function drawBar(doc, x, y, w, color, label) {
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.rect(x + 50, y - 4, w, 4, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(80);
+    doc.text(label, x, y);
+}
