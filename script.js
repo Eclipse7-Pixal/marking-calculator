@@ -11,13 +11,19 @@ function calculateScore() {
     
     const correct = attempted - wrong;
     const unattempted = Math.max(0, totalQs - attempted);
+    
+    // Logic for Marks and Penalty
     const marksPerCorrect = totalQs > 0 ? (maxMarks / totalQs) : 0;
-    const totalPenalty = wrong * (marksPerCorrect / 4);
+    const totalPenalty = wrong * (marksPerCorrect / 4); // Standard 1/4th negative marking
     const finalScore = (correct * marksPerCorrect) - totalPenalty;
     const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100).toFixed(2) : 0;
 
     document.getElementById('score').innerText = finalScore.toFixed(2);
-    return { totalQs, maxMarks, attempted, wrong, correct, unattempted, finalScore, efficiency, totalPenalty };
+    
+    return { 
+        totalQs, maxMarks, attempted, wrong, correct, 
+        unattempted, finalScore, efficiency, totalPenalty, marksPerCorrect 
+    };
 }
 
 async function downloadPDF() {
@@ -26,19 +32,19 @@ async function downloadPDF() {
     const data = calculateScore();
     const reportType = document.getElementById('reportType').value;
     const student = (document.getElementById('studentName').value || "CANDIDATE").toUpperCase();
-    const test = (document.getElementById('testName').value || "STANDARD ASSESSMENT").toUpperCase();
+    const test = (document.getElementById('testName').value || "ASSESSMENT TAG").toUpperCase();
 
-    // --- 1. HEADER (STRICT DARK THEME) ---
+    // --- 1. DARK HEADER ---
     doc.setFillColor(15, 23, 42); 
     doc.rect(0, 0, 210, 40, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
-    doc.text("STRATEGIC PERFORMANCE DOSSIER", 105, 20, { align: "center" });
+    doc.setFontSize(22);
+    doc.text("STRATEGIC PERFORMANCE DOSSIER", 105, 22, { align: "center" });
     doc.setFontSize(8);
     doc.setTextColor(0, 242, 255);
-    doc.text("OFFICIAL REPORT | POWERED BY ECLIPSE7 AI MADE BY SAIPRASAD BARURE", 105, 28, { align: "center" });
+    doc.text("OFFICIAL REPORT | POWERED BY ECLIPSE7 AI | CEO: SAIPRASAD BARURE", 105, 32, { align: "center" });
 
-    // --- 2. MAIN SUMMARY TABLE ---
+    // --- 2. FULL DATA TABLE (INCLUDING MISSING SECTIONS) ---
     doc.autoTable({
         startY: 45,
         theme: 'grid',
@@ -48,16 +54,18 @@ async function downloadPDF() {
             ['STUDENT IDENTITY', student],
             ['ASSESSMENT TAG', test],
             ['TOTAL QUESTIONS', data.totalQs],
+            ['MAXIMUM MARKS', data.maxMarks],
             ['VERIFIED CORRECT', data.correct],
             ['IDENTIFIED ERRORS', data.wrong],
-            ['AGGREGATE SCORE', data.finalScore.toFixed(2)],
+            ['PENALTY MARKS (NEGATIVE)', `- ${data.totalPenalty.toFixed(2)}`],
+            ['FINAL AGGREGATE SCORE', data.finalScore.toFixed(2)],
             ['EFFICIENCY RATING', `${data.efficiency}%`]
         ],
     });
 
     let currentY = doc.lastAutoTable.finalY + 10;
 
-    // --- 3. CORE PERFORMANCE METRICS (BARS) ---
+    // --- 3. CORE METRICS BARS ---
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(10);
     doc.text("CORE PERFORMANCE METRICS", 20, currentY);
@@ -73,13 +81,13 @@ async function downloadPDF() {
         doc.setFontSize(7);
         doc.setTextColor(100);
         doc.text(m.label, 20, currentY + 3);
-        const barWidth = (m.val / data.totalQs) * 100;
+        const barWidth = data.totalQs > 0 ? (m.val / data.totalQs) * 100 : 0;
         doc.setFillColor(m.color[0], m.color[1], m.color[2]);
         doc.rect(60, currentY, Math.max(barWidth, 2), 3, 'F');
         currentY += 8;
     });
 
-    // --- 4. SUBJECT ANALYSIS (INTEGRATED SINGLE PAGE) ---
+    // --- 4. SUBJECT ANALYSIS (INTEGRATED ON ONE PAGE) ---
     if (reportType === 'subjectwise') {
         currentY += 4;
         doc.setTextColor(30, 41, 59);
@@ -97,7 +105,7 @@ async function downloadPDF() {
             if (s.t > 0) {
                 doc.setFontSize(7);
                 doc.setTextColor(80);
-                doc.text(`${s.n}: ${s.c}C | ${s.w}W`, 20, currentY + 3);
+                doc.text(`${s.n}: ${s.c}C | ${s.w}W of ${s.t}Q`, 20, currentY + 3);
                 const maxWidth = 100;
                 const cWidth = (s.c / s.t) * maxWidth;
                 const wWidth = (s.w / s.t) * maxWidth;
@@ -108,9 +116,9 @@ async function downloadPDF() {
         });
     }
 
-    // --- 5. STRATEGIC RECOMMENDATIONS (RE-INTEGRATED) ---
-    currentY += 6;
-    doc.setDrawColor(200);
+    // --- 5. STRATEGIC RECOMMENDATIONS (FULL BOX) ---
+    currentY += 5;
+    doc.setDrawColor(220);
     doc.line(20, currentY, 190, currentY);
     currentY += 8;
     doc.setFontSize(10);
@@ -119,13 +127,13 @@ async function downloadPDF() {
     doc.setFontSize(8);
     doc.setTextColor(80);
     currentY += 6;
-    doc.text(`1. Optimize Attempt Velocity: You left ${data.unattempted} questions unaddressed (${((data.unattempted/data.totalQs)*100).toFixed(1)}% of paper).`, 20, currentY);
+    doc.text(`1. Optimization: You left ${data.unattempted} questions unaddressed. Focus on attempt velocity.`, 20, currentY);
     currentY += 5;
-    doc.text(`2. Accuracy Control: Focus on the ${data.wrong} identification errors to prevent negative marks.`, 20, currentY);
+    doc.text(`2. Error Correction: Penalty of ${data.totalPenalty.toFixed(2)} marks was incurred due to inaccuracies.`, 20, currentY);
     currentY += 5;
-    doc.text(`3. Target Metric: Achieving 100% accuracy on attempted questions would have scored ${(data.attempted * (data.maxMarks/data.totalQs)).toFixed(2)}.`, 20, currentY);
+    doc.text(`3. Insight: Max possible marks for this test was ${data.maxMarks}. Current Efficiency: ${data.efficiency}%.`, 20, currentY);
 
-    // --- 6. FOOTER & STAMP (ANCHORED TO BOTTOM) ---
+    // --- 6. SIGNATURE & GITHUB STAMP ---
     const footerY = 270;
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(9);
@@ -133,18 +141,18 @@ async function downloadPDF() {
     doc.setFontSize(7);
     doc.text("Founder & CEO, ECLIPSE7", 20, footerY + 4);
     doc.setTextColor(150);
-    doc.text(`Verified By: ECLIPSE7 STRATEGIC ENGINE | ${new Date().toLocaleDateString()}`, 20, footerY + 10);
+    doc.text(`Report Generated: ${new Date().toLocaleString()}`, 20, footerY + 10);
 
-    // GitHub Stamp Integration
+    // Pulling stamp.png from your repository
     const stampUrl = "https://eclipse7-pixal.github.io/marking-calculator/stamp.png";
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.src = stampUrl;
     img.onload = function() {
         doc.addImage(img, 'PNG', 155, 252, 38, 38);
-        doc.save(`${student}_Scoring_Dossier.pdf`);
+        doc.save(`${student}_Official_E7_Report.pdf`);
     };
     img.onerror = function() {
-        doc.save(`${student}_Scoring_Dossier.pdf`);
+        doc.save(`${student}_Official_E7_Report.pdf`);
     };
 }
