@@ -3,88 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Negative Marking Calculator | ECLIPSE7</title>
+    <title>Precision Scoring Engine | ECLIPSE7</title>
     <link rel="icon" type="image/png" href="logo.png">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --neon-blue: #38bdf8;
+            --deep-slate: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--deep-slate);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .calculator-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            padding: 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            background: linear-gradient(to right, #fff, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        
+        label {
+            display: block;
+            font-size: 0.75rem;
+            color: #38bdf8;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: white;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input:focus { border-color: var(--neon-blue); outline: none; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        /* AI STYLE BUTTONS */
+        .ai-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calc-btn {
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .calc-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.6);
+        }
+
+        .download-btn {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            margin-top: 10px;
+        }
+
+        .download-btn:hover {
+            background: var(--neon-blue);
+            color: var(--deep-slate);
+        }
+
+        .result-box {
+            background: rgba(56, 189, 248, 0.05);
+            border: 1px dashed var(--neon-blue);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .result-box h2 { margin: 0; color: var(--neon-blue); font-size: 2.2rem; }
+    </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 
 <div class="calculator-card">
-    <h1>Negative Marking Calculator</h1>
-    <p class="subtitle">Powered by ECLIPSE7</p>
+    <h1>Strategic Scoring Engine</h1>
+    <p class="subtitle">Powered by ECLIPSE7 AI</p>
 
     <div class="input-group">
-        <input type="text" id="studentName" placeholder="Student Name">
-        <input type="text" id="testName" placeholder="Test Name (e.g., JEE Mock 1)">
+        <input type="text" id="studentName" placeholder="Full Student Identity">
+        <input type="text" id="testName" placeholder="Assessment Metadata (e.g. JEE-26)">
     </div>
 
     <div class="grid-2">
         <div class="input-group">
-            <label>Total Questions</label>
+            <label>Question Count</label>
             <input type="number" id="totalQs" value="75">
         </div>
         <div class="input-group">
-            <label>Max Marks</label>
+            <label>Upper Bound Marks</label>
             <input type="number" id="maxMarks" value="300">
         </div>
     </div>
 
     <div class="grid-2">
         <div class="input-group">
-            <label>Questions Attempted</label>
+            <label>Attempts</label>
             <input type="number" id="attempted">
         </div>
         <div class="input-group">
-            <label>Wrong Answers</label>
+            <label>Inaccuracies</label>
             <input type="number" id="wrong">
         </div>
     </div>
 
-    <div class="input-group">
-        <label>Negative Ratio (e.g., 4 for 1/4th)</label>
-        <input type="number" id="ratio" value="4">
-    </div>
-
-    <div class="report-settings" style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1);">
-        <label style="color: #38bdf8; display: block; margin-bottom: 10px; font-weight: bold;">Report Analytics Type</label>
-        <select id="reportType" onchange="toggleSubjectInputs()" style="width: 100%; padding: 12px; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 6px;">
-            <option value="overall">Overall Performance Only</option>
-            <option value="subjectwise">Subject-wise Analysis (Detailed)</option>
+    <div class="report-settings" style="margin-top: 20px;">
+        <label>Intelligence Depth</label>
+        <select id="reportType" onchange="toggleSubjectInputs()">
+            <option value="overall">Standard Verification</option>
+            <option value="subjectwise">Granular Subject Analysis</option>
         </select>
 
-        <div id="subjectSection" style="display: none; margin-top: 20px;">
-            <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Subject Breakdown (Total | Correct | Wrong):</p>
-            
+        <div id="subjectSection" style="display: none; margin-top: 15px;">
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
-                <input type="number" id="phyT" placeholder="Phy Total">
-                <input type="number" id="phyC" placeholder="Phy Correct">
-                <input type="number" id="phyW" placeholder="Phy Wrong">
+                <input type="number" id="phyT" placeholder="Phy T">
+                <input type="number" id="phyC" placeholder="Phy C">
+                <input type="number" id="phyW" placeholder="Phy W">
             </div>
-            
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
-                <input type="number" id="chemT" placeholder="Chem Total">
-                <input type="number" id="chemC" placeholder="Chem Correct">
-                <input type="number" id="chemW" placeholder="Chem Wrong">
+                <input type="number" id="chemT" placeholder="Chem T">
+                <input type="number" id="chemC" placeholder="Chem C">
+                <input type="number" id="chemW" placeholder="Chem W">
             </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
-                <input type="number" id="mathBioT" placeholder="M/B Total">
-                <input type="number" id="mathBioC" placeholder="M/B Correct">
-                <input type="number" id="mathBioW" placeholder="M/B Wrong">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;">
+                <input type="number" id="mathBioT" placeholder="M/B T">
+                <input type="number" id="mathBioC" placeholder="M/B C">
+                <input type="number" id="mathBioW" placeholder="M/B W">
             </div>
         </div>
     </div>
 
-    <button onclick="calculateScore()" class="calc-btn">Calculate Final Score</button>
+    <button onclick="calculateScore()" class="ai-btn calc-btn">Execute Analytics</button>
 
     <div class="result-box">
-        <p>FINAL SCORE</p>
+        <p style="font-size: 0.7rem; margin-bottom: 5px; letter-spacing: 1px;">VERIFIED SCORE</p>
         <h2 id="score">0.00</h2>
     </div>
 
-    <button onclick="downloadPDF()" class="download-btn">Download Verified Report</button>
+    <button onclick="downloadPDF()" class="ai-btn download-btn">Generate Official Dossier</button>
 </div>
 
 <script src="script.js"></script>
