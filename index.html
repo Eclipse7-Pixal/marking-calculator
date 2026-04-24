@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strategic Scoring Engine | ECLIPSE7</title>
+    <title>Negative Marking Engine| ECLIPSE7</title>
     <style>
         :root {
             --bg-deep: #050505;
@@ -129,19 +129,19 @@
 <body>
 
 <div class="ai-container">
-    <h1>Strategic Scoring Engine</h1>
+    <h1>Negative Marking Engine</h1>
     <p class="branding">Powered by ECLIPSE7 AI | BY SAIPRASAD BARURE</p>
 
     <div class="input-group-full">
         <input type="text" id="studentName" placeholder="STUDENT IDENTITY">
     </div>
     <div class="input-group-full">
-        <input type="text" id="testName" placeholder="ASSESSMENT TAG (e.g. JEE-26)">
+        <input type="text" id="testName" placeholder="ASSESSMENT Name (e.g. JEE-26)">
     </div>
 
     <div class="input-row">
-        <div><label>Questions</label><input type="number" id="totalQs" value="75"></div>
-        <div><label>Max Marks</label><input type="number" id="maxMarks" value="300"></div>
+        <div><label>Questions</label><input type="number" id="totalQs" value="0"></div>
+        <div><label>Max Marks</label><input type="number" id="maxMarks" value="0"></div>
     </div>
 
     <div class="input-row">
@@ -173,14 +173,14 @@
         </div>
     </div>
 
-    <button onclick="calculateScore()" class="btn-core btn-execute">Execute Verification</button>
+    <button onclick="calculateScore()" class="btn-core btn-execute">Check Score </button>
 
     <div class="score-display">
-        <label>Calculated Metric</label>
+        <label>Calculated Score</label>
         <div id="score" class="score-val">0.00</div>
     </div>
 
-    <button onclick="downloadPDF()" class="btn-core btn-dossier">Export Intelligence Dossier</button>
+    <button onclick="downloadPDF()" class="btn-core btn-dossier">Export To Intelligence E7 Report</button>
 </div>
 
 <script src="script.js"></script>
