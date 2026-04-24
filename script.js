@@ -39,10 +39,10 @@ async function downloadPDF() {
     doc.rect(0, 0, 210, 40, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(22);
-    doc.text("STRATEGIC PERFORMANCE DOSSIER", 105, 22, { align: "center" });
+    doc.text("STRATEGIC PERFORMANCE E7 Report", 105, 22, { align: "center" });
     doc.setFontSize(8);
     doc.setTextColor(0, 242, 255);
-    doc.text("OFFICIAL REPORT | POWERED BY ECLIPSE7 AI | CEO: SAIPRASAD BARURE", 105, 32, { align: "center" });
+    doc.text("OFFICIAL REPORT | POWERED BY ECLIPSE7 AI | CEO&FOUNDER OF ECLIPSE7 AI: SAIPRASAD BARURE", 105, 32, { align: "center" });
 
     // --- 2. FULL DATA TABLE (INCLUDING MISSING SECTIONS) ---
     doc.autoTable({
@@ -68,7 +68,7 @@ async function downloadPDF() {
     // --- 3. CORE METRICS BARS ---
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(10);
-    doc.text("CORE PERFORMANCE METRICS", 20, currentY);
+    doc.text("CORE PERFORMANCE SCORE", 20, currentY);
     currentY += 6;
 
     const metrics = [
@@ -92,7 +92,7 @@ async function downloadPDF() {
         currentY += 4;
         doc.setTextColor(30, 41, 59);
         doc.setFontSize(10);
-        doc.text("GRANULAR SUBJECT ANALYSIS", 20, currentY);
+        doc.text("SUBJECT-WISE ANALYSIS", 20, currentY);
         currentY += 8;
 
         const subs = [
