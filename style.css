@@ -57,3 +57,17 @@ input {
 
 .footer-note { text-align: center; font-size: 10px; margin-top: 20px; color: #64748b; }
 .footer-note a { color: var(--accent); text-decoration: none; }
+
+.privacy-note {
+    margin-top: 25px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(0, 242, 255, 0.2);
+    border-radius: 10px;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
