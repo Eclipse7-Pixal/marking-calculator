@@ -96,9 +96,9 @@ async function downloadPDF() {
         currentY += 8;
 
         const subs = [
-            { n: "PHYSICS", t: parseInt(document.getElementById('phyT').value)||0, c: parseInt(document.getElementById('phyC').value)||0, w: parseInt(document.getElementById('phyW').value)||0 },
-            { n: "CHEMISTRY", t: parseInt(document.getElementById('chemT').value)||0, c: parseInt(document.getElementById('chemC').value)||0, w: parseInt(document.getElementById('chemW').value)||0 },
-            { n: "MATH/BIO", t: parseInt(document.getElementById('mathBioT').value)||0, c: parseInt(document.getElementById('mathBioC').value)||0, w: parseInt(document.getElementById('mathBioW').value)||0 }
+            { n: "PHYSICS", t: parseInt(document.getElementById('phyA').value)||0, c: parseInt(document.getElementById('phyC').value)||0, w: parseInt(document.getElementById('phyW').value)||0 },
+            { n: "CHEMISTRY", t: parseInt(document.getElementById('chemA').value)||0, c: parseInt(document.getElementById('chemC').value)||0, w: parseInt(document.getElementById('chemW').value)||0 },
+            { n: "MATH/BIO", t: parseInt(document.getElementById('mathBioA').value)||0, c: parseInt(document.getElementById('mathBioC').value)||0, w: parseInt(document.getElementById('mathBioW').value)||0 }
         ];
 
         subs.forEach(s => {
