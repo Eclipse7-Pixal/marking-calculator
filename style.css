@@ -71,3 +71,25 @@ input {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
+/* Mobile Alignment Fix */
+@media (max-width: 480px) {
+    #subjectSection {
+        padding: 10px !important; /* Smaller padding to save space */
+    }
+
+    .subject-row, 
+    #subjectSection > div:first-child {
+        grid-template-columns: 1fr 1fr 1fr 1fr !important; /* Equal spacing */
+        gap: 5px !important; /* Tighter gap for small screens */
+    }
+
+    .subject-row label {
+        font-size: 0.6rem !important; /* Shrink subject names slightly */
+    }
+
+    .mini-input {
+        padding: 6px 2px !important; /* Slimmer inputs */
+        font-size: 12px !important;
+    }
+}
