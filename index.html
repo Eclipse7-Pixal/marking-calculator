@@ -154,24 +154,35 @@
         <option value="subjectwise">DETAILED SUBJECT BREAKDOWN</option>
     </select>
 
-    <div id="subjectSection" style="display: none; margin-top: 15px;">
-        <p style="font-size: 0.6rem; color: var(--text-dim); margin-bottom: 8px;">[TOTAL] | [CORRECT] | [WRONG]</p>
-        <div class="input-row" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 8px;">
-            <input type="number" id="phyT" placeholder="PHY T">
-            <input type="number" id="phyC" placeholder="PHY C">
-            <input type="number" id="phyW" placeholder="PHY W">
-        </div>
-        <div class="input-row" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 8px;">
-            <input type="number" id="chemT" placeholder="CHEM T">
-            <input type="number" id="chemC" placeholder="CHEM C">
-            <input type="number" id="chemW" placeholder="CHEM W">
-        </div>
-        <div class="input-row" style="grid-template-columns: 1fr 1fr 1fr;">
-            <input type="number" id="mathBioT" placeholder="M/B T">
-            <input type="number" id="mathBioC" placeholder="M/B C">
-            <input type="number" id="mathBioW" placeholder="M/B W">
-        </div>
+    <div id="subjectSection" style="display: none; margin-top: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border);">
+    
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; text-align: center;">
+        <div></div> <span style="font-size: 0.65rem; color: var(--accent-cyan); letter-spacing: 1px;">ATTEMPT</span>
+        <span style="font-size: 0.65rem; color: #4ade80; letter-spacing: 1px;">CORRECT</span>
+        <span style="font-size: 0.65rem; color: #f87171; letter-spacing: 1px;">WRONG</span>
     </div>
+
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center;">
+        <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">PHYSICS</label>
+        <input type="number" id="phyA" placeholder="0" style="padding: 8px; text-align: center;">
+        <input type="number" id="phyC" placeholder="0" style="padding: 8px; text-align: center;">
+        <input type="number" id="phyW" placeholder="0" style="padding: 8px; text-align: center;">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center;">
+        <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">CHEMISTRY</label>
+        <input type="number" id="chemA" placeholder="0" style="padding: 8px; text-align: center;">
+        <input type="number" id="chemC" placeholder="0" style="padding: 8px; text-align: center;">
+        <input type="number" id="chemW" placeholder="0" style="padding: 8px; text-align: center;">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; align-items: center;">
+        <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">MATH/BIO</label>
+        <input type="number" id="mathBioA" placeholder="0" style="padding: 8px; text-align: center;">
+        <input type="number" id="mathBioC" placeholder="0" style="padding: 8px; text-align: center;">
+        <input type="number" id="mathBioW" placeholder="0" style="padding: 8px; text-align: center;">
+    </div>
+</div>
 
     <button onclick="calculateScore()" class="btn-core btn-execute">Check Score </button>
 
