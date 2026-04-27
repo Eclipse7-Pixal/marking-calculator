@@ -3,202 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Negative Marking Engine| ECLIPSE7</title>
-    <style>
-        :root {
-            --bg-deep: #050505;
-            --card-dark: #0d0d0d;
-            --accent-cyan: #00f2ff;
-            --text-dim: #9ca3af;
-            --glass-border: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            background: radial-gradient(circle at top right, #111, var(--bg-deep));
-            color: #e5e7eb;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .ai-container {
-            background: var(--card-dark);
-            border: 1px solid var(--glass-border);
-            padding: 35px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 480px;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-        }
-
-        h1 {
-            font-size: 1.6rem;
-            text-align: center;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(to bottom, #fff, var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
-        }
-
-        .branding {
-            text-align: center;
-            font-size: 0.65rem;
-            color: var(--accent-cyan);
-            letter-spacing: 3px;
-            margin-bottom: 30px;
-            opacity: 0.8;
-            text-transform: uppercase;
-        }
-
-        /* Fixed vertical stacking for top inputs */
-        .input-group-full {
-            margin-bottom: 12px;
-        }
-
-        .input-row { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            margin-bottom: 12px; 
-        }
-
-        input, select {
-            background: #151515;
-            border: 1px solid #222;
-            padding: 14px;
-            border-radius: 10px;
-            color: white;
-            font-size: 0.9rem;
-            width: 100%;
-            box-sizing: border-box;
-            transition: 0.3s;
-        }
-
-        input:focus { 
-            border-color: var(--accent-cyan); 
-            outline: none; 
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.1); 
-        }
-
-        label { 
-            font-size: 0.7rem; 
-            color: var(--text-dim); 
-            margin-bottom: 5px; 
-            display: block; 
-            text-transform: uppercase; 
-        }
-
-        .btn-core {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            font-weight: 800;
-            cursor: pointer;
-            text-transform: uppercase;
-            border: none;
-            margin-top: 15px;
-            transition: 0.4s ease;
-        }
-
-        .btn-execute { background: #fff; color: #000; }
-        .btn-execute:hover { background: var(--accent-cyan); transform: scale(1.01); }
-
-        .btn-dossier { background: transparent; color: #fff; border: 1px solid #333; }
-        .btn-dossier:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
-
-        .score-display {
-            background: #000;
-            border: 1px solid #1a1a1a;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .score-val { font-size: 2.5rem; font-weight: 300; color: var(--accent-cyan); }
-    </style>
+    <title>Negative Marking Engine | ECLIPSE7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="bg-canvas"></div> <div class="ai-container glass-effect">
+        <header class="brand-header">
+            <h1>ECLIPSE7</h1>
+            <p class="branding">Powered by ECLIPSE7 AI | BY SAIPRASAD BARURE</p>
+        </header>
 
-<div class="ai-container">
-    <h1>Negative Marking Engine</h1>
-    <p class="branding">Powered by ECLIPSE7 AI | BY SAIPRASAD BARURE</p>
+        <div class="identity-group">
+            <input type="text" id="studentName" placeholder="STUDENT IDENTITY" class="neon-input">
+            <input type="text" id="testName" placeholder="ASSESSMENT NAME (e.g. JEE-26)" class="neon-input">
+        </div>
 
-    <div class="input-group-full">
-        <input type="text" id="studentName" placeholder="STUDENT IDENTITY">
+        <div class="input-grid">
+            <div class="input-group">
+                <label>Questions</label>
+                <input type="number" id="totalQs" value="0" class="neon-input">
+            </div>
+            <div class="input-group">
+                <label>Max Marks</label>
+                <input type="number" id="maxMarks" value="0" class="neon-input">
+            </div>
+            <div class="input-group">
+                <label>Attempts</label>
+                <input type="number" id="attempted" class="neon-input">
+            </div>
+            <div class="input-group">
+                <label>Incorrect</label>
+                <input type="number" id="wrong" class="neon-input">
+            </div>
+        </div>
+
+        <select id="reportType" onchange="toggleSubjectInputs()" class="neon-select">
+            <option value="overall">OVERALL ANALYTICS</option>
+            <option value="subjectwise">DETAILED SUBJECT BREAKDOWN</option>
+        </select>
+
+        <div id="subjectSection" class="subject-panel" style="display: none;">
+            <div class="subject-header-row">
+                <span></span><span>ATT.</span><span>CORR.</span><span>WRNG.</span>
+            </div>
+            <div class="subject-row item-row">
+                <label>PHYSICS</label>
+                <input type="number" id="phyA" placeholder="0">
+                <input type="number" id="phyC" placeholder="0">
+                <input type="number" id="phyW" placeholder="0">
+            </div>
+            <div class="subject-row item-row">
+                <label>CHEMISTRY</label>
+                <input type="number" id="chemA" placeholder="0">
+                <input type="number" id="chemC" placeholder="0">
+                <input type="number" id="chemW" placeholder="0">
+            </div>
+            <div class="subject-row item-row">
+                <label>MATH/BIO</label>
+                <input type="number" id="mathBioA" placeholder="0">
+                <input type="number" id="mathBioC" placeholder="0">
+                <input type="number" id="mathBioW" placeholder="0">
+            </div>
+        </div>
+
+        <button onclick="executeCalculation()" class="btn-primary">CHECK SCORE</button>
+
+        <div class="score-display">
+            <label>CALCULATED SCORE</label>
+            <div id="score" class="score-val">0.00</div>
+            <div class="efficiency-bar"><div id="progress" class="progress-fill"></div></div>
+        </div>
+
+        <button onclick="downloadPDF()" class="btn-secondary">EXPORT TO INTELLIGENCE E7 REPORT</button>
+        
+        <div class="privacy-note">
+            <span style="color: var(--accent); font-weight: 800;">PRIVACY ASSURANCE:</span> 
+            Data entered here stays on your device. We do not collect or store any personal metrics. 
+            Enjoy the free service from <b>Saiprasad Barure / Prasad Reddy</b>.
+        </div>
     </div>
-    <div class="input-group-full">
-        <input type="text" id="testName" placeholder="ASSESSMENT Name (e.g. JEE-26)">
-    </div>
 
-    <div class="input-row">
-        <div><label>Questions</label><input type="number" id="totalQs" value="0"></div>
-        <div><label>Max Marks</label><input type="number" id="maxMarks" value="0"></div>
-    </div>
-
-    <div class="input-row">
-        <div><label>Attempts</label><input type="number" id="attempted"></div>
-        <div><label>Incorrect</label><input type="number" id="wrong"></div>
-    </div>
-
-    <select id="reportType" onchange="toggleSubjectInputs()" style="margin-top: 10px;">
-        <option value="overall">OVERALL ANALYTICS</option>
-        <option value="subjectwise">DETAILED SUBJECT BREAKDOWN</option>
-    </select>
-
- <div id="subjectSection" style="display: none; margin-top: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border);">
-    
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; text-align: center;">
-        <div></div> <span style="font-size: 0.65rem; color: var(--accent-cyan); letter-spacing: 1px;">TOTAL Q.</span>
-        <span style="font-size: 0.65rem; color: #4ade80; letter-spacing: 1px;">CORRECT</span>
-        <span style="font-size: 0.65rem; color: #f87171; letter-spacing: 1px;">WRONG</span>
-    </div>
-     
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center;">
-        <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">PHYSICS</label>
-        <input type="number" id="phyA" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="phyC" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="phyW" placeholder="0" style="padding: 8px; text-align: center;">
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 7px; margin-bottom: 8px; align-items: center;">
-        <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">CHEMISTRY</label>
-        <input type="number" id="chemA" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="chemC" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="chemW" placeholder="0" style="padding: 8px; text-align: center;">
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; align-items: center;">
-        <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">MATH/BIO</label>
-        <input type="number" id="mathBioA" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="mathBioC" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="mathBioW" placeholder="0" style="padding: 8px; text-align: center;">
-    </div>
-</div>
-
-    <button onclick="calculateScore()" class="btn-core btn-execute">Check Score </button>
-
-    <div class="score-display">
-        <label>Calculated Score</label>
-        <div id="score" class="score-val">0.00</div>
-    </div>
-
-    <button onclick="downloadPDF()" class="btn-core btn-dossier">Export To Intelligence E7 Report</button>
- <div class="privacy-note">
-        <span style="color: var(--accent-cyan); font-weight: 800;">PRIVACY ASSURANCE:</span> 
-        Data entered here stays on your device. We do not collect or store any personal metrics. 
-        Enjoy the free service from <b>Saiprasad Barure / Prasad Reddy </b>.
-    </div>
-
-</div>
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
