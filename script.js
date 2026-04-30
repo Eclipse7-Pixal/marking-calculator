@@ -1,6 +1,4 @@
-// --- script.js ---
-
-// 1. Dropdown & UI Logic
+// --- 1. UI CONTROL LOGIC ---
 const trigger = document.getElementById('selectedLabel');
 const panel = document.getElementById('selectOptions');
 const hidden = document.getElementById('reportType');
@@ -26,7 +24,7 @@ function toggleSubjectInputs() {
     }
 }
 
-// 2. Core Calculation Logic
+// --- 2. CALCULATION ENGINE ---
 function calculateScore() {
     const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
     const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
@@ -52,21 +50,18 @@ function calculateScore() {
     };
 }
 
-// 3. PDF Export Logic (Restored with Strategic Recommendations)
+// --- 3. PDF GENERATION (EXACT FORMAT) ---
 async function downloadPDF() {
-    if (!window.jspdf) {
-        alert("PDF Libraries are still loading.");
-        return;
-    }
-
+    // Ensuring the library is accessed correctly
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+    
     const data = calculateScore();
     const reportType = document.getElementById('reportType').value;
     const student = (document.getElementById('studentName').value || "CANDIDATE").toUpperCase();
     const test = (document.getElementById('testName').value || "ASSESSMENT TAG").toUpperCase();
 
-    // --- 1. Header ---
+    // 1. Header Section
     doc.setFillColor(15, 23, 42); 
     doc.rect(0, 0, 210, 40, 'F');
     doc.setTextColor(255, 255, 255);
@@ -76,7 +71,7 @@ async function downloadPDF() {
     doc.setTextColor(0, 242, 255);
     doc.text("OFFICIAL REPORT | POWERED BY ECLIPSE7 AI | CEO&FOUNDER: SAIPRASAD BARURE", 105, 32, { align: "center" });
 
-    // --- 2. Main Table ---
+    // 2. Data Table
     doc.autoTable({
         startY: 45,
         theme: 'grid',
@@ -97,7 +92,7 @@ async function downloadPDF() {
 
     let currentY = doc.lastAutoTable.finalY + 10;
 
-    // --- 3. Performance Bars ---
+    // 3. Performance Bars
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(10);
     doc.text("CORE PERFORMANCE SCORE", 20, currentY);
@@ -119,7 +114,7 @@ async function downloadPDF() {
         currentY += 8;
     });
 
-    // --- 4. Subject Analysis ---
+    // 4. Subject Wise Breakdown
     if (reportType === 'subjectwise') {
         currentY += 4;
         doc.setTextColor(30, 41, 59);
@@ -148,7 +143,7 @@ async function downloadPDF() {
         });
     }
 
-    // --- 5. STRATEGIC RECOMMENDATIONS (RESTORED) ---
+    // 5. Strategic Recommendations
     currentY += 5;
     doc.setDrawColor(220);
     doc.line(20, currentY, 190, currentY);
@@ -165,7 +160,7 @@ async function downloadPDF() {
     currentY += 5;
     doc.text(`3. Insight: Max possible marks for this test was ${data.maxMarks}. Current Efficiency: ${data.efficiency}%.`, 20, currentY);
 
-    // --- 6. Footer & Stamp ---
+    // 6. Signature & Stamp
     const footerY = 270;
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(9);
@@ -173,6 +168,7 @@ async function downloadPDF() {
     doc.setFontSize(7);
     doc.text("Founder & CEO, ECLIPSE7", 20, footerY + 4);
 
+    // Stamp Processing
     const stampUrl = "https://eclipse7-pixal.github.io/marking-calculator/stamp.png";
     const img = new Image();
     img.crossOrigin = "Anonymous"; 
@@ -183,6 +179,7 @@ async function downloadPDF() {
         doc.save(`${student}_Official_E7_Report.pdf`);
     };
     img.onerror = function() {
+        // If stamp fails, still save the report
         doc.save(`${student}_Official_E7_Report.pdf`);
     };
 }
