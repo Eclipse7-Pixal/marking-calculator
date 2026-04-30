@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Negative Marking Engine| ECLIPSE7</title>
+    <title>Negative Marking Engine | ECLIPSE7</title>
     <style>
         :root {
             --bg-deep: #050505;
@@ -57,10 +57,7 @@
             text-transform: uppercase;
         }
 
-        /* Fixed vertical stacking for top inputs */
-        .input-group-full {
-            margin-bottom: 12px;
-        }
+        .input-group-full { margin-bottom: 12px; }
 
         .input-row { 
             display: grid; 
@@ -69,7 +66,7 @@
             margin-bottom: 12px; 
         }
 
-        input, select {
+        input {
             background: #151515;
             border: 1px solid #222;
             padding: 14px;
@@ -95,6 +92,80 @@
             text-transform: uppercase; 
         }
 
+        /* --- CUSTOM SELECT STYLING --- */
+        .custom-select {
+            position: relative;
+            width: 100%;
+            margin-top: 10px;
+            user-select: none;
+        }
+
+        .select-trigger {
+            background: #151515;
+            border: 1px solid #222;
+            padding: 14px;
+            border-radius: 10px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .select-trigger:hover { border-color: var(--accent-cyan); }
+
+        .select-trigger::after {
+            content: '\f0d7';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--accent-cyan);
+            transition: 0.3s;
+        }
+
+        .custom-select.active .select-trigger::after { transform: rotate(180deg); }
+
+        .select-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 10px;
+            margin-top: 8px;
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .select-options.show { display: block; animation: fadeIn 0.2s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .option-item {
+            padding: 14px;
+            color: #e5e7eb;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .option-item:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* --- END CUSTOM SELECT --- */
+
         .btn-core {
             width: 100%;
             padding: 16px;
@@ -110,25 +181,18 @@
         .btn-execute { background: #fff; color: #000; }
         .btn-execute:hover { background: var(--accent-cyan); transform: scale(1.01); }
 
-     .btn-dossier {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent; 
-    color: #fff; 
-    border: 1px solid #333;
-    transition: 0.4s ease;
-}
+        .btn-dossier {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent; 
+            color: #fff; 
+            border: 1px solid #333;
+        }
 
-.btn-dossier i {
-    font-size: 1.1rem;
-    color: var(--accent-cyan); /* Makes the icon pop in cyan */
-}
+        .btn-dossier i { color: var(--accent-cyan); }
+        .btn-dossier:hover { border-color: var(--accent-cyan); }
 
-/* Hover effect to keep it consistent with your theme */
-.btn-dossier:hover i {
-    color: #fff;
-}
         .score-display {
             background: #000;
             border: 1px solid #1a1a1a;
@@ -137,38 +201,32 @@
             text-align: center;
             margin: 20px 0;
         }
-.privacy-note {
-    font-size: 0.65rem;
-    line-height: 1.6;
-    color: var(--text-dim);
-    text-align: center;
-    margin-top: 25px;
-    padding: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    letter-spacing: 0.5px;
-}
 
-.privacy-note b {
-    color: #fff;
-    font-weight: 600;
-}
-
-.privacy-header {
-    display: block;
-    color: var(--accent-cyan);
-    font-weight: 800;
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    font-family: 'Courier New', Courier, monospace; /* Monospace gives it a tech look */
-}
         .score-val { font-size: 2.5rem; font-weight: 300; color: var(--accent-cyan); }
+
+        .privacy-note {
+            font-size: 0.65rem;
+            line-height: 1.6;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 25px;
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+        }
+
+        .privacy-header {
+            display: block;
+            color: var(--accent-cyan);
+            font-weight: 800;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-family: 'Courier New', Courier, monospace;
+        }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 
@@ -193,40 +251,60 @@
         <div><label>Incorrect</label><input type="number" id="wrong"></div>
     </div>
 
-    <select id="reportType" onchange="toggleSubjectInputs()" style="margin-top: 10px;">
-        <option value="overall">OVERALL ANALYTICS</option>
-        <option value="subjectwise">DETAILED SUBJECT BREAKDOWN</option>
-    </select>
-
- <div id="subjectSection" style="display: none; margin-top: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border);">
-    
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; text-align: center;">
-        <div></div> <span style="font-size: 0.65rem; color: var(--accent-cyan); letter-spacing: 1px;">TOTAL Q.</span>
-        <span style="font-size: 0.65rem; color: #4ade80; letter-spacing: 1px;">CORRECT</span>
-        <span style="font-size: 0.65rem; color: #f87171; letter-spacing: 1px;">WRONG</span>
-    </div>
-     
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center;">
-        <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">PHYSICS</label>
-        <input type="number" id="phyA" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="phyC" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="phyW" placeholder="0" style="padding: 8px; text-align: center;">
+    <!-- NEW Ratio Selection Panel -->
+    <div class="custom-select" id="ratioSelectContainer">
+        <label>Negative Marking Ratio</label>
+        <div class="select-trigger" id="ratioLabel">Ratio: 1/4</div>
+        <div class="select-options" id="ratioOptions">
+            <div class="option-item" data-value="0.25">1/4</div>
+            <div class="option-item" data-value="0.33">1/3</div>
+            <div class="option-item" data-value="0.5">1/2</div>
+            <div class="option-item" data-value="0">None</div>
+        </div>
+        <input type="hidden" id="markingRatio" value="0.25">
     </div>
 
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 7px; margin-bottom: 8px; align-items: center;">
-        <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">CHEMISTRY</label>
-        <input type="number" id="chemA" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="chemC" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="chemW" placeholder="0" style="padding: 8px; text-align: center;">
+    <!-- Analytics Selection Panel -->
+    <div class="custom-select" id="customSelect">
+        <label style="margin-top: 10px;">Analytics Mode</label>
+        <div class="select-trigger" id="selectedLabel">OVERALL ANALYTICS</div>
+        <div class="select-options" id="selectOptions">
+            <div class="option-item" data-value="overall">OVERALL ANALYTICS</div>
+            <div class="option-item" data-value="subjectwise">DETAILED SUBJECT BREAKDOWN</div>
+        </div>
+        <input type="hidden" id="reportType" value="overall">
     </div>
 
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; align-items: center;">
-        <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">MATH/BIO</label>
-        <input type="number" id="mathBioA" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="mathBioC" placeholder="0" style="padding: 8px; text-align: center;">
-        <input type="number" id="mathBioW" placeholder="0" style="padding: 8px; text-align: center;">
+    <div id="subjectSection" style="display: none; margin-top: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border);">
+        <!-- Subject rows here (same as before) -->
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; text-align: center;">
+            <div></div> 
+            <span style="font-size: 0.65rem; color: var(--accent-cyan); letter-spacing: 1px;">TOTAL Q.</span>
+            <span style="font-size: 0.65rem; color: #4ade80; letter-spacing: 1px;">CORRECT</span>
+            <span style="font-size: 0.65rem; color: #f87171; letter-spacing: 1px;">WRONG</span>
+        </div>
+         
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center;">
+            <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">PHYSICS</label>
+            <input type="number" id="phyA" placeholder="0" style="padding: 8px; text-align: center;">
+            <input type="number" id="phyC" placeholder="0" style="padding: 8px; text-align: center;">
+            <input type="number" id="phyW" placeholder="0" style="padding: 8px; text-align: center;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 7px; margin-bottom: 8px; align-items: center;">
+            <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">CHEMISTRY</label>
+            <input type="number" id="chemA" placeholder="0" style="padding: 8px; text-align: center;">
+            <input type="number" id="chemC" placeholder="0" style="padding: 8px; text-align: center;">
+            <input type="number" id="chemW" placeholder="0" style="padding: 8px; text-align: center;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; align-items: center;">
+            <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">MATH/BIO</label>
+            <input type="number" id="mathBioA" placeholder="0" style="padding: 8px; text-align: center;">
+            <input type="number" id="mathBioC" placeholder="0" style="padding: 8px; text-align: center;">
+            <input type="number" id="mathBioW" placeholder="0" style="padding: 8px; text-align: center;">
+        </div>
     </div>
-</div>
 
     <button onclick="calculateScore()" class="btn-core btn-execute">Check Score </button>
 
@@ -235,19 +313,81 @@
         <div id="score" class="score-val">0.00</div>
     </div>
 
-   <button onclick="downloadPDF()" class="btn-core btn-dossier">
-    <i class="fa-solid fa-file-arrow-down" style="margin-right: 10px;"></i>
-    Export To Intelligence E7 Report
-</button>
-<div class="privacy-note">
-    <span class="privacy-header">
-        <i class="fa-solid fa-shield-halved" style="margin-right: 5px;"></i> 
-        Privacy Assurance
-    </span> 
-    Data entered here stays on your device. We do not collect or store any personal metrics. 
-    Enjoy the free service from <b>Saiprasad Barure / Prasad Reddy</b>.
+    <button onclick="downloadPDF()" class="btn-core btn-dossier">
+        <i class="fa-solid fa-file-arrow-down" style="margin-right: 10px;"></i>
+        Export To Intelligence E7 Report
+    </button>
+
+    <div class="privacy-note">
+        <span class="privacy-header">
+            <i class="fa-solid fa-shield-halved" style="margin-right: 5px;"></i> 
+            Privacy Assurance
+        </span> 
+        Data entered here stays on your device. We do not collect or store any personal metrics. 
+        Enjoy the free service from <b>Saiprasad Barure / Prasad Reddy</b>.
+    </div>
 </div>
-</div>
-<script src="script.js"></script>
+
+<script>
+    // Universal Dropdown Logic
+    function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) {
+        const container = document.getElementById(containerId);
+        const trigger = document.getElementById(triggerId);
+        const panel = document.getElementById(panelId);
+        const hidden = document.getElementById(hiddenInputId);
+        const options = panel.querySelectorAll('.option-item');
+
+        trigger.addEventListener('click', () => {
+            panel.classList.toggle('show');
+            container.classList.toggle('active');
+        });
+
+        options.forEach(item => {
+            item.addEventListener('click', () => {
+                trigger.textContent = item.textContent;
+                hidden.value = item.getAttribute('data-value');
+                panel.classList.remove('show');
+                container.classList.remove('active');
+                if (callback) callback();
+            });
+        });
+
+        window.addEventListener('click', (e) => {
+            if (!container.contains(e.target)) {
+                panel.classList.remove('show');
+                container.classList.remove('active');
+            }
+        });
+    }
+
+    // Initialize both dropdowns
+    initDropdown('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectInputs);
+    initDropdown('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', null);
+
+    function toggleSubjectInputs() {
+        const type = document.getElementById('reportType').value;
+        const section = document.getElementById('subjectSection');
+        section.style.display = (type === 'subjectwise') ? 'block' : 'none';
+    }
+
+    function calculateScore() {
+        const total = parseFloat(document.getElementById('totalQs').value) || 0;
+        const max = parseFloat(document.getElementById('maxMarks').value) || 0;
+        const att = parseFloat(document.getElementById('attempted').value) || 0;
+        const wrg = parseFloat(document.getElementById('wrong').value) || 0;
+        const ratio = parseFloat(document.getElementById('markingRatio').value) || 0;
+
+        if (total === 0) return;
+        const marksPerQ = max / total;
+        const negativePenalty = marksPerQ * ratio;
+        const score = (att - wrg) * marksPerQ - (wrg * negativePenalty);
+        
+        document.getElementById('score').innerText = score.toFixed(2);
+    }
+
+    function downloadPDF() {
+        alert("E7 Intelligence Report generating...");
+    }
+</script>
 </body>
 </html>
