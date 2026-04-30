@@ -1,26 +1,45 @@
-// --- 1. UI CONTROL LOGIC ---
-const trigger = document.getElementById('selectedLabel');
-const panel = document.getElementById('selectOptions');
-const hidden = document.getElementById('reportType');
+// --- 1. UI & DROPDOWN LOGIC ---
+function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) {
+    const container = document.getElementById(containerId);
+    const trigger = document.getElementById(triggerId);
+    const panel = document.getElementById(panelId);
+    const hidden = document.getElementById(hiddenInputId);
+    const options = panel.querySelectorAll('.option-item');
 
-if (trigger) {
-    trigger.addEventListener('click', () => panel.classList.toggle('show'));
+    if (!container || !trigger || !panel) return;
+
+    trigger.addEventListener('click', () => {
+        panel.classList.toggle('show');
+        container.classList.toggle('active');
+    });
+
+    options.forEach(item => {
+        item.addEventListener('click', () => {
+            trigger.textContent = item.textContent;
+            hidden.value = item.getAttribute('data-value');
+            panel.classList.remove('show');
+            container.classList.remove('active');
+            if (callback) callback();
+        });
+    });
+
+    window.addEventListener('click', (e) => {
+        if (!container.contains(e.target)) {
+            panel.classList.remove('show');
+            container.classList.remove('active');
+        }
+    });
 }
 
-document.querySelectorAll('.option-item').forEach(item => {
-    item.addEventListener('click', () => {
-        if(trigger) trigger.textContent = item.textContent;
-        if(hidden) hidden.value = item.getAttribute('data-value');
-        panel.classList.remove('show');
-        toggleSubjectInputs();
-    });
-});
+// Initialize your specific dropdowns from the HTML
+initDropdown('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectInputs);
+initDropdown('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', null);
 
 function toggleSubjectInputs() {
+    const type = document.getElementById('reportType').value;
     const section = document.getElementById('subjectSection');
-    const reportType = document.getElementById('reportType').value;
     if (section) {
-        section.style.display = reportType === 'subjectwise' ? 'block' : 'none';
+        section.style.display = (type === 'subjectwise') ? 'block' : 'none';
     }
 }
 
@@ -30,13 +49,18 @@ function calculateScore() {
     const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
     const attempted = parseFloat(document.getElementById('attempted').value) || 0;
     const wrong = parseFloat(document.getElementById('wrong').value) || 0;
+    const ratio = parseFloat(document.getElementById('markingRatio').value) || 0;
     
+    if (totalQs === 0) return { totalQs: 0, finalScore: 0 };
+
     const correct = attempted - wrong;
     const unattempted = Math.max(0, totalQs - attempted);
     
-    const marksPerCorrect = totalQs > 0 ? (maxMarks / totalQs) : 0;
-    const totalPenalty = wrong * (marksPerCorrect / 4); 
-    const finalScore = (correct * marksPerCorrect) - totalPenalty;
+    // Logic: Score = (Correct * MarksPerQ) - (Wrong * Penalty)
+    const marksPerQ = maxMarks / totalQs;
+    const penaltyPerQ = marksPerQ * ratio;
+    const totalPenalty = wrong * penaltyPerQ; 
+    const finalScore = (correct * marksPerQ) - totalPenalty;
     const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100).toFixed(2) : 0;
 
     const scoreElement = document.getElementById('score');
@@ -46,22 +70,25 @@ function calculateScore() {
     
     return { 
         totalQs, maxMarks, attempted, wrong, correct, 
-        unattempted, finalScore, efficiency, totalPenalty, marksPerCorrect 
+        unattempted, finalScore, efficiency, totalPenalty, marksPerQ, ratio 
     };
 }
 
-// --- 3. PDF GENERATION (EXACT FORMAT) ---
+// --- 3. PDF GENERATION (EXACT E7 FORMAT) ---
 async function downloadPDF() {
-    // Ensuring the library is accessed correctly
+    if (!window.jspdf) {
+        alert("Libraries not loaded. Check your internet connection.");
+        return;
+    }
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    
     const data = calculateScore();
     const reportType = document.getElementById('reportType').value;
     const student = (document.getElementById('studentName').value || "CANDIDATE").toUpperCase();
-    const test = (document.getElementById('testName').value || "ASSESSMENT TAG").toUpperCase();
+    const test = (document.getElementById('testName').value || "ASSESSMENT").toUpperCase();
 
-    // 1. Header Section
+    // 1. Header
     doc.setFillColor(15, 23, 42); 
     doc.rect(0, 0, 210, 40, 'F');
     doc.setTextColor(255, 255, 255);
@@ -69,9 +96,9 @@ async function downloadPDF() {
     doc.text("STRATEGIC PERFORMANCE E7 Report", 105, 22, { align: "center" });
     doc.setFontSize(8);
     doc.setTextColor(0, 242, 255);
-    doc.text("OFFICIAL REPORT | POWERED BY ECLIPSE7 AI | CEO&FOUNDER: SAIPRASAD BARURE", 105, 32, { align: "center" });
+    doc.text("OFFICIAL REPORT | POWERED BY ECLIPSE7 AI | FOUNDER: SAIPRASAD BARURE", 105, 32, { align: "center" });
 
-    // 2. Data Table
+    // 2. Data Summary
     doc.autoTable({
         startY: 45,
         theme: 'grid',
@@ -80,28 +107,27 @@ async function downloadPDF() {
         body: [
             ['STUDENT IDENTITY', student],
             ['ASSESSMENT TAG', test],
-            ['TOTAL QUESTIONS', data.totalQs],
-            ['MAXIMUM MARKS', data.maxMarks],
+            ['NEGATIVE RATIO', document.getElementById('ratioLabel').textContent],
             ['VERIFIED CORRECT', data.correct],
             ['IDENTIFIED ERRORS', data.wrong],
-            ['PENALTY MARKS (NEGATIVE)', `- ${data.totalPenalty.toFixed(2)}`],
-            ['FINAL AGGREGATE SCORE', data.finalScore.toFixed(2)],
-            ['EFFICIENCY RATING', `${data.efficiency}%`]
+            ['PENALTY INCURRED', `- ${data.totalPenalty.toFixed(2)}`],
+            ['FINAL AGGREGATE', data.finalScore.toFixed(2)],
+            ['EFFICIENCY', `${data.efficiency}%`]
         ],
     });
 
     let currentY = doc.lastAutoTable.finalY + 10;
 
-    // 3. Performance Bars
+    // 3. Visual Performance Bars
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(10);
-    doc.text("CORE PERFORMANCE SCORE", 20, currentY);
+    doc.text("CORE METRICS VISUALIZATION", 20, currentY);
     currentY += 6;
 
     const metrics = [
-        { label: `Accuracy (${data.correct})`, val: data.correct, color: [34, 197, 94] }, 
-        { label: `Errors (${data.wrong})`, val: data.wrong, color: [239, 68, 68] },   
-        { label: `Unattempted (${data.unattempted})`, val: data.unattempted, color: [148, 163, 184] } 
+        { label: `Correct (${data.correct})`, val: data.correct, color: [34, 197, 94] }, 
+        { label: `Wrong (${data.wrong})`, val: data.wrong, color: [239, 68, 68] },   
+        { label: `Skipped (${data.unattempted})`, val: data.unattempted, color: [148, 163, 184] } 
     ];
 
     metrics.forEach(m => {
@@ -114,12 +140,12 @@ async function downloadPDF() {
         currentY += 8;
     });
 
-    // 4. Subject Wise Breakdown
+    // 4. Subject Detail (If enabled)
     if (reportType === 'subjectwise') {
         currentY += 4;
         doc.setTextColor(30, 41, 59);
         doc.setFontSize(10);
-        doc.text("SUBJECT-WISE ANALYSIS", 20, currentY);
+        doc.text("DETAILED SUBJECT BREAKDOWN", 20, currentY);
         currentY += 8;
 
         const subs = [
@@ -136,8 +162,8 @@ async function downloadPDF() {
                 const maxWidth = 100;
                 const cWidth = (s.c / s.t) * maxWidth;
                 const wWidth = (s.w / s.t) * maxWidth;
-                doc.setFillColor(34, 197, 94); doc.rect(60, currentY, cWidth, 3, 'F');
-                doc.setFillColor(239, 68, 68); doc.rect(60 + cWidth, currentY, wWidth, 3, 'F');
+                doc.setFillColor(34, 197, 94); doc.rect(75, currentY, cWidth, 3, 'F');
+                doc.setFillColor(239, 68, 68); doc.rect(75 + cWidth, currentY, wWidth, 3, 'F');
                 currentY += 8;
             }
         });
@@ -154,11 +180,11 @@ async function downloadPDF() {
     doc.setFontSize(8);
     doc.setTextColor(80);
     currentY += 6;
-    doc.text(`1. Optimization: You left ${data.unattempted} questions unaddressed. Focus on attempt velocity.`, 20, currentY);
+    doc.text(`1. Optimization: You skipped ${data.unattempted} questions. Improving attempt speed could boost results.`, 20, currentY);
     currentY += 5;
-    doc.text(`2. Error Correction: Penalty of ${data.totalPenalty.toFixed(2)} marks was incurred due to inaccuracies.`, 20, currentY);
+    doc.text(`2. Error Correction: A penalty of ${data.totalPenalty.toFixed(2)} marks was lost to errors. Target accuracy.`, 20, currentY);
     currentY += 5;
-    doc.text(`3. Insight: Max possible marks for this test was ${data.maxMarks}. Current Efficiency: ${data.efficiency}%.`, 20, currentY);
+    doc.text(`3. Efficiency: You achieved ${data.efficiency}% of the max ${data.maxMarks} marks.`, 20, currentY);
 
     // 6. Signature & Stamp
     const footerY = 270;
@@ -168,7 +194,6 @@ async function downloadPDF() {
     doc.setFontSize(7);
     doc.text("Founder & CEO, ECLIPSE7", 20, footerY + 4);
 
-    // Stamp Processing
     const stampUrl = "https://eclipse7-pixal.github.io/marking-calculator/stamp.png";
     const img = new Image();
     img.crossOrigin = "Anonymous"; 
@@ -176,10 +201,9 @@ async function downloadPDF() {
     
     img.onload = function() {
         doc.addImage(img, 'PNG', 155, 252, 38, 38);
-        doc.save(`${student}_Official_E7_Report.pdf`);
+        doc.save(`${student}_E7_Report.pdf`);
     };
     img.onerror = function() {
-        // If stamp fails, still save the report
-        doc.save(`${student}_Official_E7_Report.pdf`);
+        doc.save(`${student}_E7_Report.pdf`);
     };
 }
