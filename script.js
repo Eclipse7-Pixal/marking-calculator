@@ -1,14 +1,12 @@
-// 1. UNIVERSAL DROPDOWN LOGIC (Must be at the top)
+// 1. UNIVERSAL DROPDOWN LOGIC
 function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) {
     const container = document.getElementById(containerId);
     const trigger = document.getElementById(triggerId);
     const panel = document.getElementById(panelId);
     const hidden = document.getElementById(hiddenInputId);
-    
     if (!container || !trigger || !panel) return;
 
     const options = panel.querySelectorAll('.option-item');
-
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         panel.classList.toggle('show');
@@ -33,20 +31,19 @@ function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) 
     });
 }
 
-// 2. INITIALIZE DROPDOWNS ON LOAD
+// 2. INITIALIZE ON LOAD
 document.addEventListener('DOMContentLoaded', () => {
     initDropdown('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectInputs);
     initDropdown('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', null);
 });
 
-// 3. UI VISIBILITY LOGIC
 function toggleSubjectInputs() {
     const type = document.getElementById('reportType').value;
     const section = document.getElementById('subjectSection');
     if (section) section.style.display = (type === 'subjectwise') ? 'block' : 'none';
 }
 
-// 4. SCORE CALCULATION ENGINE
+// 3. CALCULATION ENGINE
 function calculateScore() {
     const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
     const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
@@ -69,7 +66,7 @@ function calculateScore() {
     };
 }
 
-// 5. PDF GENERATION ENGINE
+// 4. PDF GENERATION ENGINE
 async function downloadPDF() {
     const data = calculateScore();
     const { jsPDF } = window.jspdf;
@@ -79,7 +76,7 @@ async function downloadPDF() {
     const student = (document.getElementById('studentName').value || "CANDIDATE").toUpperCase();
     const test = (document.getElementById('testName').value || "ASSESSMENT").toUpperCase();
 
-    // Header
+    // --- DARK HEADER ---
     doc.setFillColor(15, 23, 42); 
     doc.rect(0, 0, 210, 40, 'F');
     doc.setTextColor(255, 255, 255);
@@ -89,7 +86,7 @@ async function downloadPDF() {
     doc.setTextColor(0, 242, 255);
     doc.text("OFFICIAL REPORT | POWERED BY ECLIPSE7 AI | FOUNDER: SAIPRASAD BARURE", 105, 32, { align: "center" });
 
-    // Table
+    // --- MAIN DATA TABLE ---
     doc.autoTable({
         startY: 45,
         theme: 'grid',
@@ -109,7 +106,14 @@ async function downloadPDF() {
 
     let currentY = doc.lastAutoTable.finalY + 10;
 
-    // Accuracy Bars
+    // --- CORE PERFORMANCE BARS ---
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("CORE PERFORMANCE BARS", 20, currentY);
+    doc.setFont("helvetica", "normal");
+    currentY += 8;
+
     const metrics = [
         { label: `Accuracy (${data.correct})`, val: data.correct, color: [34, 197, 94] }, 
         { label: `Errors (${data.wrong})`, val: data.wrong, color: [239, 68, 68] }
@@ -125,11 +129,87 @@ async function downloadPDF() {
         currentY += 8;
     });
 
-    // Signature & Stamp
-    doc.setTextColor(30, 41, 59);
-    doc.text("MR. PRASAD REDDY", 20, 270);
-    doc.text("Founder & CEO, ECLIPSE7", 20, 274);
+    // --- SUBJECT-WISE ANALYSIS (BAR GRAPHS) ---
+    if (reportType === 'subjectwise') {
+        currentY += 5;
+        doc.setTextColor(30, 41, 59);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.text("SUBJECT WISE ANALYSIS", 20, currentY);
+        doc.setFont("helvetica", "normal");
+        currentY += 8;
 
+        const subjects = [
+            { id: 'Physics', t: 'phyA', c: 'phyC', w: 'phyW' },
+            { id: 'Chemistry', t: 'chemA', c: 'chemC', w: 'chemW' },
+            { id: 'Math/Bio', t: 'mathBioA', c: 'mathBioC', w: 'mathBioW' }
+        ];
+
+        subjects.forEach(sub => {
+            const total = parseInt(document.getElementById(sub.t).value) || 0;
+            const corr = parseInt(document.getElementById(sub.c).value) || 0;
+            const wrng = parseInt(document.getElementById(sub.w).value) || 0;
+
+            if (total > 0) {
+                doc.setFontSize(7);
+                doc.setTextColor(100);
+                doc.text(sub.id.toUpperCase(), 20, currentY + 3);
+                
+                const cWidth = (corr / total) * 100;
+                const wWidth = (wrng / total) * 100;
+                
+                doc.setFillColor(34, 197, 94); // Green
+                doc.rect(60, currentY, cWidth, 3, 'F');
+                doc.setFillColor(239, 68, 68); // Red
+                doc.rect(60 + cWidth, currentY, wWidth, 3, 'F');
+                
+                currentY += 6;
+            }
+        });
+    }
+
+    // --- PERSONALIZED AI RECOMMENDATIONS ---
+    currentY += 10;
+    doc.setDrawColor(220);
+    doc.line(20, currentY, 190, currentY);
+    currentY += 10;
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 41, 59);
+    doc.text("AI POWERED RECOMMENDATIONS", 20, currentY);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    currentY += 8;
+
+    let advice = "";
+    if (data.efficiency > 80) advice = "Excellent performance! Focus on time management to perfect your last few marks.";
+    else if (data.efficiency > 50) advice = "Solid foundation. Identify your error patterns to break into the 80%+ bracket.";
+    else advice = "Priority: Strengthen core concepts. Minimize guesses to reduce the penalty impact.";
+
+    doc.text(`1. Strategy: ${advice}`, 20, currentY);
+    currentY += 5;
+    doc.text(`2. Error Insight: Penalty of ${data.totalPenalty.toFixed(2)} marks suggests high-risk guessing.`, 20, currentY);
+    currentY += 5;
+    doc.text(`3. Action: Review the ${data.unattempted} questions left blank to find 'easy wins' for next time.`, 20, currentY);
+
+    // --- FOOTER: SIGNATURE & TIMESTAMP ---
+    const footerY = 270;
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("MR. PRASAD REDDY", 20, footerY); // Bolder and Bigger
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100);
+    doc.text("Founder & CEO, ECLIPSE7", 20, footerY + 5);
+    
+    // Timestamp
+    const timestamp = new Date().toLocaleString();
+    doc.setFontSize(7);
+    doc.text(`Report Timestamp: ${timestamp}`, 20, footerY + 12);
+
+    // Stamp
     const stampUrl = "https://eclipse7-pixal.github.io/marking-calculator/stamp.png";
     const img = new Image();
     img.crossOrigin = "Anonymous";
