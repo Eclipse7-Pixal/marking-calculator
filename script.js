@@ -1,4 +1,4 @@
-// 1. UNIVERSAL DROPDOWN LOGIC WITH ANIMATION SUPPORT
+// 1. UNIVERSAL DROPDOWN ENGINE WITH SYNC & PREFIX PRESERVATION
 function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) {
     const container = document.getElementById(containerId);
     const trigger = document.getElementById(triggerId);
@@ -8,10 +8,13 @@ function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) 
 
     const options = panel.querySelectorAll('.option-item');
     
+    // Track original design layout tracking values
+    const originalLabelText = trigger.textContent.split(':')[0].trim();
+
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         
-        // Close all other dropdowns first for crisp experience
+        // Crisp experience: sweep close competing operational interfaces
         document.querySelectorAll('.select-options').forEach(p => {
             if(p !== panel) p.classList.remove('show');
         });
@@ -25,8 +28,16 @@ function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) 
 
     options.forEach(item => {
         item.addEventListener('click', () => {
-            trigger.textContent = item.textContent;
-            hidden.value = item.getAttribute('data-value');
+            const chosenVal = item.getAttribute('data-value');
+            hidden.value = chosenVal;
+            
+            // Retain original styling context label layout if it demands structure
+            if (containerId === 'ratioSelectContainer') {
+                trigger.textContent = `Ratio: ${item.textContent.split(' ')[0]}`;
+            } else {
+                trigger.textContent = item.textContent;
+            }
+
             panel.classList.remove('show');
             container.classList.remove('active');
             if (callback) callback();
@@ -41,19 +52,29 @@ function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) 
     });
 }
 
-// 2. INITIALIZE ON DOM COMPLETE
+// 2. COMPLETE DOM READY BINDING MATRIX
 document.addEventListener('DOMContentLoaded', () => {
     initDropdown('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectInputs);
     initDropdown('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', null);
+    
+    // Trigger initial structural validation sequence
+    toggleSubjectInputs();
 });
 
 function toggleSubjectInputs() {
     const type = document.getElementById('reportType').value;
     const section = document.getElementById('subjectSection');
-    if (section) section.style.display = (type === 'subjectwise') ? 'block' : 'none';
+    if (!section) return;
+
+    // Fluid integration engine replacement for raw display switches
+    if (type === 'subjectwise') {
+        section.classList.add('visible');
+    } else {
+        section.classList.remove('visible');
+    }
 }
 
-// 3. CORE CALCULATION ENGINE (PROTRACTED EXACT UNCHANGED MATHEMATICAL MATRIX)
+// 3. CORE ANALYTICAL CALCULATION ENGINE (CORE IMMUTED LOGIC)
 function calculateScore() {
     const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
     const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
@@ -76,7 +97,7 @@ function calculateScore() {
     };
 }
 
-// 4. PDF GENERATION ENGINE (UNCHANGED GEOMETRY SPECIFICATION DESIGN)
+// 4. PDF GENERATION CORE (CORE GEOMETRICAL DATA PERSISTENCE MATRIX)
 async function downloadPDF() {
     const data = calculateScore();
     const { jsPDF } = window.jspdf;
@@ -86,7 +107,7 @@ async function downloadPDF() {
     const student = (document.getElementById('studentName').value || "CANDIDATE").toUpperCase();
     const test = (document.getElementById('testName').value || "ASSESSMENT").toUpperCase();
 
-    // --- DARK HEADER ---
+    // --- DARK HEADER BLOCK ---
     doc.setFillColor(15, 23, 42); 
     doc.rect(0, 0, 210, 40, 'F');
     doc.setTextColor(255, 255, 255);
@@ -96,7 +117,7 @@ async function downloadPDF() {
     doc.setTextColor(0, 242, 255);
     doc.text("OFFICIAL REPORT | POWERED BY ECLIPSE7 AI | FOUNDER: SAIPRASAD BARURE", 105, 32, { align: "center" });
 
-    // --- MAIN DATA TABLE ---
+    // --- MAIN DATA RECONSTRUCTION TABLE ---
     doc.autoTable({
         startY: 45,
         theme: 'grid',
@@ -116,7 +137,7 @@ async function downloadPDF() {
 
     let currentY = doc.lastAutoTable.finalY + 10;
 
-    // --- CORE PERFORMANCE BARS ---
+    // --- CORE PERFORMANCE VISUAL METRICS ---
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
@@ -139,7 +160,7 @@ async function downloadPDF() {
         currentY += 8;
     });
 
-    // --- SUBJECT-WISE ANALYSIS (BAR GRAPHS) ---
+    // --- SECONDARY DETAILED DATA SUB-BLOCK GRAPHS ---
     if (reportType === 'subjectwise') {
         currentY += 5;
         doc.setTextColor(30, 41, 59);
@@ -168,9 +189,9 @@ async function downloadPDF() {
                 const cWidth = (corr / total) * 100;
                 const wWidth = (wrng / total) * 100;
                 
-                doc.setFillColor(34, 197, 94); // Green bar
+                doc.setFillColor(34, 197, 94);
                 doc.rect(60, currentY, cWidth, 3, 'F');
-                doc.setFillColor(239, 68, 68); // Red bar
+                doc.setFillColor(239, 68, 68);
                 doc.rect(60 + cWidth, currentY, wWidth, 3, 'F');
                 
                 currentY += 6;
@@ -178,7 +199,7 @@ async function downloadPDF() {
         });
     }
 
-    // --- PERSONALIZED AI RECOMMENDATIONS ---
+    // --- INTEGRATED REPORTING RECOMMENDATIONS ---
     currentY += 10;
     doc.setDrawColor(220);
     doc.line(20, currentY, 190, currentY);
@@ -202,7 +223,7 @@ async function downloadPDF() {
     currentY += 5;
     doc.text(`3. Action: Review the ${data.unattempted} questions left blank to find 'easy wins' for next time.`, 20, currentY);
 
-    // --- FOOTER FRAME ---
+    // --- SIGNATURE AND VALIDATION STAMP ---
     const footerY = 270;
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(11);
@@ -218,7 +239,7 @@ async function downloadPDF() {
     doc.setFontSize(7);
     doc.text(`Report Timestamp: ${timestamp}`, 20, footerY + 12);
 
-    // Cryptographic Stamp Processing Layer
+    // Secure cross-origin image stamp parsing layer
     const stampUrl = "https://eclipse7-pixal.github.io/marking-calculator/stamp.png";
     const img = new Image();
     img.crossOrigin = "Anonymous";
