@@ -14,336 +14,149 @@
     <meta property="og:image" content="logo.ico">
     <meta property="og:type" content="website">
 
-    <!-- External Assets -->
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
-    <!-- PDF GENERATION LIBRARIES (Add these here) -->
+    <!-- PDF Generation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-    <style>
-        :root {
-            --bg-deep: #050505;
-            --card-dark: #0d0d0d;
-            --accent-cyan: #00f2ff;
-            --text-dim: #9ca3af;
-            --glass-border: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            background: radial-gradient(circle at top right, #111, var(--bg-deep));
-            color: #e5e7eb;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .ai-container {
-            background: var(--card-dark);
-            border: 1px solid var(--glass-border);
-            padding: 35px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 480px;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-        }
-
-        h1 {
-            font-size: 1.6rem;
-            text-align: center;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(to bottom, #fff, var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
-        }
-
-        .branding {
-            text-align: center;
-            font-size: 0.65rem;
-            color: var(--accent-cyan);
-            letter-spacing: 3px;
-            margin-bottom: 30px;
-            opacity: 0.8;
-            text-transform: uppercase;
-        }
-
-        .input-group-full { margin-bottom: 12px; }
-
-        .input-row { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            margin-bottom: 12px; 
-        }
-
-        input {
-            background: #151515;
-            border: 1px solid #222;
-            padding: 14px;
-            border-radius: 10px;
-            color: white;
-            font-size: 0.9rem;
-            width: 100%;
-            box-sizing: border-box;
-            transition: 0.3s;
-        }
-
-        input:focus { 
-            border-color: var(--accent-cyan); 
-            outline: none; 
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.1); 
-        }
-
-        label { 
-            font-size: 0.7rem; 
-            color: var(--text-dim); 
-            margin-bottom: 5px; 
-            display: block; 
-            text-transform: uppercase; 
-        }
-
-        /* --- CUSTOM SELECT STYLING --- */
-        .custom-select {
-            position: relative;
-            width: 100%;
-            margin-top: 10px;
-            user-select: none;
-        }
-
-        .select-trigger {
-            background: #151515;
-            border: 1px solid #222;
-            padding: 14px;
-            border-radius: 10px;
-            color: white;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: 0.3s;
-        }
-
-        .select-trigger:hover { border-color: var(--accent-cyan); }
-
-        .select-trigger::after {
-            content: '\f0d7';
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            color: var(--accent-cyan);
-            transition: 0.3s;
-        }
-
-        .custom-select.active .select-trigger::after { transform: rotate(180deg); }
-
-        .select-options {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #0d0d0d;
-            border: 1px solid #222;
-            border-radius: 10px;
-            margin-top: 8px;
-            display: none;
-            z-index: 100;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-
-        .select-options.show { display: block; animation: fadeIn 0.2s ease-out; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .option-item {
-            padding: 14px;
-            color: #e5e7eb;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .option-item:hover {
-            background: var(--accent-cyan);
-            color: #000;
-            font-weight: bold;
-        }
-
-        /* --- END CUSTOM SELECT --- */
-
-        .btn-core {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            font-weight: 800;
-            cursor: pointer;
-            text-transform: uppercase;
-            border: none;
-            margin-top: 15px;
-            transition: 0.4s ease;
-        }
-
-        .btn-execute { background: #fff; color: #000; }
-        .btn-execute:hover { background: var(--accent-cyan); transform: scale(1.01); }
-
-        .btn-dossier {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent; 
-            color: #fff; 
-            border: 1px solid #333;
-        }
-
-        .btn-dossier i { color: var(--accent-cyan); }
-        .btn-dossier:hover { border-color: var(--accent-cyan); }
-
-        .score-display {
-            background: #000;
-            border: 1px solid #1a1a1a;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .score-val { font-size: 2.5rem; font-weight: 300; color: var(--accent-cyan); }
-
-        .privacy-note {
-            font-size: 0.65rem;
-            line-height: 1.6;
-            color: var(--text-dim);
-            text-align: center;
-            margin-top: 25px;
-            padding: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-        }
-
-        .privacy-header {
-            display: block;
-            color: var(--accent-cyan);
-            font-weight: 800;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            font-family: 'Courier New', Courier, monospace;
-        }
-    </style>
+    <!-- External Stylesheet Links Seamlessly -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="ai-container">
-    <h1>Negative Marking Engine</h1>
-    <p class="branding">Powered by ECLIPSE7 AI | BY SAIPRASAD BARURE</p>
+    <header class="brand-header">
+        <h1>Negative Marking Engine</h1>
+        <p class="branding">Powered by ECLIPSE7 AI | BY SAIPRASAD BARURE</p>
+    </header>
 
-    <div class="input-group-full">
-        <input type="text" id="studentName" placeholder="STUDENT IDENTITY">
-    </div>
-    <div class="input-group-full">
-        <input type="text" id="testName" placeholder="ASSESSMENT NAME (e.g. JEE-26)">
-    </div>
-
-    <div class="input-row">
-        <div><label>Questions</label><input type="number" id="totalQs" value="0"></div>
-        <div><label>Max Marks</label><input type="number" id="maxMarks" value="0"></div>
-    </div>
-
-    <div class="input-row">
-        <div><label>Attempts</label><input type="number" id="attempted"></div>
-        <div><label>Incorrect</label><input type="number" id="wrong"></div>
-    </div>
-
-    <!-- NEW Ratio Selection Panel -->
-    <div class="custom-select" id="ratioSelectContainer">
-        <label>Negative Marking Ratio</label>
-        <div class="select-trigger" id="ratioLabel">Ratio: 1/4</div>
-        <div class="select-options" id="ratioOptions">
-            <div class="option-item" data-value="0.25">1/4</div>
-            <div class="option-item" data-value="0.33">1/3</div>
-            <div class="option-item" data-value="0.5">1/2</div>
-            <div class="option-item" data-value="0">None</div>
+    <main class="form-wrapper">
+        <!-- Student Metadata -->
+        <div class="input-group-full">
+            <div class="input-wrapper">
+                <i class="fa-solid fa-user input-icon"></i>
+                <input type="text" id="studentName" placeholder="STUDENT IDENTITY">
+            </div>
         </div>
-        <input type="hidden" id="markingRatio" value="0.25">
-    </div>
-
-    <!-- Analytics Selection Panel -->
-    <div class="custom-select" id="customSelect">
-        <label style="margin-top: 10px;">Analytics Mode</label>
-        <div class="select-trigger" id="selectedLabel">OVERALL ANALYTICS</div>
-        <div class="select-options" id="selectOptions">
-            <div class="option-item" data-value="overall">OVERALL ANALYTICS</div>
-            <div class="option-item" data-value="subjectwise">DETAILED SUBJECT BREAKDOWN</div>
-        </div>
-        <input type="hidden" id="reportType" value="overall">
-    </div>
-
-    <div id="subjectSection" style="display: none; margin-top: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border);">
-        <!-- Subject rows here (same as before) -->
-        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; text-align: center;">
-            <div></div> 
-            <span style="font-size: 0.65rem; color: var(--accent-cyan); letter-spacing: 1px;">TOTAL Q.</span>
-            <span style="font-size: 0.65rem; color: #4ade80; letter-spacing: 1px;">CORRECT</span>
-            <span style="font-size: 0.65rem; color: #f87171; letter-spacing: 1px;">WRONG</span>
-        </div>
-         
-        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center;">
-            <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">PHYSICS</label>
-            <input type="number" id="phyA" placeholder="0" style="padding: 8px; text-align: center;">
-            <input type="number" id="phyC" placeholder="0" style="padding: 8px; text-align: center;">
-            <input type="number" id="phyW" placeholder="0" style="padding: 8px; text-align: center;">
+        <div class="input-group-full">
+            <div class="input-wrapper">
+                <i class="fa-solid fa-file-signature input-icon"></i>
+                <input type="text" id="testName" placeholder="ASSESSMENT NAME (e.g. JEE-26)">
+            </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 7px; margin-bottom: 8px; align-items: center;">
-            <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">CHEMISTRY</label>
-            <input type="number" id="chemA" placeholder="0" style="padding: 8px; text-align: center;">
-            <input type="number" id="chemC" placeholder="0" style="padding: 8px; text-align: center;">
-            <input type="number" id="chemW" placeholder="0" style="padding: 8px; text-align: center;">
+        <!-- Global Assessment Parameters -->
+        <div class="input-row">
+            <div>
+                <label class="field-label">Questions</label>
+                <input type="number" id="totalQs" value="0">
+            </div>
+            <div>
+                <label class="field-label">Max Marks</label>
+                <input type="number" id="maxMarks" value="0">
+            </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 10px; align-items: center;">
-            <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-dim);">MATH/BIO</label>
-            <input type="number" id="mathBioA" placeholder="0" style="padding: 8px; text-align: center;">
-            <input type="number" id="mathBioC" placeholder="0" style="padding: 8px; text-align: center;">
-            <input type="number" id="mathBioW" placeholder="0" style="padding: 8px; text-align: center;">
+        <div class="input-row">
+            <div>
+                <label class="field-label">Attempts</label>
+                <input type="number" id="attempted">
+            </div>
+            <div>
+                <label class="field-label">Incorrect</label>
+                <input type="number" id="wrong">
+            </div>
         </div>
-    </div>
 
-    <button onclick="calculateScore()" class="btn-core btn-execute">Check Score </button>
+        <!-- Dropdowns Grid -->
+        <div class="dropdown-grid">
+            <!-- Ratio Selection Panel -->
+            <div class="custom-select" id="ratioSelectContainer">
+                <label class="field-label">Negative Marking Ratio</label>
+                <div class="select-trigger" id="ratioLabel">Ratio: 1/4</div>
+                <div class="select-options" id="ratioOptions">
+                    <div class="option-item" data-value="0.25">1/4</div>
+                    <div class="option-item" data-value="0.33">1/3</div>
+                    <div class="option-item" data-value="0.5">1/2</div>
+                    <div class="option-item" data-value="0">None</div>
+                </div>
+                <input type="hidden" id="markingRatio" value="0.25">
+            </div>
 
-    <div class="score-display">
-        <label>Calculated Score</label>
-        <div id="score" class="score-val">0.00</div>
-    </div>
+            <!-- Analytics Selection Panel -->
+            <div class="custom-select" id="customSelect">
+                <label class="field-label">Analytics Mode</label>
+                <div class="select-trigger" id="selectedLabel">OVERALL ANALYTICS</div>
+                <div class="select-options" id="selectOptions">
+                    <div class="option-item" data-value="overall">OVERALL ANALYTICS</div>
+                    <div class="option-item" data-value="subjectwise">DETAILED BREAKDOWN</div>
+                </div>
+                <input type="hidden" id="reportType" value="overall">
+            </div>
+        </div>
 
-    <button onclick="downloadPDF()" class="btn-core btn-dossier">
-        <i class="fa-solid fa-file-arrow-down" style="margin-right: 10px;"></i>
-        Export To Intelligence E7 Report [PDF]
-    </button>
+        <!-- Subject Breakdown Module -->
+        <div id="subjectSection" class="subject-section-panel">
+            <div class="subject-grid-header">
+                <div></div> 
+                <span>TOTAL Q.</span>
+                <span>CORRECT</span>
+                <span>WRONG</span>
+            </div>
+             
+            <div class="subject-row-inputs">
+                <label class="subject-tag">PHYSICS</label>
+                <input type="number" id="phyA" placeholder="0">
+                <input type="number" id="phyC" placeholder="0">
+                <input type="number" id="phyW" placeholder="0">
+            </div>
 
-    <div class="privacy-note">
+            <div class="subject-row-inputs">
+                <label class="subject-tag">CHEMISTRY</label>
+                <input type="number" id="chemA" placeholder="0">
+                <input type="number" id="chemC" placeholder="0">
+                <input type="number" id="chemW" placeholder="0">
+            </div>
+
+            <div class="subject-row-inputs">
+                <label class="subject-tag">MATH/BIO</label>
+                <input type="number" id="mathBioA" placeholder="0">
+                <input type="number" id="mathBioC" placeholder="0">
+                <input type="number" id="mathBioW" placeholder="0">
+            </div>
+        </div>
+
+        <!-- Execution Center -->
+        <button onclick="calculateScore()" class="btn-core btn-execute">
+            <span>Check Score</span>
+            <i class="fa-solid fa-bolt-lightning"></i>
+        </button>
+
+        <div class="score-display">
+            <label class="score-title">Calculated Telemetry Score</label>
+            <div id="score" class="score-val">0.00</div>
+        </div>
+
+        <button onclick="downloadPDF()" class="btn-core btn-dossier">
+            <i class="fa-solid fa-file-arrow-down"></i>
+            <span>Export Intelligence E7 Report [PDF]</span>
+        </button>
+    </main>
+
+    <footer class="privacy-note">
         <span class="privacy-header">
-            <i class="fa-solid fa-shield-halved" style="margin-right: 5px;"></i> 
-            Privacy Assurance
+            <i class="fa-solid fa-shield-halved"></i> 
+            Secure Processing Assurance
         </span> 
-        Data entered here stays on your device. We do not collect or store any personal metrics. 
-        Enjoy the free service from <b>Saiprasad Barure / Prasad Reddy</b>.
-    </div>
+        Data entered here processing stays localized entirely on your hardware environment. No outbound metrics are parsed. Enjoy this free service from <b>Saiprasad Barure / Prasad Reddy</b>.
+    </footer>
 </div>
-<!-- Remove the wrapping tags, just keep the src line -->
+
     <script src="script.js"></script>
 </body>
 </html>
