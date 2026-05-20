@@ -1,4 +1,6 @@
+// ============================================================================
 // 1. UNIVERSAL DROPDOWN ENGINE WITH SYNC & PREFIX PRESERVATION
+// ============================================================================
 function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) {
     const container = document.getElementById(containerId);
     const trigger = document.getElementById(triggerId);
@@ -11,7 +13,7 @@ function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) 
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         
-        // Sweep close competing operational interfaces
+        // Clear active states from competing dropdown interfaces
         document.querySelectorAll('.select-options').forEach(p => {
             if(p !== panel) p.classList.remove('show');
         });
@@ -49,7 +51,9 @@ function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) 
     });
 }
 
+// ============================================================================
 // 2. COMPLETE DOM READY BINDING MATRIX
+// ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
     initDropdown('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectInputs);
     initDropdown('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', null);
@@ -71,7 +75,9 @@ function toggleSubjectInputs() {
     }
 }
 
-// 3. CORE ANALYTICAL CALCULATION ENGINE (CORE IMMUTED LOGIC)
+// ============================================================================
+// 3. CORE ANALYTICAL CALCULATION ENGINE (CORE IMMUTABLE LOGIC)
+// ============================================================================
 function calculateScore() {
     const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
     const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
@@ -94,88 +100,101 @@ function calculateScore() {
     };
 }
 
-// 4. ULTRA PRO MAX EXTRAORDINARY GRAPHICAL HUD PDF ENGINE
+// ============================================================================
+// 4. ULTRA PRO MAX PRINT-OPTIMIZED EXTRAORDINARY PDF ENGINE
+// ============================================================================
 async function downloadPDF() {
     const data = calculateScore();
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4'); 
+    const doc = new jsPDF('p', 'mm', 'a4'); // Standard A4: 210mm x 297mm
     
     const reportType = document.getElementById('reportType').value;
     const student = (document.getElementById('studentName').value || "UNVERIFIED_CANDIDATE").toUpperCase();
     const test = (document.getElementById('testName').value || "CORE_ASSESSMENT_RUN").toUpperCase();
     const timestamp = new Date().toLocaleString().toUpperCase();
 
-    // --- PHASE 1: MICRO-GRID BLUEPRINT BACKGROUND MATRIX ---
-    doc.setFillColor(250, 252, 255); // Icy cyber canvas white tint
+    // --- PHASE 1: LIGHT MICRO-GRID BLUEPRINT BACKGROUND MATRIX ---
+    doc.setFillColor(255, 255, 255); // Pristine white page base to save all printing ink
     doc.rect(0, 0, 210, 297, 'F');
     
-    // Programmatic Engineering Grid Coordinates Accent Lines
-    doc.setDrawColor(230, 238, 245);
-    doc.setLineWidth(0.2);
-    for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297); // Vertical structural grids
-    for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j); // Horizontal structural grids
+    // Light Engineering Grid Coordinates Lines (Minimal Ink Consumption)
+    doc.setDrawColor(240, 244, 248);
+    doc.setLineWidth(0.25);
+    for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
+    for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j);
 
-    // --- PHASE 2: MILITARY INDUSTRIAL CORNER HUD TARGETING BRACKETS ---
-    doc.setDrawColor(15, 23, 42); // Deep slate execution anchor lines
-    doc.setLineWidth(0.8);
-    // Top-Left Frame Unit
-    doc.line(8, 8, 22, 8); doc.line(8, 8, 8, 22); doc.rect(8, 8, 2, 2, 'F');
-    // Top-Right Frame Unit
-    doc.line(202, 8, 188, 8); doc.line(202, 8, 202, 22); doc.rect(200, 8, 2, 2, 'F');
-    // Bottom-Left Frame Unit
-    doc.line(8, 289, 22, 289); doc.line(8, 289, 8, 275); doc.rect(8, 287, 2, 2, 'F');
-    // Bottom-Right Frame Unit
-    doc.line(202, 289, 188, 289); doc.line(202, 289, 202, 275); doc.rect(200, 287, 2, 2, 'F');
+    // --- PHASE 2: TECHNICAL OUTER BOUNDING FRAME & ACCENT TICKS ---
+    doc.setDrawColor(148, 163, 184); // Matte grey thin outer container line
+    doc.setLineWidth(0.3);
+    doc.rect(8, 8, 194, 281);
+    
+    doc.setDrawColor(15, 23, 42); // High-contrast dark slate corner ticks
+    doc.setLineWidth(0.7);
+    // Top-Left corner structure
+    doc.line(6, 6, 16, 6); doc.line(6, 6, 6, 16);
+    // Top-Right corner structure
+    doc.line(204, 6, 194, 6); doc.line(204, 6, 204, 16);
+    // Bottom-Left corner structure
+    doc.line(6, 291, 16, 291); doc.line(6, 291, 6, 281);
+    // Bottom-Right corner structure
+    doc.line(204, 291, 194, 291); doc.line(204, 291, 204, 281);
 
-    // --- PHASE 3: ASYMMETRIC QUANTUM HEADER MATRIX ---
-    doc.setFillColor(11, 8, 28); // Tactical Midnight Obsidian
+    // --- PHASE 3: HIGH-TECH INK-EFFICIENT ASYMMETRIC HEADER PANEL ---
+    // Clean light grey-blue background fill for the main text block
+    doc.setFillColor(248, 250, 252);
     doc.rect(10, 10, 190, 32, 'F');
     
-    // Integrated Neon Core Border Accent Blocks
-    doc.setFillColor(0, 242, 255); // Cyan Neon Laser Block
-    doc.rect(10, 42, 125, 1.5, 'F');
-    doc.setFillColor(189, 0, 255); // Purple Neon Laser Block
-    doc.rect(135, 42, 65, 1.5, 'F');
+    // Geometric accent lines instead of thick dark backgrounds
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5);
+    doc.rect(10, 10, 190, 32, 'D');
+    
+    // Sharp dual-toned color accent strip below the title text block
+    doc.setFillColor(14, 165, 233); // Tech Cyan Strip
+    doc.rect(10, 41, 130, 1, 'F');
+    doc.setFillColor(168, 85, 247); // Tech Purple Strip
+    doc.rect(140, 41, 60, 1, 'F');
 
-    // Header HUD Text Typography Layout
-    doc.setTextColor(255, 255, 255);
+    // Header Typography Layout
+    doc.setTextColor(15, 23, 42); // Deep high-contrast charcoal slate text
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("QUANTUM ENGINE INTELLIGENCE REPORT", 16, 22);
+    doc.setFontSize(16);
+    doc.text("QUANTUM ENGINE PERFORMANCE DOSSIER", 16, 21);
     
     doc.setFont("courier", "bold");
-    doc.setFontSize(7.5);
-    doc.setTextColor(0, 242, 255);
-    doc.text(`SYSTEM_STATUS: SECURE // EMISSION_BLOCK_ID: E7_V4.0_RUN_${Math.floor(1000+Math.random()*9000)}`, 16, 28);
+    doc.setFontSize(8);
+    doc.setTextColor(14, 165, 233); // Vivid technical cyan identifier label
+    doc.text(`SYSTEM CORE: VERIFIED // EMISSION RUN: E7_V4.0_GEN_${Math.floor(1000 + Math.random() * 9000)}`, 16, 27);
     
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.setTextColor(148, 163, 184);
-    doc.text("ECLIPSE7 ANALYSIS LABS ENGINE MATRIX // FOUNDER & OWNER: SAIPRASAD BARURE", 16, 36);
+    doc.setTextColor(100, 116, 139); // Clean mid-tone slate text
+    doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY // REPRESENTATIVE: SAIPRASAD BARURE", 16, 35);
 
-    // Dynamic Upper Right ID Stamp Box
-    doc.setFillColor(24, 18, 54);
-    doc.rect(155, 14, 40, 10, 'F');
-    doc.setTextColor(189, 0, 255);
+    // Discrete Top-Right Blueprint Status Token Badge
+    doc.setFillColor(241, 245, 249);
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.2);
+    doc.rect(156, 14, 38, 8, 'DF');
+    doc.setTextColor(71, 85, 105);
     doc.setFont("courier", "bold");
-    doc.setFontSize(8);
-    doc.text("CORE INTEL", 162, 20);
+    doc.setFontSize(7);
+    doc.text("PRINT OPTIMIZED", 161, 19);
 
-    // --- PHASE 4: ASYMMETRIC SYSTEM METRIC CARDS GRID (TWO COLUMN HUD MODULES) ---
-    let cardY = 50;
+    // --- PHASE 4: ASYMMETRIC TWO-COLUMN TELEMETRY PODS GRID ---
+    let cardY = 48;
     
-    // --- LEFT COLUMN CARD: IDENTITY MODULE ---
-    doc.setFillColor(15, 23, 42); 
-    doc.rect(10, cardY, 92, 6, 'F'); // Dark Badge Title Bar
-    doc.setTextColor(0, 242, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.text(" SECURE ID TOKEN REGISTRY", 12, cardY + 4.2);
+    // --- LEFT CARD COLUMN: REGISTRY & SECURITY PROFILE ---
+    doc.setFillColor(241, 245, 249); // Soft subtle label title bar block
+    doc.rect(10, cardY, 92, 6, 'F');
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3);
+    doc.rect(10, cardY, 92, 6, 'D');
+    
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text(" SECURE INITIAL IDENTITY MATRIX", 12, cardY + 4.2);
     
     doc.setFillColor(255, 255, 255);
     doc.setDrawColor(203, 213, 225);
-    doc.setLineWidth(0.4);
-    doc.rect(10, cardY + 6, 92, 26, 'DF'); // White Pod Body Frame
+    doc.rect(10, cardY + 6, 92, 26, 'DF'); // Main card info container box
     
     doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
     doc.text("CANDIDATE INITIALS :", 14, cardY + 14);
@@ -183,109 +202,122 @@ async function downloadPDF() {
     doc.text("SYSTEM TIME STAMP  :", 14, cardY + 30);
     
     doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
-    doc.text(student.length > 20 ? student.substring(0,20)+"..." : student, 46, cardY + 14);
-    doc.text(test.length > 20 ? test.substring(0,20)+"..." : test, 46, cardY + 22);
+    doc.text(student.length > 20 ? student.substring(0, 20) + "..." : student, 44, cardY + 14);
+    doc.text(test.length > 20 ? test.substring(0, 20) + "..." : test, 44, cardY + 22);
     doc.setFont("courier", "bold"); doc.setFontSize(6.5);
-    doc.text(timestamp, 46, cardY + 30);
+    doc.text(timestamp, 44, cardY + 30);
 
-    // --- RIGHT COLUMN CARD: COGNITIVE DATA PARAMETERS MODULE ---
-    doc.setFillColor(15, 23, 42); 
-    doc.rect(108, cardY, 92, 6, 'F'); // Dark Badge Title Bar
-    doc.setTextColor(189, 0, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.text(" BASE STRUCTURE LOAD PARAMETERS", 110, cardY + 4.2);
+    // --- RIGHT CARD COLUMN: RAW METRIC DATA FEEDS ---
+    doc.setFillColor(241, 245, 249);
+    doc.rect(108, cardY, 92, 6, 'F');
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3);
+    doc.rect(108, cardY, 92, 6, 'D');
+    
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text(" LOAD DATA STRUCTURAL CONSTANTS", 110, cardY + 4.2);
     
     doc.setFillColor(255, 255, 255);
-    doc.rect(108, cardY + 6, 92, 26, 'DF'); // White Pod Body Frame
+    doc.setDrawColor(203, 213, 225);
+    doc.rect(108, cardY + 6, 92, 26, 'DF');
     
     doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
-    doc.text("TOTAL ASSIGNED Q   :", 112, cardY + 13);
-    doc.text("MAX ASSIGNED EVAL  :", 112, cardY + 19);
-    doc.text("USER EVAL ATTEMPTS :", 112, cardY + 25);
-    doc.text("VERIFIED FAULTS    :", 112, cardY + 31);
+    doc.text("TOTAL QUESTIONS    :", 112, cardY + 13);
+    doc.text("MAX EVAL MARKS      :", 112, cardY + 19);
+    doc.text("EVAL USER ATTEMPTS  :", 112, cardY + 25);
+    doc.text("VERIFIED FAULTS     :", 112, cardY + 31);
     
     doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
     doc.text(`${data.totalQs} ITEMS`, 148, cardY + 13);
     doc.text(`${data.maxMarks} MARKS`, 148, cardY + 19);
     doc.text(`${data.attempted} UNITS`, 148, cardY + 25);
-    doc.setTextColor(239, 68, 68); // Soft Error Red
+    doc.setTextColor(225, 29, 725); // Clear contrasting red text label for errors
     doc.text(`${data.wrong} FAULTS`, 148, cardY + 31);
 
-    // --- PHASE 5: THE GIANT HERO QUANTUM SCORE DISPLAY MODULE ---
-    let scoreY = 88;
-    doc.setFillColor(11, 8, 28); // Tactical deep dark frame block
-    doc.rect(10, scoreY, 190, 26, 'F');
+    // ============================================================================
+    // --- PHASE 5: ELITE LIGHT TECH INDUSTRIAL GRAND SCORE BADGE VIEW ---
+    // ============================================================================
+    let scoreY = 86;
+    doc.setFillColor(250, 251, 253); // Light ivory grey tint background box frame
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
+    doc.rect(10, scoreY, 190, 24, 'DF');
     
-    // Grid Lines Layer inside Score Block for aesthetic complexity
-    doc.setDrawColor(30, 27, 75);
-    doc.setLineWidth(0.3);
-    doc.line(65, scoreY, 65, scoreY + 26);
-    doc.line(140, scoreY, 140, scoreY + 26);
+    // Internal technical demarcation layout divider lines
+    doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.3);
+    doc.line(68, scoreY, 68, scoreY + 24);
+    doc.line(142, scoreY, 142, scoreY + 24);
     
-    // Left Element Sub-Block (Computed Mark System Reads)
-    doc.setTextColor(148, 163, 184); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("COMPUTED REAL MARKS", 16, scoreY + 8);
-    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-    doc.text(`${(data.correct * data.marksPerCorrect).toFixed(2)}`, 16, scoreY + 16);
-    doc.setFontSize(6.5); doc.setTextColor(100, 116, 139);
-    doc.text(`FROM ${data.correct} CORRECT ANSWERS`, 16, scoreY + 22);
+    // Left Element Box Field (Verified Core Real Computed Marks Breakdown)
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
+    doc.text("COMPUTED REAL MARKS", 15, scoreY + 6);
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+    doc.text(`${(data.correct * data.marksPerCorrect).toFixed(2)}`, 15, scoreY + 14);
+    doc.setFontSize(6); doc.setTextColor(148, 163, 184);
+    doc.text(`FROM ${data.correct} CORRECT UNTIED ANCHORS`, 15, scoreY + 20);
 
-    // Center Element Sub-Block (The Ultimate Grand Score Badge View)
-    doc.setTextColor(0, 242, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text("INTELLIGENCE ENGINE SCORE", 72, scoreY + 7);
-    doc.setFont("courier", "bold"); doc.setFontSize(22);
-    doc.text(`${data.finalScore.toFixed(2)}`, 72, scoreY + 18);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(148, 163, 184);
-    doc.text(`/ ${data.maxMarks} TOTAL ABSOLUTE LIMIT`, 72, scoreY + 23);
+    // Center Element Box Field (High Contrast Large Numeric Main Score Display View)
+    doc.setTextColor(14, 165, 233); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text("INTELLIGENCE ENGINE SCORE RUN", 73, scoreY + 6);
+    doc.setFont("courier", "bold"); doc.setFontSize(20); doc.setTextColor(15, 23, 42);
+    doc.text(`${data.finalScore.toFixed(2)}`, 73, scoreY + 15);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
+    doc.text(`/ ${data.maxMarks} ABSOLUTE EVALUATION LIMIT`, 73, scoreY + 21);
 
-    // Right Element Sub-Block (Engine System Efficiency)
-    doc.setTextColor(148, 163, 184); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("ENGINE EFFICIENCY", 146, scoreY + 8);
-    // Dynamic color shift based on efficiency tier
-    if(data.efficiency >= 75) doc.setTextColor(52, 211, 153);
-    else if(data.efficiency >= 45) doc.setTextColor(251, 191, 36);
-    else doc.setTextColor(248, 113, 113);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(13);
-    doc.text(`${data.efficiency}%`, 146, scoreY + 16);
-    doc.setFontSize(6.5); doc.setTextColor(100, 116, 139);
-    doc.text("SCALED PERFORMANCE VALUE", 146, scoreY + 22);
+    // Right Element Box Field (Engine Execution System Efficiency Metrics)
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
+    doc.text("ENGINE EFFICIENCY RATIO", 147, scoreY + 6);
+    
+    // Dynamic color weight shifts for print stability based on score data ranges
+    if(data.efficiency >= 75) doc.setTextColor(5, 150, 105);      // Deep emerald print safe green
+    else if(data.efficiency >= 45) doc.setTextColor(217, 119, 6);  // Solid amber print safe orange
+    else doc.setTextColor(220, 38, 38);                            // Vivid technical error red
+    
+    doc.setFont("helvetica", "bold"); doc.setFontSize(12);
+    doc.text(`${data.efficiency}%`, 147, scoreY + 14);
+    doc.setFontSize(6); doc.setTextColor(148, 163, 184);
+    doc.text("SCALED PERFORMANCE METRIC VALUE", 147, scoreY + 20);
 
-    // --- PHASE 6: PRO MAX SEGMENTED LED TELEMETRY METERS ---
-    let meterY = 122;
+    // ============================================================================
+    // --- PHASE 6: SEGMENTED OUTLINED TECHNICAL TELEMETRY METER BARS ---
+    // ============================================================================
+    let meterY = 118;
     doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4);
     doc.line(10, meterY - 4, 200, meterY - 4);
     
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-    doc.text("HARDWARE SIMULATION HUD METERS", 11, meterY);
-    meterY += 6;
+    doc.text("HARDWARE SIMULATION HUD ARRAYS", 11, meterY);
+    meterY += 5;
 
-    const telemetryMeters = [
-        { title: "ACCURACY TRACKER DISPATCH ARRAY", value: data.correct, max: data.totalQs || 1, color: [0, 242, 255] },
-        { title: "PENALTY INFLICTED INCIDENCE MATRIX", value: data.wrong, max: data.totalQs || 1, color: [189, 0, 255] }
+    const dataMeters = [
+        { title: "ACCURACY TRACKER DISPATCH ARRAY", value: data.correct, max: data.totalQs || 1, color: [14, 165, 233] },
+        { title: "PENALTY INFLICTED INCIDENCE MATRIX", value: data.wrong, max: data.totalQs || 1, color: [168, 85, 247] }
     ];
 
-    telemetryMeters.forEach(meter => {
+    dataMeters.forEach(mItem => {
         doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139);
-        doc.text(meter.title, 11, meterY + 3.5);
+        doc.text(mItem.title, 11, meterY + 3.5);
 
-        // Render Premium High-Tech Segmented LED Layout Blocks instead of plain lines
-        let totalLedSegments = 24;
-        let activeLedSegments = Math.round((meter.value / meter.max) * totalLedSegments);
-        let startX = 72;
+        // Print-friendly segmented visual blocks instead of continuous solid fills
+        let segmentsCount = 24;
+        let activeSegments = Math.round((mItem.value / mItem.max) * segmentsCount);
+        let barStartX = 74;
         
-        for(let s = 0; s < totalLedSegments; s++) {
-            if(s < activeLedSegments) {
-                doc.setFillColor(meter.color[0], meter.color[1], meter.color[2]); // Vibrant Active LED block
+        for(let s = 0; s < segmentsCount; s++) {
+            doc.setLineWidth(0.2);
+            if(s < activeSegments) {
+                doc.setFillColor(mItem.color[0], mItem.color[1], mItem.color[2]);
+                doc.setDrawColor(mItem.color[0], mItem.color[1], mItem.color[2]);
+                doc.rect(barStartX + (s * 5.1), meterY, 4.0, 4.0, 'F'); // Clean solid active color fill block
             } else {
-                doc.setFillColor(235, 241, 247); // Darkened uncharged background tracking block
+                doc.setDrawColor(226, 232, 240);
+                doc.rect(barStartX + (s * 5.1), meterY, 4.0, 4.0, 'D'); // Safe crisp outline empty tracking block
             }
-            doc.rect(startX + (s * 5.2), meterY, 4.2, 4.5, 'F');
         }
-        meterY += 8;
+        meterY += 7;
     });
 
-    // --- PHASE 7: MODULAR SUBJECT MATRIX MODULES (TACTICAL BREAKDOWNS) ---
+    // ============================================================================
+    // --- PHASE 7: MODULAR SUBJECTWISE BREAKDOWN MODULE STACKS ---
+    // ============================================================================
     if (reportType === 'subjectwise') {
         doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4);
         doc.line(10, meterY - 1, 200, meterY - 1);
@@ -294,102 +326,110 @@ async function downloadPDF() {
         doc.text("CROSS-SUBJECT ANALYTICS MODULE ENGINE", 11, meterY + 4);
         meterY += 9;
 
-        const dynamicSubjects = [
+        const analyticalSubjects = [
             { name: 'PHYSICS SUBSYSTEM', keyA: 'phyA', keyC: 'phyC', keyW: 'phyW' },
             { name: 'CHEMISTRY SUBSYSTEM', keyA: 'chemA', keyC: 'chemC', keyW: 'chemW' },
             { name: 'MATH / BIO SUBSYSTEM', keyA: 'mathBioA', keyC: 'mathBioC', keyW: 'mathBioW' }
         ];
 
-        dynamicSubjects.forEach(subjectItem => {
-            const total = parseInt(document.getElementById(subjectItem.keyA).value) || 0;
-            const corr = parseInt(document.getElementById(subjectItem.keyC).value) || 0;
-            const wrng = parseInt(document.getElementById(subjectItem.keyW).value) || 0;
+        analyticalSubjects.forEach(subItem => {
+            const total = parseInt(document.getElementById(subItem.keyA).value) || 0;
+            const corr = parseInt(document.getElementById(subItem.keyC).value) || 0;
+            const wrng = parseInt(document.getElementById(subItem.keyW).value) || 0;
 
             doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(71, 85, 105);
-            doc.text(subjectItem.name, 11, meterY + 3.5);
+            doc.text(subItem.name, 11, meterY + 3);
 
             if (total > 0) {
-                // Compound Visual Stack Segment Processing Logic
-                let segmentWidth = 125;
-                let cWidth = (corr / total) * segmentWidth;
-                let wWidth = (wrng / total) * segmentWidth;
-                let unattemptedWidth = segmentWidth - (cWidth + wWidth);
+                let segmentMaxWidth = 122;
+                let correctWidth = (corr / total) * segmentMaxWidth;
+                let wrongWidth = (wrng / total) * segmentMaxWidth;
+                let idleWidth = segmentMaxWidth - (correctWidth + wrongWidth);
 
-                doc.setFillColor(52, 211, 153); // Emerald Success Correct Block
-                if(cWidth > 0) doc.rect(72, meterY, cWidth, 4.5, 'F');
+                // Print safe flat block stack combinations
+                doc.setFillColor(16, 185, 129); // Safe Correct Green
+                if(correctWidth > 0) doc.rect(74, meterY, correctWidth, 4.0, 'F');
                 
-                doc.setFillColor(248, 113, 113); // Crimson Critical Error Wrong Block
-                if(wWidth > 0) doc.rect(72 + cWidth, meterY, wWidth, 4.5, 'F');
+                doc.setFillColor(244, 63, 94);  // Safe Fault Crimson Red
+                if(wrongWidth > 0) doc.rect(74 + correctWidth, meterY, wrongWidth, 4.0, 'F');
 
-                doc.setFillColor(203, 213, 225); // Muted Unattempted Remaining block
-                if(unattemptedWidth > 0) doc.rect(72 + cWidth + wWidth, meterY, unattemptedWidth, 4.5, 'F');
+                doc.setFillColor(241, 245, 249); // Muted Unattempted Background Grey
+                if(idleWidth > 0) doc.rect(74 + correctWidth + wrongWidth, meterY, idleWidth, 4.0, 'F');
                 
-                // Overlay explicit localized text breakdown string values inside tracking matrix
-                doc.setFontSize(5.5); doc.setTextColor(30, 41, 59);
-                doc.text(`[ OK: ${corr} | ERR: ${wrng} | IDLE: ${total - (corr+wrng)} ]`, 144 + 12, meterY - 1.5);
+                doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.25);
+                doc.rect(74, meterY, segmentMaxWidth, 4.0, 'D'); // Bounding framework overlay loop
+                
+                doc.setFontSize(5.5); doc.setTextColor(15, 23, 42); doc.setFont("courier", "bold");
+                doc.text(`[ OK: ${corr} | ERR: ${wrng} | IDLE: ${total - (corr + wrng)} ]`, 146 + 12, meterY - 1.2);
             } else {
                 doc.setFont("helvetica", "oblique"); doc.setFontSize(6); doc.setTextColor(148, 163, 184);
-                doc.text("CORE CHANNELS SHUT DOWN // DATA FEED UNINITIALIZED", 72, meterY + 3.2);
+                doc.text("CORE CHANNELS SHUT DOWN // DATA FEED UNINITIALIZED IN EVALUATION PLATFORM", 74, meterY + 3);
                 doc.setFont("helvetica", "bold");
             }
-            meterY += 8;
-        } );
+            meterY += 7;
+        });
     }
 
-    // --- PHASE 8: THE DARK GLOWING INTELLIGENCE TERMINAL ENGINE POD ---
-    let terminalY = Math.max(meterY + 4, 152);
+    // ============================================================================
+    // --- PHASE 8: THE OUTLINED TECHNICAL TERMINAL INTEL CONTAINER ---
+    // ============================================================================
+    let terminalBoxY = Math.max(meterY + 4, 148);
     
-    doc.setFillColor(11, 8, 28); // Pure Deep Terminal Canvas Obsidian Block
-    doc.rect(10, terminalY, 190, 38, 'F');
+    // Light clean technical box framework instead of solid dark colors
+    doc.setFillColor(252, 253, 255);
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
+    doc.rect(10, terminalBoxY, 190, 36, 'DF');
     
-    // High Intensity Cyber Purple Vertical Alignment Core Bar
-    doc.setFillColor(189, 0, 255);
-    doc.rect(10, terminalY, 2.5, 38, 'F');
+    // Solid thick Indigo tech anchor strip down left side boundary edge
+    doc.setFillColor(168, 85, 247);
+    doc.rect(10, terminalBoxY, 2.5, 36, 'F');
 
-    doc.setTextColor(0, 242, 255); doc.setFontSize(9); doc.setFont("helvetica", "bold");
-    doc.text("AUTOMATED ALGORITHMIC SYSTEMS SYSTEM ADVICE MATRIX", 18, terminalY + 7);
+    doc.setTextColor(15, 23, 42); doc.setFontSize(8.5); doc.setFont("helvetica", "bold");
+    doc.text("AUTOMATED ALGORITHMIC INTELLIGENCE RECOMMENDATIONS MATRIX", 16, terminalBoxY + 6);
     
-    doc.setFont("courier", "normal"); doc.setFontSize(7.5); doc.setTextColor(241, 245, 249);
+    doc.setFont("courier", "bold"); doc.setFontSize(7.5); doc.setTextColor(51, 65, 85); // High legibility dark text
 
-    let adviceStr = "";
-    if (data.efficiency > 80) adviceStr = "EXCELLENT RESPONSE CONTEXT. MAXIMIZE SPEED METRICS TO LOCK ULTIMATE SCALING PEAKS.";
-    else if (data.efficiency > 50) adviceStr = "STABLE INTERMEDIATE SYSTEM BASE. FILTER ANOMALIES TO BREAK THE 80% BARRIER LOOPS.";
-    else adviceStr = "CONCEPTUAL FOUNDATION HOLES DISCOVERED. HALT RANDOM GUESS RUNS TO REMOVE PENALTY DECAY.";
+    let strategyString = "";
+    if (data.efficiency > 80) strategyString = "EXCELLENT PERFORMANCE CONTEXT. OPTIMIZE SPEED TRACKERS TO RETAIN PEAK SCALING STATUS.";
+    else if (data.efficiency > 50) strategyString = "STABLE INTERMEDIATE SYSTEM ACCURACY. ISOLATE INCIDENCE LOOPS TO BREAK THE 80% THRESHOLD.";
+    else strategyString = "CONCEPTUAL CORE VULNERABILITY FOUND. CEASE RANDOM GUESS PROCEDURES TO REMOVE PENALTY DECAY.";
 
-    doc.text(`>> SYSTEM_STRATEGY : ${adviceStr}`, 16, terminalY + 16);
-    doc.text(`>> PENALTY_LOGS   : LOSS METRIC TOTALS A VALUE OF ${data.totalPenalty.toFixed(2)} MARK LOSS OUTCOMES.`, 16, terminalY + 23);
-    doc.text(`>> ARCHITECTURE   : REVIEW THE ${data.unattempted} UNATTEMPTED BLANK SIGNALS TO CONVERT QUICK GAINS.`, 16, terminalY + 30);
+    doc.text(`>> SYSTEM_STRATEGY  : ${strategyString}`, 15, terminalBoxY + 14);
+    doc.text(`>> PENALTY_ANALYSIS : TOTAL ACCUMULATED PENALTY IMPACT REDUCES PERFORMANCE BY ${data.totalPenalty.toFixed(2)} ABSOLUTE MARKS.`, 15, terminalBoxY + 21);
+    doc.text(`>> CORE_OPTIMIZATION: ANALYZE THE ${data.unattempted} UNATTEMPTED BLANK PROMPTS TO DISCOVER LOW RESISTANCE ADVANTAGES.`, 15, terminalBoxY + 28);
 
-    // --- PHASE 9: AUTHENTICATED CORPORATE EXECUTIVE FOOTER SIGN-OFF ---
-    const footerY = 255;
+    // ============================================================================
+    // --- PHASE 9: EXECUTIVE SIGN-OFF PLATFORM & DEPLOYMENT STAMP ---
+    // ============================================================================
+    const finalFooterY = 254;
     doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4);
-    doc.line(10, footerY - 4, 200, footerY - 4);
+    doc.line(10, finalFooterY - 4, 200, finalFooterY - 4);
 
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-    doc.text("MR. PRASAD REDDY", 14, footerY + 4);
+    doc.text("MR. PRASAD REDDY", 14, finalFooterY + 4);
     
     doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
-    doc.text("Chief Executive Officer & Founder, ECLIPSE7 COGNITIVE CORE", 14, footerY + 9);
+    doc.text("Chief Executive Officer & Founder, ECLIPSE7 COGNITIVE INTEGRITY CORE", 14, finalFooterY + 9);
     
-    doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(34, 197, 94); // High visibility emerald approval text
-    doc.text("STATUS: SYSTEM_INTEGRITY_VERIFIED_AND_SIGNED_AUTHENTIC", 14, footerY + 14);
+    doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(5, 150, 105); // Clean dark-green text for secure physical prints
+    doc.text("STATUS STATUS: COGNITIVE SYSTEM RECORD INTEGRITY APPROVED & SECURELY VERIFIED", 14, finalFooterY + 14);
     
     doc.setFont("courier", "normal"); doc.setFontSize(6); doc.setTextColor(148, 163, 184);
-    doc.text(`HASH_BLOCK: SECURE_MATRIX_E7_LOG_DATA_RECONSTRUCTION_${timestamp.replace(/ /g, "_")}`, 14, footerY + 21);
+    doc.text(`HASH_BLOCK_ID: E7_PRINT_DOCK_RECONSTRUCT_METRIC_VALID_RUN_${timestamp.replace(/ /g, "_")}`, 14, finalFooterY + 21);
 
-    // --- PHASE 10: SECURE ASYNC ARCHIVAL STAMP DEPLOYMENT CHANNEL ---
+    // Secure async image retrieval pipeline channels for official stamp integration
     const stampUrl = "https://eclipse7-pixal.github.io/marking-calculator/stamp.png";
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.src = stampUrl;
     
     img.onload = function() {
-        // Render stamp beautifully aligned inside the targeting grid frames
-        doc.addImage(img, 'PNG', 158, 245, 36, 36);
-        doc.save(`${student}_E7_ULTRA_PRO_REPORT.pdf`);
+        // Clean placement inside open clean coordinate vectors free of block background collision issues
+        doc.addImage(img, 'PNG', 158, 244, 36, 36);
+        doc.save(`${student}_E7_PRO_MAX_PRINT_REPORT.pdf`);
     };
     img.onerror = () => {
-        // Absolute fallback execution context channel if network assets reject cross-domain permissions
-        doc.save(`${student}_E7_ULTRA_PRO_REPORT.pdf`);
+        // Absolute failover execution fallback context if proxy firewalls deny cross-origin imaging
+        doc.save(`${student}_E7_PRO_MAX_PRINT_REPORT.pdf`);
     };
 }
