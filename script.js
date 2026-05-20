@@ -7,14 +7,11 @@ function initDropdown(containerId, triggerId, panelId, hiddenInputId, callback) 
     if (!container || !trigger || !panel) return;
 
     const options = panel.querySelectorAll('.option-item');
-    
-    // Track original design layout tracking values
-    const originalLabelText = trigger.textContent.split(':')[0].trim();
 
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         
-        // Crisp experience: sweep close competing operational interfaces
+        // Sweep close competing operational interfaces
         document.querySelectorAll('.select-options').forEach(p => {
             if(p !== panel) p.classList.remove('show');
         });
