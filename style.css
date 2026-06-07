@@ -95,7 +95,7 @@ body {
     padding: 42px 38px;
     border-radius: 28px;
     width: 100%;
-    max-width: 540px;
+    max-width: 620px; /* Enhanced for immaculate layout scaling */
     box-shadow: var(--fluent-shadow);
     transition: var(--transition-fluent);
     position: relative;
@@ -154,7 +154,6 @@ body {
     margin-bottom: 18px;
     position: relative;
     width: 100%;
-    box-sizing: border-box;
 }
 
 .soft-field-label {
@@ -192,10 +191,11 @@ body {
     padding-left: 48px !important;
 }
 
+/* --- IMMUTABLE PC SIDE-BY-SIDE GRID ARCHITECTURE --- */
 .fluent-layout-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; /* Force explicit 2 column system */
+    gap: 20px !important; /* Match perfect visual separation */
     margin-bottom: 18px;
     width: 100%;
 }
@@ -243,7 +243,6 @@ input.validation-error {
     position: relative;
     width: 100%;
     user-select: none;
-    box-sizing: border-box;
 }
 
 .select-box-trigger {
@@ -538,13 +537,16 @@ input.validation-error {
     margin-bottom: 8px;
 }
 
-/* --- RE-ENGINEERED MOBILE STABILIZATION PATCH --- */
-@media (max-width: 600px) {
+/* --- RE-ENGINEERED SMART MOBILE BREAKPOINT RESPONSIVE RECONSTRUCTION --- */
+@media screen and (max-width: 600px) {
     body { padding: 12px 8px; }
-    .soft-glass-container { padding: 32px 16px; border-radius: 20px; }
+    .soft-glass-container { padding: 32px 14px; border-radius: 20px; }
     .app-header h1 { font-size: 1.45rem; }
     .score-hero-val { font-size: 2.5rem; }
-    .fluent-layout-row { grid-template-columns: 1fr; gap: 14px; }
+    
+    /* Safely unstack grid blocks only for small viewport targets */
+    .fluent-layout-row { grid-template-columns: 1fr !important; gap: 14px !important; }
+    
     .subject-breakdown-wrapper.visible { padding: 14px 6px; }
     .subject-grid-layout-header, .subject-grid-row {
         grid-template-columns: 1fr 0.9fr 0.9fr 0.9fr !important;
