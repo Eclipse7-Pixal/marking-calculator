@@ -401,7 +401,7 @@ async function downloadPDFReportSequence() {
     doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v5.0`, 16, 27);
     
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
-    doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | AUDITOR: SAIPRASAD BARURE", 16, 35);
+    doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
 
     // Telemetry Fields Layout Blocks
     let cardY = 48;
