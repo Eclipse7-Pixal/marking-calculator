@@ -1,234 +1,562 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+:root {
+    /* Premium Frosted Dark Microsoft & Google Material Blend Paradigm */
+    --ambient-purple: #7c3aed;
+    --ambient-blue: #0284c7;
+    --ambient-emerald: #059669;
     
-    <title>Negative Marking Engine | ECLIPSE7 Premium Core</title>
-    <meta name="description" content="Official Negative Marking Engine by Eclipse7. Calculate JEE and NEET scores with precision. Created by Saiprasad Barure.">
-    <link rel="icon" type="image/x-icon" href="logo.ico">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    --bg-dark-base: #09090e;
+    --fluent-surface: rgba(18, 18, 29, 0.45);
+    --fluent-input-bg: rgba(10, 10, 16, 0.6);
+    --fluent-border: rgba(255, 255, 255, 0.06);
+    --fluent-border-focus: rgba(124, 58, 237, 0.4);
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    --text-core: #f8fafc;
+    --text-muted: #94a3b8;
+    
+    --fluent-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 
+                     inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    --bezier-fluent: cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-fluent: all 0.35s var(--bezier-fluent);
+}
 
-    <link rel="stylesheet" href="style.css">
+html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+    box-sizing: border-box;
+}
 
-    <style>
-        .app-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
+body {
+    background-color: var(--bg-dark-base);
+    color: var(--text-core);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 40px 24px;
+}
 
-        .meta-branding-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            margin-top: 10px;
-        }
+/* Fluid Soft Ambient Background Visualizers */
+.fluent-ambient-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 50%, #111019, var(--bg-dark-base));
+}
 
-        .platform-title-meta {
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: #93c5fd; /* Soft premium blue hue accent */
-            opacity: 0.95;
-            margin: 0;
-            line-height: 1.3;
-        }
+.ambient-fluid-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: 0.18;
+    mix-blend-mode: plus-lighter;
+    animation: fluentOrbitSmooth 25s infinite ease-in-out alternate;
+}
 
-        .author-attribution-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.64rem;
-            font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #9ca3af;
-            opacity: 0.7;
-            margin: 0;
-        }
+.orb-alpha {
+    top: -10%; right: 10%;
+    width: 500px; height: 500px;
+    background: var(--ambient-purple);
+}
 
-        .author-attribution-meta::before,
-        .author-attribution-meta::after {
-            content: '';
-            display: inline-block;
-            width: 14px;
-            height: 1px;
-            background: currentColor;
-            opacity: 0.3;
-        }
-    </style>
-</head>
-<body>
+.orb-beta {
+    bottom: -5%; left: 5%;
+    width: 600px; height: 600px;
+    background: var(--ambient-blue);
+    animation-delay: -7s;
+}
 
-<div class="fluent-ambient-canvas">
-    <div class="ambient-fluid-orb orb-alpha"></div>
-    <div class="ambient-fluid-orb orb-beta"></div>
-    <div class="ambient-fluid-orb orb-gamma"></div>
-</div>
+.orb-gamma {
+    top: 40%; left: 35%;
+    width: 450px; height: 450px;
+    background: var(--ambient-emerald);
+    opacity: 0.08;
+    animation-duration: 35s;
+}
 
-<div class="soft-glass-container" id="mainAppContainer">
-    <div id="systemNotification" class="fluent-toast">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span id="notificationMessage">Validation Token Uninitialized.</span>
-    </div>
+@keyframes fluentOrbitSmooth {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, -60px) scale(1.08); }
+    100% { transform: translate(-30px, 30px) scale(0.95); }
+}
 
-    <header class="app-header">
-        <div class="fluent-badge">E7 Core Premium v5.0</div>
-        <h1>Negative Marking Engine</h1>
-        
-        <div class="meta-branding-container">
-            <p class="platform-title-meta">ECLIPSE7 FLUID EVALUATION PLATFORM</p>
-            <p class="author-attribution-meta">By Saiprasad Barure</p>
-        </div>
-    </header>
+/* Frosted Modern Container Shell */
+.soft-glass-container {
+    background: var(--fluent-surface);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid var(--fluent-border);
+    padding: 42px 38px;
+    border-radius: 28px;
+    width: 100%;
+    max-width: 680px; /* Optimized layout framework for premium PC sizing layout */
+    box-shadow: var(--fluent-shadow);
+    transition: var(--transition-fluent);
+    position: relative;
+    box-sizing: border-box;
+}
 
-    <form id="evaluationForm" onsubmit="event.preventDefault();">
-        
-        <div class="input-field-group">
-            <label class="soft-field-label">Student Authentication <span class="req-star">*</span></label>
-            <div class="fluent-input-wrapper">
-                <i class="fa-solid fa-fingerprint input-field-icon"></i>
-                <input type="text" id="studentName" placeholder="Enter student identity" required autocomplete="off">
-            </div>
-        </div>
+.soft-glass-container:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85), 
+                0 0 40px rgba(124, 58, 237, 0.05);
+}
 
-        <div class="input-field-group">
-            <label class="soft-field-label">Assessment Token <span class="req-star">*</span></label>
-            <div class="fluent-input-wrapper">
-                <i class="fa-solid fa-hashtag input-field-icon"></i>
-                <input type="text" id="testName" placeholder="Assessment name (e.g., JEE Main Major)" required autocomplete="off">
-            </div>
-        </div>
+/* Premium Header Configurations */
+.app-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 32px;
+}
 
-        <div class="input-field-group">
-            <label class="soft-field-label">Smart Curriculum Profile <span class="req-star">*</span></label>
-            <div class="custom-select-box" id="examProfileSelectContainer">
-                <div class="select-box-trigger" id="examProfileLabel">SELECT EXAM PROFILE</div>
-                <div class="select-box-dropdown" id="examProfileOptions">
-                    <div class="select-box-option" data-value="custom">CUSTOM MODE (MANUAL OVERRIDE)</div>
-                    <div class="select-box-option" data-value="jeemain">JEE MAIN PROFILE</div>
-                    <div class="select-box-option" data-value="jeeadv">JEE ADVANCED PROFILE</div>
-                    <div class="select-box-option" data-value="neet">NEET UG PROFILE</div>
-                </div>
-                <input type="hidden" id="examProfile" value="custom" required>
-            </div>
-        </div>
+.fluent-badge {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    padding: 5px 14px;
+    border-radius: 20px;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
 
-        <div class="fluent-layout-row">
-            <div class="input-field-group">
-                <label class="soft-field-label">Total Questions <span class="req-star">*</span></label>
-                <input type="number" id="totalQs" placeholder="0" min="1" required>
-            </div>
-            <div class="input-field-group">
-                <label class="soft-field-label">Max Marks <span class="req-star">*</span></label>
-                <input type="number" id="maxMarks" placeholder="0" min="1" required>
-            </div>
-        </div>
+.app-header h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 0;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 30%, #cbd5e1 80%, var(--ambient-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
-        <div class="fluent-layout-row">
-            <div class="input-field-group">
-                <label class="soft-field-label">Total Attempts <span class="req-star">*</span></label>
-                <input type="number" id="attempted" placeholder="0" min="0" required>
-            </div>
-            <div class="input-field-group">
-                <label class="soft-field-label">Incorrect Faults <span class="req-star">*</span></label>
-                <input type="number" id="wrong" placeholder="0" min="0" required>
-            </div>
-        </div>
+.sub-branding {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 2.5px;
+    margin-top: 10px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
 
-        <div class="fluent-layout-row dropdown-adjustment">
-            <div class="custom-select-box" id="ratioSelectContainer">
-                <label class="soft-field-label">Negative Ratio <span class="req-star">*</span></label>
-                <div class="select-box-trigger" id="ratioLabel">Ratio: 1/4</div>
-                <div class="select-box-dropdown" id="ratioOptions">
-                    <div class="select-box-option" data-value="0.25">1/4 Ratio</div>
-                    <div class="select-box-option" data-value="0.33">1/3 Ratio</div>
-                    <div class="select-box-option" data-value="0.5">1/2 Ratio</div>
-                    <div class="select-box-option" data-value="0">No Penalty</div>
-                </div>
-                <input type="hidden" id="markingRatio" value="0.25" required>
-            </div>
+/* Field Structuring & Star Mechanics */
+.input-field-group {
+    margin-bottom: 18px;
+    position: relative;
+    width: 100%;
+}
 
-            <div class="custom-select-box" id="customSelect">
-                <label class="soft-field-label">Analytics Mode <span class="req-star">*</span></label>
-                <div class="select-box-trigger" id="selectedLabel">OVERALL MODE</div>
-                <div class="select-box-dropdown" id="selectOptions">
-                    <div class="select-box-option" data-value="overall">OVERALL MODE</div>
-                    <div class="select-box-option" data-value="subjectwise">SUBJECT BREAKDOWN</div>
-                </div>
-                <input type="hidden" id="reportType" value="overall" required>
-            </div>
-        </div>
+.soft-field-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: block;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding-left: 2px;
+}
 
-        <div id="subjectSection" class="subject-breakdown-wrapper">
-            <div class="subject-grid-layout-header">
-                <div></div> 
-                <span>TOTAL Q.</span>
-                <span>CORRECT</span>
-                <span>WRONG</span>
-            </div>
-             
-            <div class="subject-grid-row" data-subject="phy">
-                <label class="sub-identity-lbl">PHYSICS</label>
-                <input type="number" id="phyA" placeholder="0" class="sub-input sub-tot" min="0">
-                <input type="number" id="phyC" placeholder="0" class="sub-input sub-cor" min="0">
-                <input type="number" id="phyW" placeholder="0" class="sub-input sub-wro" min="0">
-            </div>
+.req-star {
+    color: #ef4444;
+    font-weight: bold;
+    margin-left: 2px;
+}
 
-            <div class="subject-grid-row" data-subject="chem">
-                <label class="sub-identity-lbl">CHEMISTRY</label>
-                <input type="number" id="chemA" placeholder="0" class="sub-input sub-tot" min="0">
-                <input type="number" id="chemC" placeholder="0" class="sub-input sub-cor" min="0">
-                <input type="number" id="chemW" placeholder="0" class="sub-input sub-wro" min="0">
-            </div>
+.fluent-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
 
-            <div class="subject-grid-row" data-subject="mathBio">
-                <label class="sub-identity-lbl" id="mathBioLabel">MATH/BIO</label>
-                <input type="number" id="mathBioA" placeholder="0" class="sub-input sub-tot" min="0">
-                <input type="number" id="mathBioC" placeholder="0" class="sub-input sub-cor" min="0">
-                <input type="number" id="mathBioW" placeholder="0" class="sub-input sub-wro" min="0">
-            </div>
-            
-            <div class="quantum-intel-status">
-                <i class="fa-solid fa-microchip"></i> 
-                <span id="intelMessage">Quantum cross-input synchronization layer active.</span>
-            </div>
-        </div>
+.input-field-icon {
+    position: absolute;
+    left: 18px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    opacity: 0.5;
+    transition: var(--transition-fluent);
+}
 
-        <button type="button" onclick="executeCalculationSequence()" class="fluent-btn btn-primary-gradient">
-            <span>Compute Assessment Metrics</span>
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </button>
+.fluent-input-wrapper input {
+    padding-left: 48px !important;
+}
 
-        <div class="fluent-score-hero-display">
-            <label class="score-hero-title">CALCULATED METRIC SCORE</label>
-            <div id="score" class="score-hero-val">0.00</div>
-            <div class="fluent-wave-shimmer"></div>
-        </div>
+/* Mobile-First Layout Row Definition (Stacked by default) */
+.fluent-layout-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+}
 
-        <button type="button" onclick="downloadPDFReportSequence()" class="fluent-btn btn-secondary-frosted">
-            <i class="fa-solid fa-file-pdf"></i>
-            <span>Export E7 Intelligence Document</span>
-        </button>
-    </form>
+.dropdown-adjustment {
+    margin-bottom: 6px;
+}
 
-    <footer class="fluent-footer">
-        <span class="secure-badge">
-            <i class="fa-solid fa-shield-halved"></i> LOCAL PRIVACY ACCORD VALID
-        </span> 
-        Calculations execute immediately within memory sandbox allocation. Built under direct oversight of <b>Saiprasad Barure / Prasad Reddy</b>.
-    </footer>
-</div>
+/* Smooth Soft Inputs Block */
+input[type="text"], input[type="number"] {
+    background: var(--fluent-input-bg);
+    border: 1px solid var(--fluent-border);
+    padding: 14px 16px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 500;
+    width: 100%;
+    box-sizing: border-box;
+    transition: var(--transition-fluent);
+}
 
-<script src="script.js"></script>
-</body>
-</html>
+input:focus {
+    outline: none;
+    border-color: var(--fluent-border-focus);
+    background: rgba(15, 15, 24, 0.8);
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+
+/* Explicit Validation Target Style Indicator */
+input.validation-error {
+    border-color: rgba(239, 68, 68, 0.6) !important;
+    background: rgba(239, 68, 68, 0.04) !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12) !important;
+    animation: fluentInputPulseAlert 0.3s ease-in-out;
+}
+
+@keyframes fluentInputPulseAlert {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.01); }
+}
+
+/* Custom Dropdown Triggers */
+.custom-select-box {
+    position: relative;
+    width: 100%;
+    user-select: none;
+}
+
+.select-box-trigger {
+    background: var(--fluent-input-bg);
+    border: 1px solid var(--fluent-border);
+    padding: 14px 16px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition-fluent);
+    letter-spacing: 0.5px;
+}
+
+.select-box-trigger:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.select-box-trigger::after {
+    content: '\f0d7';
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    transition: transform 0.3s var(--bezier-fluent);
+}
+
+.custom-select-box.active .select-box-trigger::after {
+    transform: rotate(180deg);
+    color: var(--text-core);
+}
+
+.select-box-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    background: #0f0f18;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    z-index: 120;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    transition: opacity 0.25s var(--bezier-fluent), transform 0.25s var(--bezier-fluent), visibility 0.25s;
+}
+
+.select-box-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.select-box-option {
+    padding: 13px 16px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition-fluent);
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.select-box-option:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    padding-left: 20px;
+}
+
+/* Frosted Accordion Panel Configurations */
+.subject-breakdown-wrapper {
+    max-height: 0;
+    opacity: 0;
+    transform: scaleY(0.97);
+    transform-origin: top;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid transparent;
+    border-radius: 16px;
+    padding: 0 16px;
+    margin-top: 0;
+    box-sizing: border-box;
+    transition: max-height 0.4s var(--bezier-fluent), 
+                opacity 0.4s var(--bezier-fluent), 
+                transform 0.4s var(--bezier-fluent),
+                padding 0.4s var(--bezier-fluent),
+                margin-top 0.4s var(--bezier-fluent);
+}
+
+.subject-breakdown-wrapper.visible {
+    max-height: 380px;
+    opacity: 1;
+    transform: scaleY(1);
+    padding: 18px;
+    margin-top: 16px;
+    border-color: rgba(255, 255, 255, 0.03);
+}
+
+.subject-grid-layout-header {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.subject-grid-layout-header span {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.subject-grid-layout-header span:nth-child(2) { color: var(--ambient-blue); }
+.subject-grid-layout-header span:nth-child(3) { color: #10b981; }
+.subject-grid-layout-header span:nth-child(4) { color: #f43f5e; }
+
+.subject-grid-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.subject-grid-row:last-child { margin-bottom: 0; }
+
+.sub-identity-lbl {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.sub-input {
+    padding: 10px 6px !important;
+    text-align: center;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.quantum-intel-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.05);
+    font-size: 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+}
+.quantum-intel-status i { color: var(--ambient-blue); }
+
+/* Fluent Interactive Button Links */
+.fluent-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    border: none;
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-fluent);
+    box-sizing: border-box;
+}
+
+.btn-primary-gradient {
+    background: linear-gradient(135deg, #ffffff, #e2e8f0);
+    color: #09090e;
+}
+
+.btn-primary-gradient:hover {
+    background: linear-gradient(135deg, #ffffff, #c8d2df);
+    transform: translateY(-1.5px);
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
+}
+
+.btn-secondary-frosted {
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-core);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.btn-secondary-frosted:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1.5px);
+}
+
+/* Premium Dashboard Metrics Panel Box */
+.fluent-score-hero-display {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.01);
+    padding: 24px;
+    border-radius: 16px;
+    text-align: center;
+    margin: 24px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.fluent-score-hero-display::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+.score-hero-title {
+    font-size: 0.68rem;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+.score-hero-val {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+@keyframes fluentScalePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); color: var(--ambient-blue); }
+    100% { transform: scale(1); }
+}
+
+/* Modern Fluent Toast System Alerts */
+.fluent-toast {
+    position: absolute;
+    top: -65px; left: 0; right: 0;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid transparent;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s var(--bezier-fluent), transform 0.3s var(--bezier-fluent);
+    z-index: 200;
+    pointer-events: none;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+}
+
+.fluent-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes fluentContainerShake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Footer Declarations */
+.fluent-footer {
+    font-size: 0.68rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 32px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.secure-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #10b981;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+/* --- THE PC MODE LAYOUT STABILIZATION ENGINE --- */
+@media (min-width: 601px) {
+    .fluent-layout-row {
+        grid-template-columns: 1fr 1fr; /* Force dual-column split rows on desktop screen scopes */
+        gap: 20px;
+    }
+}
+
+/* --- RE-ENGINEERED MOBILE STABILIZATION PATCH --- */
+@media (max-width: 600px) {
+    body { padding: 12px 8px; }
+    .soft-glass-container { padding: 32px 16px; border-radius: 20px; }
+    .app-header h1 { font-size: 1.45rem; }
+    .score-hero-val { font-size: 2.5rem; }
+    .fluent-layout-row { grid-template-columns: 1fr; gap: 14px; }
+    .subject-breakdown-wrapper.visible { padding: 14px 6px; }
+    .subject-grid-layout-header, .subject-grid-row {
+        grid-template-columns: 1fr 0.9fr 0.9fr 0.9fr !important;
+        gap: 6px !important;
+    }
+    .sub-input { padding: 8px 2px !important; font-size: 0.8rem !important; }
+    .sub-identity-lbl { font-size: 0.68rem; }
+    .fluent-toast { top: -80px; font-size: 0.72rem; }
+}
