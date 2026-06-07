@@ -18,6 +18,7 @@
 
     <link rel="stylesheet" href="style.css">
 
+    <!-- Embedded styles specifically optimizing the text presentation issue from image_4d4e3f.jpg -->
     <style>
         .app-header {
             text-align: center;
@@ -37,7 +38,7 @@
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #93c5fd; 
+            color: #93c5fd; /* Soft premium blue hue accent */
             opacity: 0.95;
             margin: 0;
             line-height: 1.3;
@@ -65,19 +66,6 @@
             background: currentColor;
             opacity: 0.3;
         }
-
-        /* Fluid validation error state style highlights */
-        .fluent-input-wrapper.validation-error, input.validation-error {
-            border: 1px solid #ef4444 !important;
-            box-shadow: 0 0 12px rgba(239, 68, 68, 0.2) !important;
-            animation: inputShake 0.4s ease-in-out;
-        }
-
-        @keyframes inputShake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-4px); }
-            75% { transform: translateX(4px); }
-        }
     </style>
 </head>
 <body>
@@ -95,9 +83,10 @@
     </div>
 
     <header class="app-header">
-        <div class="fluent-badge">E7 Core Premium v2.0</div>
+        <div class="fluent-badge">E7 Core Premium v5.0</div>
         <h1>Negative Marking Engine</h1>
         
+        <!-- Optimized Typography Stack System to fix wrapping layout issues -->
         <div class="meta-branding-container">
             <p class="platform-title-meta">ECLIPSE7 FLUID EVALUATION PLATFORM</p>
             <p class="author-attribution-meta">By Saiprasad Barure</p>
@@ -108,7 +97,7 @@
         
         <div class="input-field-group">
             <label class="soft-field-label">Student Authentication <span class="req-star">*</span></label>
-            <div class="fluent-input-wrapper" id="studentNameWrapper">
+            <div class="fluent-input-wrapper">
                 <i class="fa-solid fa-fingerprint input-field-icon"></i>
                 <input type="text" id="studentName" placeholder="Enter student identity" required autocomplete="off">
             </div>
@@ -116,7 +105,7 @@
 
         <div class="input-field-group">
             <label class="soft-field-label">Assessment Token <span class="req-star">*</span></label>
-            <div class="fluent-input-wrapper" id="testNameWrapper">
+            <div class="fluent-input-wrapper">
                 <i class="fa-solid fa-hashtag input-field-icon"></i>
                 <input type="text" id="testName" placeholder="Assessment name (e.g., JEE Main Major)" required autocomplete="off">
             </div>
@@ -236,160 +225,12 @@
 
     <footer class="fluent-footer">
         <span class="secure-badge">
-            <i class="fa-solid fa-shield-halved"></i> PRIVACY NOTE :
+            <i class="fa-solid fa-shield-halved"></i> LOCAL PRIVACY ACCORD VALID
         </span> 
-        YOUR DATA IS 100% PRIVATE: All marks are calculated instantly inside your device's browser. No data is saved or tracked. Built by Saiprasad B. / Prasad R.
+        Calculations execute immediately within memory sandbox allocation. Built under direct oversight of <b>Saiprasad Barure / Prasad Reddy</b>.
     </footer>
 </div>
 
-<script>
-    // System UI Notification triggering engine
-    function showNotification(message, duration = 4000) {
-        const toast = document.getElementById("systemNotification");
-        const msgSpan = document.getElementById("notificationMessage");
-        
-        msgSpan.innerText = message;
-        toast.classList.add("visible"); // Make sure to add transitions in your style.css for .fluent-toast.visible
-
-        // Fallback styling injection if css file is not loaded
-        toast.style.display = "flex";
-        toast.style.opacity = "1";
-        toast.style.transform = "translateY(0)";
-
-        setTimeout(() => {
-            toast.style.opacity = "0";
-            toast.style.transform = "translateY(-10px)";
-            setTimeout(() => { toast.style.display = "none"; }, 300);
-        }, duration);
-    }
-
-    // Dynamic field validation layer runner
-    function validateFormFields() {
-        // Clear all previous errors
-        document.querySelectorAll('.validation-error').forEach(el => el.classList.remove('validation-error'));
-
-        // 1. Check Identity fields
-        const studentName = document.getElementById("studentName");
-        if (!studentName.value.trim()) {
-            document.getElementById("studentNameWrapper").classList.add("validation-error");
-            showNotification("Please enter your Student Identity before continuing.");
-            studentName.focus();
-            return false;
-        }
-
-        const testName = document.getElementById("testName");
-        if (!testName.value.trim()) {
-            document.getElementById("testNameWrapper").classList.add("validation-error");
-            showNotification("Please specify the Assessment Token name.");
-            testName.focus();
-            return false;
-        }
-
-        // 2. Base metrics validations
-        const totalQs = document.getElementById("totalQs");
-        if (!totalQs.value || parseInt(totalQs.value) <= 0) {
-            totalQs.classList.add("validation-error");
-            showNotification("Total Questions field is mandatory and must be greater than 0.");
-            totalQs.focus();
-            return false;
-        }
-
-        const maxMarks = document.getElementById("maxMarks");
-        if (!maxMarks.value || parseInt(maxMarks.value) <= 0) {
-            maxMarks.classList.add("validation-error");
-            showNotification("Max Marks field is required to process target parameters.");
-            maxMarks.focus();
-            return false;
-        }
-
-        const attempted = document.getElementById("attempted");
-        if (attempted.value === "") {
-            attempted.classList.add("validation-error");
-            showNotification("Please enter Total Attempts. Enter 0 if none.");
-            attempted.focus();
-            return false;
-        }
-
-        const wrong = document.getElementById("wrong");
-        if (wrong.value === "") {
-            wrong.classList.add("validation-error");
-            showNotification("Incorrect Faults field cannot be blank. Enter 0 if zero errors.");
-            wrong.focus();
-            return false;
-        }
-
-        // Logic check: Attempts cannot be higher than questions
-        if (parseInt(attempted.value) > parseInt(totalQs.value)) {
-            attempted.classList.add("validation-error");
-            showNotification("Oops! Total Attempts cannot exceed overall Exam Questions.");
-            attempted.focus();
-            return false;
-        }
-
-        // Logic check: Errors cannot be higher than attempts
-        if (parseInt(wrong.value) > parseInt(attempted.value)) {
-            wrong.classList.add("validation-error");
-            showNotification("Incorrect Faults cannot be higher than Total Attempts.");
-            wrong.focus();
-            return false;
-        }
-
-        // 3. Subject wise breakdown structural configuration check
-        const reportType = document.getElementById("reportType").value;
-        if (reportType === "subjectwise") {
-            let subjectInputsValid = true;
-            const subjects = ["phy", "chem", "mathBio"];
-            
-            for (let sub of subjects) {
-                const tot = document.getElementById(`${sub}A`);
-                const cor = document.getElementById(`${sub}C`);
-                const wro = document.getElementById(`${sub}W`);
-
-                if (tot.value === "" || cor.value === "" || wro.value === "") {
-                    if(tot.value === "") tot.classList.add("validation-error");
-                    if(cor.value === "") cor.classList.add("validation-error");
-                    if(wro.value === "") wro.classList.add("validation-error");
-                    
-                    showNotification(`Please fill in all parameter rows for the active Subject Breakdown profile.`);
-                    subjectInputsValid = false;
-                    break;
-                }
-            }
-            if (!subjectInputsValid) return false;
-        }
-
-        return true;
-    }
-
-    // High Execution Pipeline core connector
-    function executeCalculationSequence() {
-        // Run verification loop
-        if (!validateFormFields()) {
-            return; // Halt system execution sequence early if state validation fails
-        }
-
-        // If validation passes, run calculation calculations safely...
-        console.log("Validation complete. Processing metrics matrix...");
-        
-        const attempted = parseInt(document.getElementById("attempted").value);
-        const wrong = parseInt(document.getElementById("wrong").value);
-        const totalQs = parseInt(document.getElementById("totalQs").value);
-        const maxMarks = parseInt(document.getElementById("maxMarks").value);
-        const ratio = parseFloat(document.getElementById("markingRatio").value);
-
-        const marksPerQuestion = maxMarks / totalQs;
-        const correct = attempted - wrong;
-        const scoreCalculated = (correct * marksPerQuestion) - (wrong * marksPerQuestion * ratio);
-
-        // Render response metrics inside hero window container
-        document.getElementById("score").innerText = scoreCalculated.toFixed(2);
-        showNotification("Assessment Metrics Computed Successfully!", 2500);
-    }
-
-    function downloadPDFReportSequence() {
-        if (!validateFormFields()) return;
-        showNotification("Generating Intelligence Document Document...");
-    }
-</script>
+<script src="script.js"></script>
 </body>
 </html>
