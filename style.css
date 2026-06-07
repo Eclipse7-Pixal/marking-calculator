@@ -36,7 +36,7 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    padding: 40px 24px;
+    padding: 24px;
 }
 
 /* Fluid Soft Ambient Background Visualizers */
@@ -95,7 +95,7 @@ body {
     padding: 42px 38px;
     border-radius: 28px;
     width: 100%;
-    max-width: 680px; /* Optimized layout framework for premium PC sizing layout */
+    max-width: 520px;
     box-shadow: var(--fluent-shadow);
     transition: var(--transition-fluent);
     position: relative;
@@ -153,7 +153,6 @@ body {
 .input-field-group {
     margin-bottom: 18px;
     position: relative;
-    width: 100%;
 }
 
 .soft-field-label {
@@ -191,10 +190,9 @@ body {
     padding-left: 48px !important;
 }
 
-/* Mobile-First Layout Row Definition (Stacked by default) */
 .fluent-layout-row {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 16px;
     margin-bottom: 18px;
 }
@@ -536,21 +534,28 @@ input.validation-error {
     margin-bottom: 8px;
 }
 
-/* --- THE PC MODE LAYOUT STABILIZATION ENGINE --- */
-@media (min-width: 601px) {
-    .fluent-layout-row {
-        grid-template-columns: 1fr 1fr; /* Force dual-column split rows on desktop screen scopes */
-        gap: 20px;
-    }
-}
-
 /* --- RE-ENGINEERED MOBILE STABILIZATION PATCH --- */
-@media (max-width: 600px) {
+@media (max-width: 480px) {
     body { padding: 12px 8px; }
-    .soft-glass-container { padding: 32px 16px; border-radius: 20px; }
+    .soft-glass-container { padding: 32px 14px; border-radius: 20px; }
     .app-header h1 { font-size: 1.45rem; }
     .score-hero-val { font-size: 2.5rem; }
-    .fluent-layout-row { grid-template-columns: 1fr; gap: 14px; }
+    
+    /* MAINTAINING DESKTOP-STYLE SIDE-BY-SIDE GRID ARCHITECTURE ON MOBILE VANS */
+    .fluent-layout-row { 
+        grid-template-columns: 1fr 1fr; 
+        gap: 10px; 
+    }
+    
+    /* Optimization scaling for labels and text elements inside side-by-side rows */
+    .soft-field-label {
+        font-size: 0.65rem;
+    }
+    input[type="text"], input[type="number"], .select-box-trigger {
+        padding: 12px 10px;
+        font-size: 0.82rem;
+    }
+
     .subject-breakdown-wrapper.visible { padding: 14px 6px; }
     .subject-grid-layout-header, .subject-grid-row {
         grid-template-columns: 1fr 0.9fr 0.9fr 0.9fr !important;
