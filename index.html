@@ -29,15 +29,16 @@
 </head>
 <body>
 
-<!-- Isolated Canvas Container (Fixes Mobile Side-Scroll Overflow) -->
+<!-- Isolated Canvas Container -->
 <div class="ambient-background-canvas">
     <div class="blob-portal blob-1"></div>
     <div class="blob-portal blob-2"></div>
+    <div class="grid-overlay"></div>
 </div>
 
 <div class="ai-container">
     <header class="brand-header">
-        <div class="glow-badge">E7 Core Quantum v4.0</div>
+        <div class="glow-badge">E7 Core Quantum v4.5</div>
         <h1>Negative Marking Engine</h1>
         <p class="branding">Powered by ECLIPSE7 AI • BY SAIPRASAD BARURE</p>
     </header>
@@ -59,26 +60,41 @@
             </div>
         </div>
 
+        <!-- Smart Exam Tracker Profile Toggle -->
+        <div class="input-group-full">
+            <label class="field-label">Smart Curriculum Profile</label>
+            <div class="custom-select" id="examProfileSelectContainer">
+                <div class="select-trigger" id="examProfileLabel">SELECT EXAM PROFILE</div>
+                <div class="select-options" id="examProfileOptions">
+                    <div class="option-item" data-value="custom">CUSTOM MODE (MANUAL)</div>
+                    <div class="option-item" data-value="jeemain">JEE MAIN PROFILE</div>
+                    <div class="option-item" data-value="jeeadv">JEE ADVANCED PROFILE</div>
+                    <div class="option-item" data-value="neet">NEET UG PROFILE</div>
+                </div>
+                <input type="hidden" id="examProfile" value="custom">
+            </div>
+        </div>
+
         <!-- Global Assessment Parameters -->
         <div class="input-row">
             <div>
                 <label class="field-label">Total Questions</label>
-                <input type="number" id="totalQs">
+                <input type="number" id="totalQs" placeholder="0">
             </div>
             <div>
                 <label class="field-label">Max Marks</label>
-                <input type="number" id="maxMarks">
+                <input type="number" id="maxMarks" placeholder="0">
             </div>
         </div>
 
         <div class="input-row">
             <div>
                 <label class="field-label">Total Attempts</label>
-                <input type="number" id="attempted">
+                <input type="number" id="attempted" placeholder="0">
             </div>
             <div>
                 <label class="field-label">Incorrect Faults</label>
-                <input type="number" id="wrong">
+                <input type="number" id="wrong" placeholder="0">
             </div>
         </div>
 
@@ -118,25 +134,28 @@
                 <span>WRONG</span>
             </div>
              
-            <div class="subject-row-inputs">
+            <div class="subject-row-inputs" data-subject="phy">
                 <label class="subject-tag">PHYSICS</label>
-                <input type="number" id="phyA" placeholder="0">
-                <input type="number" id="phyC" placeholder="0">
-                <input type="number" id="phyW" placeholder="0">
+                <input type="number" id="phyA" placeholder="0" class="sub-tot">
+                <input type="number" id="phyC" placeholder="0" class="sub-cor">
+                <input type="number" id="phyW" placeholder="0" class="sub-wro">
             </div>
 
-            <div class="subject-row-inputs">
+            <div class="subject-row-inputs" data-subject="chem">
                 <label class="subject-tag">CHEMISTRY</label>
-                <input type="number" id="chemA" placeholder="0">
-                <input type="number" id="chemC" placeholder="0">
-                <input type="number" id="chemW" placeholder="0">
+                <input type="number" id="chemA" placeholder="0" class="sub-tot">
+                <input type="number" id="chemC" placeholder="0" class="sub-cor">
+                <input type="number" id="chemW" placeholder="0" class="sub-wro">
             </div>
 
-            <div class="subject-row-inputs">
-                <label class="subject-tag">MATH/BIO</label>
-                <input type="number" id="mathBioA" placeholder="0">
-                <input type="number" id="mathBioC" placeholder="0">
-                <input type="number" id="mathBioW" placeholder="0">
+            <div class="subject-row-inputs" data-subject="mathBio">
+                <label class="subject-tag" id="mathBioLabel">MATH/BIO</label>
+                <input type="number" id="mathBioA" placeholder="0" class="sub-tot">
+                <input type="number" id="mathBioC" placeholder="0" class="sub-cor">
+                <input type="number" id="mathBioW" placeholder="0" class="sub-wro">
+            </div>
+            <div class="smart-intelligence-status">
+                <i class="fa-solid fa-microchip-ai"></i> <span id="intelMessage">Quantum synchronization active. Manual override monitored.</span>
             </div>
         </div>
 
