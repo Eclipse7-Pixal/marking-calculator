@@ -95,7 +95,7 @@ body {
     padding: 42px 38px;
     border-radius: 28px;
     width: 100%;
-    max-width: 520px;
+    max-width: 540px;
     box-shadow: var(--fluent-shadow);
     transition: var(--transition-fluent);
     position: relative;
@@ -153,6 +153,8 @@ body {
 .input-field-group {
     margin-bottom: 18px;
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .soft-field-label {
@@ -195,6 +197,7 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 16px;
     margin-bottom: 18px;
+    width: 100%;
 }
 
 .dropdown-adjustment {
@@ -240,6 +243,7 @@ input.validation-error {
     position: relative;
     width: 100%;
     user-select: none;
+    box-sizing: border-box;
 }
 
 .select-box-trigger {
@@ -535,9 +539,9 @@ input.validation-error {
 }
 
 /* --- RE-ENGINEERED MOBILE STABILIZATION PATCH --- */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     body { padding: 12px 8px; }
-    .soft-glass-container { padding: 32px 14px; border-radius: 20px; }
+    .soft-glass-container { padding: 32px 16px; border-radius: 20px; }
     .app-header h1 { font-size: 1.45rem; }
     .score-hero-val { font-size: 2.5rem; }
     .fluent-layout-row { grid-template-columns: 1fr; gap: 14px; }
