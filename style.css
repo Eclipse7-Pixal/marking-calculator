@@ -1,18 +1,17 @@
 :root {
-    /* Extraordinary Quantum Deep Cyberpunk Theme */
-    --bg-deep: #030208;
-    --card-surface: rgba(10, 8, 20, 0.6);
+    /* Premium Premium Black Cyberpunk Color Paradigm */
+    --bg-deep: #050508;
+    --card-surface: rgba(11, 11, 18, 0.75);
     --accent-neon: #00f2ff;
-    --accent-purple: #bd00ff;
-    --accent-glow: rgba(0, 242, 255, 0.35);
+    --accent-purple: #9d00ff;
+    --accent-glow: rgba(0, 242, 255, 0.25);
     --text-primary: #f8fafc;
-    --text-dim: #94a3b8;
-    --border-glass: rgba(255, 255, 255, 0.06);
-    --border-glow: rgba(189, 0, 255, 0.2);
-    --input-bg: rgba(5, 3, 10, 0.8);
+    --text-dim: #64748b;
+    --border-glass: rgba(255, 255, 255, 0.035);
+    --input-bg: #0b0914;
     
     /* Precision Curves & Mechanics */
-    --bezier: cubic-bezier(0.25, 1, 0.5, 1);
+    --bezier: cubic-bezier(0.16, 1, 0.3, 1);
     --transition: all 0.4s var(--bezier);
 }
 
@@ -36,68 +35,69 @@ body {
     padding: 24px;
 }
 
-/* Background Structural Isolation Box */
+/* Re-engineered High-End Ambient Visualizers */
 .ambient-background-canvas {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
     overflow: hidden;
     pointer-events: none;
     z-index: -1;
 }
 
-/* Vector Ambient Plasma Orbs */
+.grid-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
 .blob-portal {
     position: absolute;
     border-radius: 50%;
-    filter: blur(140px);
-    opacity: 0.35;
+    filter: blur(160px);
+    opacity: 0.18;
     mix-blend-mode: screen;
-    animation: floatingOrbit 12s infinite ease-in-out alternate;
+    animation: floatingOrbit 16s infinite ease-in-out alternate;
 }
 .blob-1 {
-    top: -10%;
-    right: -10%;
-    width: 450px;
-    height: 450px;
+    top: -15%; right: -15%;
+    width: 550px; height: 550px;
     background: radial-gradient(circle, var(--accent-neon), var(--accent-purple));
 }
 .blob-2 {
-    bottom: -10%;
-    left: -10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, var(--accent-purple), #ff007c);
-    animation-delay: -4s;
+    bottom: -15%; left: -15%;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--accent-purple), #ff0055);
+    animation-delay: -6s;
 }
 
 @keyframes floatingOrbit {
     0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(40px, 30px) scale(1.15); }
+    100% { transform: translate(60px, 40px) scale(1.1); }
 }
 
-/* Premium Glassmorphic Card Container */
+/* Glassmorphic Cyber Container Matrix */
 .ai-container {
     background: var(--card-surface);
-    backdrop-filter: blur(25px) saturate(200%);
-    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    backdrop-filter: blur(35px) saturate(220%);
+    -webkit-backdrop-filter: blur(35px) saturate(220%);
     border: 1px solid var(--border-glass);
     padding: 45px 40px;
-    border-radius: 28px;
+    border-radius: 24px;
     width: 100%;
-    max-width: 490px;
-    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    max-width: 500px;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.95),
+                inset 0 1px 1px rgba(255, 255, 255, 0.05);
     transition: var(--transition);
     box-sizing: border-box;
 }
 
 .ai-container:hover {
-    border-color: rgba(0, 242, 255, 0.25);
-    box-shadow: 0 40px 90px rgba(0, 0, 0, 0.9),
-                0 0 40px rgba(0, 242, 255, 0.05);
+    border-color: rgba(0, 242, 255, 0.18);
+    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.98),
+                0 0 50px rgba(0, 242, 255, 0.03);
 }
 
 /* Sci-Fi Decorative Header */
@@ -109,25 +109,25 @@ body {
 }
 
 .glow-badge {
-    background: linear-gradient(90deg, rgba(0,242,255,0.1), rgba(189,0,255,0.1));
-    border: 1px solid rgba(0, 242, 255, 0.3);
+    background: rgba(0, 242, 255, 0.05);
+    border: 1px solid rgba(0, 242, 255, 0.25);
     color: var(--accent-neon);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.65rem;
-    padding: 4px 12px;
-    border-radius: 20px;
-    letter-spacing: 2px;
+    padding: 4px 14px;
+    border-radius: 4px;
+    letter-spacing: 2.5px;
     text-transform: uppercase;
-    margin-bottom: 12px;
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.15);
+    margin-bottom: 14px;
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
 }
 
 .brand-header h1 {
-    font-size: 1.85rem;
+    font-size: 1.95rem;
     font-weight: 800;
     text-align: center;
     letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #ffffff 40%, #a5f3fc 70%, var(--accent-neon));
+    background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 70%, var(--accent-neon));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
@@ -136,15 +136,15 @@ body {
 .branding {
     font-size: 0.65rem;
     color: var(--text-dim);
-    letter-spacing: 3px;
-    margin-top: 8px;
+    letter-spacing: 3.5px;
+    margin-top: 10px;
     text-transform: uppercase;
     font-weight: 700;
 }
 
-/* Input Fields Framework */
+/* Inputs Architecture */
 .input-group-full {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .input-wrapper {
@@ -155,22 +155,22 @@ body {
 
 .input-icon {
     position: absolute;
-    left: 16px;
+    left: 18px;
     color: var(--accent-neon);
     font-size: 0.85rem;
-    opacity: 0.7;
+    opacity: 0.6;
     transition: var(--transition);
 }
 
 .input-wrapper input {
-    padding-left: 46px !important;
+    padding-left: 48px !important;
 }
 
 .input-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .dropdown-grid {
@@ -182,9 +182,9 @@ body {
 
 input[type="text"], input[type="number"] {
     background: var(--input-bg);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 14px 18px;
-    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 15px 18px;
+    border-radius: 12px;
     color: #fff;
     font-size: 0.9rem;
     font-weight: 500;
@@ -196,29 +196,22 @@ input[type="text"], input[type="number"] {
 input:focus {
     outline: none;
     border-color: var(--accent-neon);
-    background: rgba(10, 6, 22, 0.9);
-    box-shadow: 0 0 20px rgba(0, 242, 255, 0.15),
-                inset 0 0 10px rgba(0, 242, 255, 0.05);
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+    background: #0f0d1a;
+    box-shadow: 0 0 25px rgba(0, 242, 255, 0.12);
 }
 
 label.field-label {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     color: var(--text-dim);
     margin-bottom: 6px;
     padding-left: 2px;
     display: block;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     font-weight: 700;
 }
 
-/* Ultra UI Custom Dropdowns */
+/* Custom Selective Input Windows */
 .custom-select {
     position: relative;
     width: 100%;
@@ -227,9 +220,9 @@ label.field-label {
 
 .select-trigger {
     background: var(--input-bg);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 14px 18px;
-    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 15px 18px;
+    border-radius: 12px;
     color: #fff;
     font-size: 0.85rem;
     font-weight: 600;
@@ -239,11 +232,12 @@ label.field-label {
     align-items: center;
     transition: var(--transition);
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .select-trigger:hover {
     border-color: var(--accent-purple);
-    box-shadow: 0 0 15px rgba(189, 0, 255, 0.1);
+    box-shadow: 0 0 20px rgba(157, 0, 247, 0.1);
 }
 
 .select-trigger::after {
@@ -260,18 +254,17 @@ label.field-label {
 
 .select-options {
     position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    right: 0;
-    background: #090611;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    background: #08070f;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
+    border-radius: 12px;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-12px) scale(0.95);
-    z-index: 100;
+    transform: translateY(-10px) scale(0.98);
+    z-index: 110;
     overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
     transition: opacity 0.3s var(--bezier), transform 0.3s var(--bezier), visibility 0.3s;
 }
 
@@ -283,7 +276,7 @@ label.field-label {
 
 .option-item {
     padding: 14px 18px;
-    color: #cbd5e1;
+    color: #94a3b8;
     cursor: pointer;
     transition: var(--transition);
     font-size: 0.8rem;
@@ -298,40 +291,40 @@ label.field-label {
     font-weight: 800;
 }
 
-/* Accordion Engine for Subject Block */
+/* Accordion Component Matrix for Cross-Subject Subsystems */
 .subject-section-panel {
     max-height: 0;
     opacity: 0;
-    transform: scaleY(0.95);
+    transform: scaleY(0.96);
     transform-origin: top;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.01);
+    background: rgba(255, 255, 255, 0.005);
     border: 1px solid transparent;
-    border-radius: 18px;
+    border-radius: 16px;
     padding: 0 20px;
     margin-top: 0;
     box-sizing: border-box;
-    transition: max-height 0.45s var(--bezier), 
-                opacity 0.45s var(--bezier), 
-                transform 0.45s var(--bezier),
-                padding 0.45s var(--bezier),
-                margin-top 0.45s var(--bezier),
-                border-color 0.45s var(--bezier);
+    transition: max-height 0.5s var(--bezier), 
+                opacity 0.5s var(--bezier), 
+                transform 0.5s var(--bezier),
+                padding 0.5s var(--bezier),
+                margin-top 0.5s var(--bezier),
+                border-color 0.5s var(--bezier);
 }
 
 .subject-section-panel.visible {
-    max-height: 300px; 
+    max-height: 380px; 
     opacity: 1;
     transform: scaleY(1);
     padding: 20px;
     margin-top: 18px;
-    border-color: rgba(255, 255, 255, 0.04);
-    background: rgba(255, 255, 255, 0.01);
+    border-color: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.008);
 }
 
 .subject-grid-header {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    grid-template-columns: 1.3fr 1fr 1fr 1fr;
     gap: 12px;
     margin-bottom: 14px;
     text-align: center;
@@ -340,7 +333,7 @@ label.field-label {
 .subject-grid-header span {
     font-size: 0.65rem;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
 }
 
 .subject-grid-header span:nth-child(2) { color: var(--accent-neon); }
@@ -349,7 +342,7 @@ label.field-label {
 
 .subject-row-inputs {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    grid-template-columns: 1.3fr 1fr 1fr 1fr;
     gap: 12px;
     margin-bottom: 12px;
     align-items: center;
@@ -360,24 +353,50 @@ label.field-label {
 .subject-tag {
     font-size: 0.7rem;
     font-weight: 800;
-    color: var(--text-dim);
+    color: #94a3b8;
     letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .subject-row-inputs input {
-    padding: 10px;
+    padding: 11px 8px;
     text-align: center;
     font-size: 0.85rem;
-    border-radius: 10px;
+    border-radius: 8px;
+    background: #05040a;
 }
 
-/* Quantum Action Control Elements */
+.smart-intelligence-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.04);
+    font-size: 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-neon);
+    opacity: 0.8;
+}
+
+.smart-intelligence-status i {
+    animation: pulseGlow 2s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.5; text-shadow: 0 0 0px var(--accent-neon); }
+    50% { opacity: 1; text-shadow: 0 0 8px var(--accent-neon); }
+}
+
+/* Control Execution Nodes */
 .btn-core {
     width: 100%;
     padding: 16px;
-    border-radius: 16px;
+    border-radius: 12px;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     cursor: pointer;
     text-transform: uppercase;
     border: none;
@@ -386,7 +405,7 @@ label.field-label {
     justify-content: center;
     align-items: center;
     gap: 12px;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     position: relative;
     overflow: hidden;
     transition: var(--transition);
@@ -394,38 +413,36 @@ label.field-label {
 }
 
 .btn-execute {
-    background: linear-gradient(135deg, #ffffff, #e2e8f0);
-    color: #030208;
-    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, #ffffff, #cbd5e1);
+    color: #050508;
+    box-shadow: 0 4px 25px rgba(255, 255, 255, 0.03);
 }
 
 .btn-execute:hover {
-    background: linear-gradient(135deg, var(--accent-neon), #00bfff);
-    box-shadow: 0 0 30px var(--accent-glow);
+    background: linear-gradient(135deg, var(--accent-neon), #00b8cc);
+    box-shadow: 0 0 35px rgba(0, 242, 255, 0.3);
     transform: translateY(-2px);
 }
-
-.btn-execute:active { transform: translateY(1px); }
 
 .btn-dossier {
     background: transparent;
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .btn-dossier:hover {
     border-color: var(--accent-purple);
-    background: rgba(189, 0, 255, 0.04);
-    box-shadow: 0 0 25px rgba(189, 0, 255, 0.15);
+    background: rgba(157, 0, 255, 0.03);
+    box-shadow: 0 0 30px rgba(157, 0, 255, 0.1);
     transform: translateY(-2px);
 }
 
-/* Telemetry Display Box */
+/* Core Visual Metrics Displays */
 .score-display {
-    background: linear-gradient(180deg, #05030a 0%, #0c0919 100%);
-    border: 1px solid rgba(255, 255, 255, 0.02);
+    background: linear-gradient(180deg, #030206 0%, #080611 100%);
+    border: 1px solid rgba(255, 255, 255, 0.01);
     padding: 26px;
-    border-radius: 20px;
+    border-radius: 16px;
     text-align: center;
     margin: 26px 0;
     position: relative;
@@ -442,46 +459,51 @@ label.field-label {
 .score-title {
     font-size: 0.65rem;
     text-transform: uppercase;
-    letter-spacing: 2.5px;
-    color: var(--text-dim);
+    letter-spacing: 3px;
+    color: #475569;
     display: block;
-    margin-bottom: 6px;
-    font-weight: 700;
+    margin-bottom: 8px;
+    font-weight: 800;
 }
 
 .score-val {
-    font-size: 3.2rem;
+    font-size: 3.4rem;
     font-weight: 800;
     color: var(--accent-neon);
     font-family: 'JetBrains Mono', monospace;
-    text-shadow: 0 0 25px var(--accent-glow);
+    text-shadow: 0 0 30px var(--accent-glow);
 }
 
-/* Futuristic Scanline Animation effect */
+@keyframes scorePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.04); color: #fff; text-shadow: 0 0 40px var(--accent-neon); }
+    100% { transform: scale(1); }
+}
+
 .scan-line {
     position: absolute;
-    top: 0; left: 0; right: 0; height: 4px;
-    background: linear-gradient(to bottom, rgba(0, 242, 255, 0.2), transparent);
-    opacity: 0.4;
-    animation: scanSweep 4s linear infinite;
+    top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(to bottom, rgba(0, 242, 255, 0.15), transparent);
+    opacity: 0.3;
+    animation: scanSweep 5s linear infinite;
 }
 
 @keyframes scanSweep {
-    0% { top: 0%; }
-    100% { top: 100%; }
+    0% { top: -5%; }
+    100% { top: 105%; }
 }
 
-/* Footer Section Grid */
+/* Legal Disclaimers & Signatures */
 .privacy-note {
     font-size: 0.68rem;
     line-height: 1.6;
-    color: var(--text-dim);
+    color: #475569;
     text-align: center;
     margin-top: 35px;
     padding: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
-    background: rgba(255, 255, 255, 0.01);
-    border-radius: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.005);
+    border-radius: 12px;
 }
 
 .privacy-header {
@@ -493,82 +515,27 @@ label.field-label {
     font-weight: 800;
     font-size: 0.7rem;
     letter-spacing: 2px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     text-transform: uppercase;
     font-family: 'JetBrains Mono', monospace;
 }
 
-/* ============================================================================
-   RE-ENGINEERED MOBILE STABILIZATION PATCH (FULL SPECTRUM UPDATE)
-   ============================================================================ */
+/* --- RE-ENGINEERED MOBILE STABILIZATION PATCH --- */
 @media (max-width: 480px) {
-    body {
-        padding: 16px 12px;
-    }
-
-    /* FIX: Prevents large floating glass gradients from colliding directly underneath 
-       the layout elements by controlling scale and pushing them further out to view edges. */
-    .blob-portal {
-        transform: translate3d(0,0,0);
-        filter: blur(100px);
-        opacity: 0.28;
-    }
-    
-    .blob-1 {
-        top: -15%;
-        right: -25%;
-        width: 280px;
-        height: 280px;
-    }
-    
-    .blob-2 {
-        bottom: -15%;
-        left: -25%;
-        width: 300px;
-        height: 300px;
-    }
-
-    /* RE-ENGINEERED CONTAINER OVERRIDE: Increases container surface density to 
-       0.85 opacity and ups backdrop blur to 35px. This completely filters out 
-       underlying bleeding colors, ensuring supreme contrast and clean readability. */
-    .ai-container { 
-        padding: 32px 18px; 
-        border-radius: 22px;
-        background: rgba(10, 8, 22, 0.85);
-        backdrop-filter: blur(35px) saturate(220%);
-        -webkit-backdrop-filter: blur(35px) saturate(220%);
-        border: 1px solid rgba(255, 255, 255, 0.09);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    }
-
-    .brand-header h1 { font-size: 1.45rem; }
-    .score-val { font-size: 2.5rem; }
-    
-    .dropdown-grid { 
-        grid-template-columns: 1fr; 
-        gap: 16px; 
-    }
-    
-    /* Collapses the inner wrapper padding to allocate maximum width to layout inputs */
-    .subject-section-panel.visible {
-        padding: 16px 8px;
-    }
-    
-    /* Forces columns to align identically and minimizes gutters to prevent line overflow */
+    body { padding: 16px 10px; }
+    .ai-container { padding: 32px 16px; border-radius: 16px; }
+    .brand-header h1 { font-size: 1.5rem; }
+    .score-val { font-size: 2.6rem; }
+    .dropdown-grid { grid-template-columns: 1fr; gap: 14px; }
+    .subject-section-panel.visible { padding: 16px 6px; }
     .subject-grid-header, .subject-row-inputs {
         grid-template-columns: 1.1fr 1fr 1fr 1fr !important;
         gap: 6px !important;
     }
-    
-    /* Collapses default browser engine input floor limits */
     .subject-row-inputs input {
         padding: 8px 4px !important;
         min-width: 0 !important; 
         font-size: 0.8rem !important;
     }
-    
-    .subject-tag {
-        font-size: 0.62rem !important;
-    }
+    .subject-tag { font-size: 0.62rem !important; }
 }
