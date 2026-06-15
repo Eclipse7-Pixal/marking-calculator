@@ -82,7 +82,7 @@
     </div>
 
     <header class="app-header">
-        <div class="fluent-badge">E7 Core Premium v2.0</div>
+        <div class="fluent-badge">E7 Core Premium v2.5</div>
         <h1>Negative Marking Engine</h1>
         
         <div class="meta-branding-container">
@@ -126,22 +126,22 @@
         <div class="fluent-layout-row">
             <div class="input-field-group">
                 <label class="soft-field-label">Total Questions <span class="req-star">*</span></label>
-                <input type="number" id="totalQs" placeholder="0" min="1" required>
+                <input type="number" id="totalQs" placeholder="0" min="1" required class="v-keyboard-target">
             </div>
             <div class="input-field-group">
                 <label class="soft-field-label">Max Marks <span class="req-star">*</span></label>
-                <input type="number" id="maxMarks" placeholder="0" min="1" required>
+                <input type="number" id="maxMarks" placeholder="0" min="1" required class="v-keyboard-target">
             </div>
         </div>
 
         <div class="fluent-layout-row">
             <div class="input-field-group">
                 <label class="soft-field-label">Total Attempts <span class="req-star">*</span></label>
-                <input type="number" id="attempted" placeholder="0" min="0" required>
+                <input type="number" id="attempted" placeholder="0" min="0" required class="v-keyboard-target">
             </div>
             <div class="input-field-group">
                 <label class="soft-field-label">Incorrect <span class="req-star">*</span></label>
-                <input type="number" id="wrong" placeholder="0" min="0" required>
+                <input type="number" id="wrong" placeholder="0" min="0" required class="v-keyboard-target">
             </div>
         </div>
 
@@ -180,26 +180,26 @@
              
             <div class="subject-grid-row" data-subject="phy">
                 <label class="sub-identity-lbl">PHYSICS</label>
-                <input type="number" id="phyA" placeholder="0" class="sub-input sub-tot" min="0">
-                <input type="number" id="phyC" placeholder="0" class="sub-input sub-cor" min="0">
-                <input type="number" id="phyW" placeholder="0" class="sub-input sub-wro" min="0">
-                <input type="number" id="phyN" placeholder="0" class="sub-input sub-not" min="0">
+                <input type="number" id="phyA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0">
+                <input type="number" id="phyC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0">
+                <input type="number" id="phyW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0">
+                <input type="number" id="phyN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0">
             </div>
 
             <div class="subject-grid-row" data-subject="chem">
                 <label class="sub-identity-lbl">CHEMISTRY</label>
-                <input type="number" id="chemA" placeholder="0" class="sub-input sub-tot" min="0">
-                <input type="number" id="chemC" placeholder="0" class="sub-input sub-cor" min="0">
-                <input type="number" id="chemW" placeholder="0" class="sub-input sub-wro" min="0">
-                <input type="number" id="chemN" placeholder="0" class="sub-input sub-not" min="0">
+                <input type="number" id="chemA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0">
+                <input type="number" id="chemC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0">
+                <input type="number" id="chemW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0">
+                <input type="number" id="chemN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0">
             </div>
 
             <div class="subject-grid-row" data-subject="mathBio">
                 <label class="sub-identity-lbl" id="mathBioLabel">MATH/BIO</label>
-                <input type="number" id="mathBioA" placeholder="0" class="sub-input sub-tot" min="0">
-                <input type="number" id="mathBioC" placeholder="0" class="sub-input sub-cor" min="0">
-                <input type="number" id="mathBioW" placeholder="0" class="sub-input sub-wro" min="0">
-                <input type="number" id="mathBioN" placeholder="0" class="sub-input sub-not" min="0">
+                <input type="number" id="mathBioA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0">
+                <input type="number" id="mathBioC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0">
+                <input type="number" id="mathBioW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0">
+                <input type="number" id="mathBioN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0">
             </div>
             
             <div class="quantum-intel-status">
@@ -231,6 +231,29 @@
         </span> 
         All marks are calculated instantly inside your device's browser. No data is saved or tracked. Built by <b>Saiprasad Barure / Prasad Reddy</b>.
     </footer>
+</div>
+
+<div id="glassmorphicKeyboardPanel" class="glass-keyboard-container">
+    <div class="keyboard-drag-notch-handle"></div>
+    <div class="keyboard-matrix-grid">
+        <button type="button" class="kb-matrix-key" data-key="1">1</button>
+        <button type="button" class="kb-matrix-key" data-key="2">2</button>
+        <button type="button" class="kb-matrix-key" data-key="3">3</button>
+        <button type="button" class="kb-matrix-key" data-key="4">4</button>
+        <button type="button" class="kb-matrix-key" data-key="5">5</button>
+        <button type="button" class="kb-matrix-key" data-key="6">6</button>
+        <button type="button" class="kb-matrix-key" data-key="7">7</button>
+        <button type="button" class="kb-matrix-key" data-key="8">8</button>
+        <button type="button" class="kb-matrix-key" data-key="9">9</button>
+        <button type="button" class="kb-matrix-key kb-functional-accent-key" data-key="clear">CLR</button>
+        <button type="button" class="kb-matrix-key" data-key="0">0</button>
+        <button type="button" class="kb-matrix-key kb-functional-backspace-key" data-key="backspace">
+            <i class="fa-solid fa-delete-left"></i>
+        </button>
+    </div>
+    <button type="button" class="keyboard-dismiss-control-btn" onclick="dismissVirtualKeyboardPanel()">
+        <span>Confirm Matrix Entry</span> <i class="fa-solid fa-circle-check"></i>
+    </button>
 </div>
 
 <script src="script.js"></script>
