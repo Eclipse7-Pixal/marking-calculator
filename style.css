@@ -771,4 +771,12 @@ input.validation-error {
         height: 34px;
         font-size: 0.85rem;
     }
+    /* --- PREMIUM PROFILE MOUNT LOCKED ROW FEEDBACK MASK --- */
+    .profile-locked-input {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-color: rgba(255, 255, 255, 0.03) !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+    box-shadow: none !important;
 }
