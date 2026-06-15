@@ -132,7 +132,21 @@ function applySelectedExamProfile(profileKey) {
     const intelBox = document.getElementById('intelMessage');
     if (intelBox) intelBox.textContent = profile.intel;
 
-    if (profileKey === 'custom') return;
+    const totalQsInput = document.getElementById('totalQs');
+
+    if (profileKey === 'custom') {
+        if (totalQsInput) {
+            totalQsInput.removeAttribute('readonly');
+            totalQsInput.classList.remove('profile-locked-input');
+        }
+        return;
+    }
+
+    // Dynamic enforcement: Lock total questions input row for official curriculum presets
+    if (totalQsInput) {
+        totalQsInput.setAttribute('readonly', 'true');
+        totalQsInput.classList.add('profile-locked-input');
+    }
 
     document.getElementById('totalQs').value = profile.totalQs;
     document.getElementById('maxMarks').value = profile.maxMarks;
@@ -156,6 +170,14 @@ function applySelectedExamProfile(profileKey) {
 function setProfileToCustomOverride() {
     const hiddenProf = document.getElementById('examProfile');
     const triggerProf = document.getElementById('examProfileLabel');
+    
+    // Release locking structures from total question row configuration instantly
+    const totalQsInput = document.getElementById('totalQs');
+    if (totalQsInput) {
+        totalQsInput.removeAttribute('readonly');
+        totalQsInput.classList.remove('profile-locked-input');
+    }
+
     if(hiddenProf && hiddenProf.value !== 'custom') {
         hiddenProf.value = 'custom';
         if(triggerProf) triggerProf.textContent = EXAM_PROFILES.custom.label;
@@ -276,7 +298,11 @@ function syncSubjectBreakdownToMainInputs() {
         aggregateWrong += w;
     });
 
-    if(aggregateTotal > 0) document.getElementById('totalQs').value = aggregateTotal;
+    // Mirror calculated aggregate back to core input data tracking matrix
+    const totalQsInput = document.getElementById('totalQs');
+    if(aggregateTotal > 0 && totalQsInput) {
+        totalQsInput.value = aggregateTotal;
+    }
     
     let computedAttempts = aggregateCorrect + aggregateWrong;
     document.getElementById('attempted').value = computedAttempts > 0 || aggregateWrong > 0 ? computedAttempts : '';
@@ -293,13 +319,17 @@ function setupPremiumVirtualKeyboardCoreEngine() {
 
     targets.forEach(input => {
         if (isTouchFormFactorDevice) {
-            // Suppress native layout popup cleanly without locking write access
             input.setAttribute('inputmode', 'none');
-            input.removeAttribute('readonly'); 
+            // Never explicitly lock write access here across calculations matrix rows
+            if (input.id !== 'totalQs' || document.getElementById('examProfile').value === 'custom') {
+                input.removeAttribute('readonly');
+            }
         }
 
-        // Dedicated event wire hooks for active configuration context
         input.addEventListener('click', (e) => {
+            // Guard: If input is explicitly marked readonly, do not activate keyboard panel
+            if (input.hasAttribute('readonly')) return;
+            
             if (!isTouchFormFactorDevice) return; 
             e.stopPropagation();
 
@@ -315,7 +345,6 @@ function setupPremiumVirtualKeyboardCoreEngine() {
         });
     });
 
-    // Wire operational click interception matrices for key elements
     const matrixKeys = kbContainer.querySelectorAll('.kb-matrix-key');
     matrixKeys.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -326,7 +355,6 @@ function setupPremiumVirtualKeyboardCoreEngine() {
             const commandKeyValue = btn.getAttribute('data-key');
             let baseStringValue = currentlyFocusedInputFieldNode.value;
 
-            // Soft tactile click response simulation profile
             btn.style.transform = 'scale(0.92)';
             setTimeout(() => { btn.style.transform = 'none'; }, 80);
 
@@ -335,19 +363,16 @@ function setupPremiumVirtualKeyboardCoreEngine() {
             } else if (commandKeyValue === 'backspace') {
                 currentlyFocusedInputFieldNode.value = baseStringValue.slice(0, -1);
             } else {
-                // Buffer input sequences constraints validation safety
                 if (baseStringValue.length < 4) {
                     currentlyFocusedInputFieldNode.value = baseStringValue + commandKeyValue;
                 }
             }
 
-            // Fire standard event update listeners pipelines manually
             currentlyFocusedInputFieldNode.dispatchEvent(new Event('input', { bubbles: true }));
             processSubjectRowRecalculationSequence(currentlyFocusedInputFieldNode);
         });
     });
 
-    // Intercept clicks on structural elements to maintain input stream stability
     window.addEventListener('click', (e) => {
         if (kbContainer.classList.contains('panel-active') && 
             !kbContainer.contains(e.target) && 
