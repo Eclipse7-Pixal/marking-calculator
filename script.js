@@ -38,6 +38,9 @@ const EXAM_PROFILES = {
     }
 };
 
+let currentlyFocusedInputFieldNode = null;
+let isTouchFormFactorDevice = false;
+
 // ============================================================================
 // 2. MODERN RE-ENGINEERED FLUENT DROPDOWN CONTROLLER
 // ============================================================================
@@ -91,12 +94,16 @@ function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, call
 // 3. CENTRALIZED LIFE-CYCLE INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Determine platform layout configurations
+    isTouchFormFactorDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 1024);
+
     initDropdownSystem('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectSectionDisplay);
     initDropdownSystem('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', () => { setProfileToCustomOverride(); });
     initDropdownSystem('examProfileSelectContainer', 'examProfileLabel', 'examProfileOptions', 'examProfile', applySelectedExamProfile);
     
     setupReactiveSubjectSyncObservers();
     setupMainFallbackInputObservers();
+    setupPremiumVirtualKeyboardCoreEngine();
     
     toggleSubjectSectionDisplay();
 });
@@ -111,6 +118,7 @@ function toggleSubjectSectionDisplay() {
         syncSubjectBreakdownToMainInputs();
     } else {
         section.classList.remove('visible');
+        dismissVirtualKeyboardPanel();
     }
 }
 
@@ -141,7 +149,6 @@ function applySelectedExamProfile(profileKey) {
     clearImplicitTransientResiduals();
     clearInputValidationStyles();
     
-    // Automatically solve rows using new defaults matching the loaded profile
     ['phy', 'chem', 'mathBio'].forEach(sub => executeRowAlgebraSolver(sub));
     syncSubjectBreakdownToMainInputs();
 }
@@ -176,18 +183,19 @@ function setupReactiveSubjectSyncObservers() {
 
     subPanel.addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT') {
-            setProfileToCustomOverride();
-            
-            // Find parent row attribute to scope execution
-            const row = e.target.closest('.subject-grid-row');
-            if (row) {
-                const subjectKey = row.getAttribute('data-subject');
-                executeRowAlgebraSolver(subjectKey, e.target);
-            }
-            
-            syncSubjectBreakdownToMainInputs();
+            processSubjectRowRecalculationSequence(e.target);
         }
     });
+}
+
+function processSubjectRowRecalculationSequence(targetNode) {
+    setProfileToCustomOverride();
+    const row = targetNode.closest('.subject-grid-row');
+    if (row) {
+        const subjectKey = row.getAttribute('data-subject');
+        executeRowAlgebraSolver(subjectKey, targetNode);
+    }
+    syncSubjectBreakdownToMainInputs();
 }
 
 function executeRowAlgebraSolver(sub, activeElement = null) {
@@ -203,42 +211,33 @@ function executeRowAlgebraSolver(sub, activeElement = null) {
 
     if (tot === null) return; 
 
-    // Capture state tracking variable sets
     let filledFields = [];
     if (cor !== null) filledFields.push({ id: 'C', val: cor, el: elCor });
     if (wro !== null) filledFields.push({ id: 'W', val: wro, el: elWro });
     if (not !== null) filledFields.push({ id: 'N', val: not, el: elNot });
 
-    // Scenario A: User populated all parameters, balance the non-active elements
     if (filledFields.length === 3) {
         if (activeElement === elNot) {
-            // Recalculate Correct based on newly modified Not Attempted + existing Wrong
             let updatedCor = Math.max(0, tot - not - wro);
-            elCor.value = updatedCor;
+            elCor.value = updatedCor === 0 && not === 0 && wro === 0 ? "" : updatedCor;
         } else if (activeElement === elWro) {
-            // Recalculate Correct based on newly modified Wrong + existing Not Attempted
             let updatedCor = Math.max(0, tot - wro - not);
-            elCor.value = updatedCor;
+            elCor.value = updatedCor === 0 && wro === 0 && not === 0 ? "" : updatedCor;
         } else {
-            // Balance Not Attempted as fallback constraint
             let updatedNot = Math.max(0, tot - cor - wro);
-            elNot.value = updatedNot;
+            elNot.value = updatedNot === 0 && cor === 0 && wro === 0 ? "" : updatedNot;
         }
         return;
     }
 
-    // Scenario B: Rule Matrix triggered when exactly any two values are supplied
     if (filledFields.length === 2) {
         const structuralMask = filledFields.map(f => f.id).join('');
         
         if (structuralMask === 'CW') {
-            // Missing: Not Attempted
             elNot.value = Math.max(0, tot - cor - wro);
         } else if (structuralMask === 'WN') {
-            // Missing: Correct (Crucial requirement for speed workflow)
             elCor.value = Math.max(0, tot - wro - not);
         } else if (structuralMask === 'CN') {
-            // Missing: Wrong
             elWro.value = Math.max(0, tot - cor - not);
         }
     }
@@ -285,7 +284,101 @@ function syncSubjectBreakdownToMainInputs() {
 }
 
 // ============================================================================
-// 6. FLUENT NOTIFICATION SYSTEM & UI CRITICAL VALIDATION ENGINE
+// 6. GLOSSY TOUCH-OPTIMIZED VIRTUAL KEYPAD CORE SUBSYSTEM
+// ============================================================================
+function setupPremiumVirtualKeyboardCoreEngine() {
+    const targets = document.querySelectorAll('.v-keyboard-target');
+    const kbContainer = document.getElementById('glassmorphicKeyboardPanel');
+    if (!kbContainer) return;
+
+    targets.forEach(input => {
+        if (isTouchFormFactorDevice) {
+            // Suppress secondary native platform software popup layout triggers
+            input.setAttribute('inputmode', 'none');
+            input.setAttribute('readonly', 'true');
+        }
+
+        // Dedicated event wire hooks for active configuration context
+        input.addEventListener('click', (e) => {
+            if (!isTouchFormFactorDevice) return; // Pass execution cleanly to standard desktop keyboard maps
+            e.stopPropagation();
+
+            if (currentlyFocusedInputFieldNode) {
+                currentlyFocusedInputFieldNode.classList.remove('v-keyboard-focused-node');
+            }
+
+            currentlyFocusedInputFieldNode = input;
+            input.classList.add('v-keyboard-focused-node');
+            
+            kbContainer.classList.add('panel-active');
+            adjustViewportPaddingForVirtualKeyboardPanel(true);
+        });
+    });
+
+    // Wire operational click interception matrices for key elements
+    const matrixKeys = kbContainer.querySelectorAll('.kb-matrix-key');
+    matrixKeys.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!currentlyFocusedInputFieldNode) return;
+
+            const commandKeyValue = btn.getAttribute('data-key');
+            let baseStringValue = currentlyFocusedInputFieldNode.value;
+
+            // Soft tactile click response simulation profile
+            btn.style.transform = 'scale(0.92)';
+            setTimeout(() => { btn.style.transform = 'none'; }, 80);
+
+            if (commandKeyValue === 'clear') {
+                currentlyFocusedInputFieldNode.value = '';
+            } else if (commandKeyValue === 'backspace') {
+                currentlyFocusedInputFieldNode.value = baseStringValue.slice(0, -1);
+            } else {
+                // Buffer input sequences constraints validation safety
+                if (baseStringValue.length < 4) {
+                    currentlyFocusedInputFieldNode.value = baseStringValue + commandKeyValue;
+                }
+            }
+
+            // Fire standard event update listeners pipelines manually
+            currentlyFocusedInputFieldNode.dispatchEvent(new Event('input', { bubbles: true }));
+            processSubjectRowRecalculationSequence(currentlyFocusedInputFieldNode);
+        });
+    });
+
+    // Intercept clicks on structural elements to maintain input stream stability
+    window.addEventListener('click', (e) => {
+        if (kbContainer.classList.contains('panel-active') && 
+            !kbContainer.contains(e.target) && 
+            !e.target.classList.contains('v-keyboard-target')) {
+            dismissVirtualKeyboardPanel();
+        }
+    });
+}
+
+function dismissVirtualKeyboardPanel() {
+    const kbContainer = document.getElementById('glassmorphicKeyboardPanel');
+    if (kbContainer) {
+        kbContainer.classList.remove('panel-active');
+    }
+    if (currentlyFocusedInputFieldNode) {
+        currentlyFocusedInputFieldNode.classList.remove('v-keyboard-focused-node');
+        currentlyFocusedInputFieldNode = null;
+    }
+    adjustViewportPaddingForVirtualKeyboardPanel(false);
+}
+
+function adjustViewportPaddingForVirtualKeyboardPanel(isOpening) {
+    if (isOpening) {
+        document.body.style.paddingBottom = "360px";
+    } else {
+        document.body.style.paddingBottom = "24px";
+    }
+}
+
+// ============================================================================
+// 7. FLUENT NOTIFICATION SYSTEM & UI CRITICAL VALIDATION ENGINE
 // ============================================================================
 function triggerSystemToastNotification(message, isError = true) {
     const toast = document.getElementById('systemNotification');
@@ -316,14 +409,12 @@ function scanAndValidateSystemInputs() {
     clearInputValidationStyles();
     let invalidNodes = [];
 
-    // 1. Structural Identity Diagnostics
     const studentName = document.getElementById('studentName');
     const testName = document.getElementById('testName');
     
     if (!studentName.value.trim()) invalidNodes.push(studentName);
     if (!testName.value.trim()) invalidNodes.push(testName);
 
-    // 2. Global Score Matrix Evaluation
     const totalQs = document.getElementById('totalQs');
     const maxMarks = document.getElementById('maxMarks');
     const attempted = document.getElementById('attempted');
@@ -334,7 +425,6 @@ function scanAndValidateSystemInputs() {
     if (attempted.value === "" || parseFloat(attempted.value) < 0) invalidNodes.push(attempted);
     if (wrong.value === "" || parseFloat(wrong.value) < 0) invalidNodes.push(wrong);
 
-    // 3. Subject Wise Multi-Channel Subsystem Verification
     const reportType = document.getElementById('reportType').value;
     if (reportType === 'subjectwise') {
         ['phy', 'chem', 'mathBio'].forEach(sub => {
@@ -350,7 +440,6 @@ function scanAndValidateSystemInputs() {
         });
     }
 
-    // Logical bound sanity checker
     if (invalidNodes.length === 0) {
         if (parseFloat(wrong.value) > parseFloat(attempted.value)) {
             invalidNodes.push(wrong);
@@ -387,7 +476,7 @@ function animateContainerShake() {
 }
 
 // ============================================================================
-// 7. CALCULATION ENGINE LOGIC UNIFICATION
+// 8. CALCULATION ENGINE LOGIC UNIFICATION
 // ============================================================================
 function executeCalculationSequence() {
     if (!scanAndValidateSystemInputs()) return null;
@@ -419,7 +508,7 @@ function executeCalculationSequence() {
 }
 
 // ============================================================================
-// 8. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT)
+// 9. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT)
 // ============================================================================
 async function downloadPDFReportSequence() {
     const telemetryData = executeCalculationSequence();
@@ -434,7 +523,6 @@ async function downloadPDFReportSequence() {
     const test = document.getElementById('testName').value.toUpperCase();
     const timestamp = new Date().toLocaleString().toUpperCase();
 
-    // Background Canvas
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, 'F');
     
@@ -443,11 +531,9 @@ async function downloadPDFReportSequence() {
     for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
     for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j);
 
-    // Frame
     doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3);
     doc.rect(8, 8, 194, 281);
 
-    // Header Panel
     doc.setFillColor(248, 250, 252);
     doc.rect(10, 10, 190, 32, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5);
@@ -460,12 +546,11 @@ async function downloadPDFReportSequence() {
     doc.text("NEGATIVE MARKING PERFORMANCE REPORT", 16, 21);
     
     doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
-    doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v5.0`, 16, 27);
+    doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v5.5`, 16, 27);
     
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
     doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
 
-    // Telemetry Fields Layout Blocks
     let cardY = 48;
     doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
@@ -484,7 +569,6 @@ async function downloadPDFReportSequence() {
     doc.text(test.length > 20 ? test.substring(0, 20) + "..." : test, 44, cardY + 22);
     doc.setFont("courier", "bold"); doc.setFontSize(6.5); doc.text(timestamp, 44, cardY + 30);
 
-    // Numerical Telemetry Columns
     doc.setFillColor(241, 245, 249); doc.rect(108, cardY, 92, 6, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(108, cardY, 92, 6, 'D');
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
@@ -504,7 +588,6 @@ async function downloadPDFReportSequence() {
     doc.text(`${telemetryData.attempted} UNITS`, 148, cardY + 25);
     doc.setTextColor(225, 29, 72); doc.text(`${telemetryData.wrong} FAULTS`, 148, cardY + 31);
 
-    // Score Dashboard Layout Banner
     let scoreY = 86;
     doc.setFillColor(250, 251, 253); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
     doc.rect(10, scoreY, 190, 24, 'DF');
@@ -526,7 +609,6 @@ async function downloadPDFReportSequence() {
     doc.setFont("helvetica", "bold"); doc.setFontSize(12);
     doc.text(`${telemetryData.efficiency}%`, 147, scoreY + 14);
 
-    // Telemetry Graph Segmentation
     let meterY = 118;
     doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY - 4, 200, meterY - 4);
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
@@ -558,7 +640,6 @@ async function downloadPDFReportSequence() {
         meterY += 7;
     });
 
-    // Subject Breakdown Print Blocks
     if (reportType === 'subjectwise') {
         doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY - 1, 200, meterY - 1);
         doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
@@ -601,7 +682,6 @@ async function downloadPDFReportSequence() {
         });
     }
 
-    // Terminal Insights Panel Block
     let tBoxY = Math.max(meterY + 4, 148);
     doc.setFillColor(252, 253, 255); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
     doc.rect(10, tBoxY, 190, 36, 'DF');
@@ -620,7 +700,6 @@ async function downloadPDFReportSequence() {
     doc.text(`>> PENALTY_DECAY  : THE REGISTERED PENALTY INFLICTED SUBTRACTS ${telemetryData.totalPenalty.toFixed(2)} POINTS FROM ABSOLUTE CAPACITY.`, 15, tBoxY + 21);
     doc.text(`>> EFFICIENCY_GAP : ${telemetryData.unattempted} UNATTEMPTED SEGMENTS IDENTIFIED FOR LOW-COST SCORE OPTIMIZATION.`, 15, tBoxY + 28);
 
-    // Footer Sign-Off Blocks
     const finalFooterY = 254;
     doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, finalFooterY - 4, 200, finalFooterY - 4);
 
