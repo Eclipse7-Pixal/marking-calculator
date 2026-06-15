@@ -24,6 +24,7 @@ html, body {
     overflow-x: hidden;
     position: relative;
     box-sizing: border-box;
+    transition: padding-bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body {
@@ -136,15 +137,6 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-.sub-branding {
-    font-size: 0.65rem;
-    color: var(--text-muted);
-    letter-spacing: 2.5px;
-    margin-top: 10px;
-    text-transform: uppercase;
-    font-weight: 700;
-}
-
 .input-field-group {
     margin-bottom: 18px;
     position: relative;
@@ -214,6 +206,12 @@ input:focus {
     border-color: var(--fluent-border-focus);
     background: rgba(15, 15, 24, 0.8);
     box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+
+.v-keyboard-target.v-keyboard-focused-node {
+    border-color: #0284c7 !important;
+    background: rgba(2, 132, 199, 0.08) !important;
+    box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.2) !important;
 }
 
 input.validation-error {
@@ -306,7 +304,6 @@ input.validation-error {
     padding-left: 20px;
 }
 
-/* 5-Column Grid Matrix Setup for Subject Analytics Section */
 .subject-breakdown-wrapper {
     max-height: 0;
     opacity: 0;
@@ -444,13 +441,6 @@ input.validation-error {
     overflow: hidden;
 }
 
-.fluent-score-hero-display::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-}
-
 .score-hero-title {
     font-size: 0.68rem;
     letter-spacing: 1.5px;
@@ -502,6 +492,107 @@ input.validation-error {
     20%, 80% { transform: translate3d(2px, 0, 0); }
     30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
     40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* ============================================================================
+/* PREMIUM INTERACTIVE SOFT GLASSMORPHIC NUMERIC KEYPAD COMPONENT STYLE
+/* ============================================================================ */
+.glass-keyboard-container {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(13, 13, 22, 0.5);
+    backdrop-filter: blur(50px) saturate(210%);
+    -webkit-backdrop-filter: blur(50px) saturate(210%);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 32px 32px 0 0;
+    padding: 16px 20px calc(env(safe-area-inset-bottom) + 16px) 20px;
+    z-index: 99999;
+    box-shadow: 0 -15px 50px rgba(0, 0, 0, 0.65);
+    transform: translateY(105%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.glass-keyboard-container.panel-active {
+    transform: translateY(0);
+}
+
+.keyboard-drag-notch-handle {
+    width: 42px; height: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    align-self: center;
+    margin-bottom: 2px;
+}
+
+.keyboard-matrix-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.kb-matrix-key {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 14px;
+    padding: 14px 0;
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.kb-matrix-key:active {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.kb-functional-accent-key {
+    background: rgba(239, 68, 68, 0.08) !important;
+    border-color: rgba(239, 68, 68, 0.12) !important;
+    color: #fca5a5;
+    font-size: 0.95rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.kb-functional-backspace-key {
+    background: rgba(148, 163, 184, 0.08) !important;
+    border-color: rgba(148, 163, 184, 0.12) !important;
+    color: #cbd5e1;
+    font-size: 1.1rem;
+}
+
+.keyboard-dismiss-control-btn {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border: none;
+    border-radius: 14px;
+    padding: 13px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.25);
+    transition: opacity 0.2s;
+}
+
+.keyboard-dismiss-control-btn:active {
+    opacity: 0.85;
 }
 
 .fluent-footer {
