@@ -1,5 +1,4 @@
 :root {
-    /* Premium Frosted Dark Microsoft & Google Material Blend Paradigm */
     --ambient-purple: #7c3aed;
     --ambient-blue: #0284c7;
     --ambient-emerald: #059669;
@@ -39,7 +38,6 @@ body {
     padding: 24px;
 }
 
-/* Fluid Soft Ambient Background Visualizers */
 .fluent-ambient-canvas {
     position: fixed;
     top: 0; left: 0;
@@ -86,7 +84,6 @@ body {
     100% { transform: translate(-30px, 30px) scale(0.95); }
 }
 
-/* Frosted Modern Container Shell */
 .soft-glass-container {
     background: var(--fluent-surface);
     backdrop-filter: blur(40px) saturate(180%);
@@ -95,7 +92,7 @@ body {
     padding: 42px 38px;
     border-radius: 28px;
     width: 100%;
-    max-width: 520px;
+    max-width: 550px;
     box-shadow: var(--fluent-shadow);
     transition: var(--transition-fluent);
     position: relative;
@@ -108,7 +105,6 @@ body {
                 0 0 40px rgba(124, 58, 237, 0.05);
 }
 
-/* Premium Header Configurations */
 .app-header {
     display: flex;
     flex-direction: column;
@@ -149,7 +145,6 @@ body {
     font-weight: 700;
 }
 
-/* Field Structuring & Star Mechanics */
 .input-field-group {
     margin-bottom: 18px;
     position: relative;
@@ -201,7 +196,6 @@ body {
     margin-bottom: 6px;
 }
 
-/* Smooth Soft Inputs Block */
 input[type="text"], input[type="number"] {
     background: var(--fluent-input-bg);
     border: 1px solid var(--fluent-border);
@@ -222,7 +216,6 @@ input:focus {
     box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
 }
 
-/* Explicit Validation Target Style Indicator */
 input.validation-error {
     border-color: rgba(239, 68, 68, 0.6) !important;
     background: rgba(239, 68, 68, 0.04) !important;
@@ -235,7 +228,6 @@ input.validation-error {
     50% { transform: scale(1.01); }
 }
 
-/* Custom Dropdown Triggers */
 .custom-select-box {
     position: relative;
     width: 100%;
@@ -314,7 +306,7 @@ input.validation-error {
     padding-left: 20px;
 }
 
-/* Frosted Accordion Panel Configurations */
+/* 5-Column Grid Matrix Setup for Subject Analytics Section */
 .subject-breakdown-wrapper {
     max-height: 0;
     opacity: 0;
@@ -345,25 +337,27 @@ input.validation-error {
 
 .subject-grid-layout-header {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: 1.1fr 0.9fr 0.9fr 0.9fr 0.9fr;
+    gap: 8px;
     margin-bottom: 12px;
     text-align: center;
 }
 
 .subject-grid-layout-header span {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 .subject-grid-layout-header span:nth-child(2) { color: var(--ambient-blue); }
 .subject-grid-layout-header span:nth-child(3) { color: #10b981; }
 .subject-grid-layout-header span:nth-child(4) { color: #f43f5e; }
+.subject-grid-layout-header span:nth-child(5) { color: #e2e8f0; }
 
 .subject-grid-row {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: 1.1fr 0.9fr 0.9fr 0.9fr 0.9fr;
+    gap: 8px;
     margin-bottom: 10px;
     align-items: center;
 }
@@ -371,13 +365,13 @@ input.validation-error {
 .subject-grid-row:last-child { margin-bottom: 0; }
 
 .sub-identity-lbl {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 700;
     color: var(--text-muted);
 }
 
 .sub-input {
-    padding: 10px 6px !important;
+    padding: 10px 4px !important;
     text-align: center;
     font-size: 0.85rem !important;
     border-radius: 8px !important;
@@ -397,7 +391,6 @@ input.validation-error {
 }
 .quantum-intel-status i { color: var(--ambient-blue); }
 
-/* Fluent Interactive Button Links */
 .fluent-btn {
     width: 100%;
     padding: 15px;
@@ -440,7 +433,6 @@ input.validation-error {
     transform: translateY(-1.5px);
 }
 
-/* Premium Dashboard Metrics Panel Box */
 .fluent-score-hero-display {
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.01);
@@ -481,7 +473,6 @@ input.validation-error {
     100% { transform: scale(1); }
 }
 
-/* Modern Fluent Toast System Alerts */
 .fluent-toast {
     position: absolute;
     top: -65px; left: 0; right: 0;
@@ -513,7 +504,6 @@ input.validation-error {
     40%, 60% { transform: translate3d(4px, 0, 0); }
 }
 
-/* Footer Declarations */
 .fluent-footer {
     font-size: 0.68rem;
     line-height: 1.6;
@@ -534,34 +524,31 @@ input.validation-error {
     margin-bottom: 8px;
 }
 
-/* --- RE-ENGINEERED MOBILE STABILIZATION PATCH --- */
 @media (max-width: 480px) {
-    body { padding: 12px 8px; }
-    .soft-glass-container { padding: 32px 14px; border-radius: 20px; }
+    body { padding: 12px 4px; }
+    .soft-glass-container { padding: 32px 10px; border-radius: 20px; }
     .app-header h1 { font-size: 1.45rem; }
     .score-hero-val { font-size: 2.5rem; }
     
-    /* MAINTAINING DESKTOP-STYLE SIDE-BY-SIDE GRID ARCHITECTURE ON MOBILE VANS */
     .fluent-layout-row { 
         grid-template-columns: 1fr 1fr; 
-        gap: 10px; 
+        gap: 8px; 
     }
     
-    /* Optimization scaling for labels and text elements inside side-by-side rows */
     .soft-field-label {
         font-size: 0.65rem;
     }
     input[type="text"], input[type="number"], .select-box-trigger {
-        padding: 12px 10px;
-        font-size: 0.82rem;
+        padding: 12px 8px;
+        font-size: 0.8rem;
     }
 
-    .subject-breakdown-wrapper.visible { padding: 14px 6px; }
+    .subject-breakdown-wrapper.visible { padding: 14px 4px; }
     .subject-grid-layout-header, .subject-grid-row {
-        grid-template-columns: 1fr 0.9fr 0.9fr 0.9fr !important;
-        gap: 6px !important;
+        grid-template-columns: 1fr 0.85fr 0.85fr 0.85fr 0.85fr !important;
+        gap: 4px !important;
     }
-    .sub-input { padding: 8px 2px !important; font-size: 0.8rem !important; }
-    .sub-identity-lbl { font-size: 0.68rem; }
+    .sub-input { padding: 8px 1px !important; font-size: 0.78rem !important; }
+    .sub-identity-lbl { font-size: 0.62rem; }
     .fluent-toast { top: -80px; font-size: 0.72rem; }
 }
