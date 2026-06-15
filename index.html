@@ -10,62 +10,13 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&family=JetBrains+Mono:wght=400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        .app-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .meta-branding-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            margin-top: 10px;
-        }
-
-        .platform-title-meta {
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: #93c5fd;
-            opacity: 0.95;
-            margin: 0;
-            line-height: 1.3;
-        }
-
-        .author-attribution-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.64rem;
-            font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #9ca3af;
-            opacity: 0.7;
-            margin: 0;
-        }
-
-        .author-attribution-meta::before,
-        .author-attribution-meta::after {
-            content: '';
-            display: inline-block;
-            width: 14px;
-            height: 1px;
-            background: currentColor;
-            opacity: 0.3;
-        }
-    </style>
 </head>
 <body>
 
@@ -84,7 +35,6 @@
     <header class="app-header">
         <div class="fluent-badge">E7 Core Premium v2.5</div>
         <h1>Negative Marking Engine</h1>
-        
         <div class="meta-branding-container">
             <p class="platform-title-meta">ECLIPSE7 FLUID EVALUATION PLATFORM</p>
             <p class="author-attribution-meta">By Saiprasad Barure</p>
@@ -97,7 +47,7 @@
             <label class="soft-field-label">Student Authentication <span class="req-star">*</span></label>
             <div class="fluent-input-wrapper">
                 <i class="fa-solid fa-fingerprint input-field-icon"></i>
-                <input type="text" id="studentName" placeholder="Enter student identity" required autocomplete="off" class="v-keyboard-target" data-kb-type="qwerty">
+                <input type="text" id="studentName" placeholder="Enter student identity" required autocomplete="off" inputmode="none" class="v-keyboard-target alpha-numeric-target">
             </div>
         </div>
 
@@ -105,16 +55,16 @@
             <label class="soft-field-label">Assessment Token <span class="req-star">*</span></label>
             <div class="fluent-input-wrapper">
                 <i class="fa-solid fa-hashtag input-field-icon"></i>
-                <input type="text" id="testName" placeholder="Assessment name (e.g., JEE Main Major)" required autocomplete="off" class="v-keyboard-target" data-kb-type="qwerty">
+                <input type="text" id="testName" placeholder="Assessment name (e.g., JEE Main Major)" required autocomplete="off" inputmode="none" class="v-keyboard-target alpha-numeric-target">
             </div>
         </div>
 
         <div class="input-field-group">
             <label class="soft-field-label">Smart Curriculum Profile <span class="req-star">*</span></label>
             <div class="custom-select-box" id="examProfileSelectContainer">
-                <div class="select-box-trigger" id="examProfileLabel">SELECT EXAM PROFILE</div>
+                <div class="select-box-trigger" id="examProfileLabel">CUSTOM MODE (MANUAL OVERRIDE)</div>
                 <div class="select-box-dropdown" id="examProfileOptions">
-                    <div class="select-box-option" data-value="custom">CUSTOM MODE (MANUAL OVERRIDE)</div>
+                    <div class="select-box-option" data-value="custom">CUSTOM MODE (NONE)</div>
                     <div class="select-box-option" data-value="jeemain">JEE MAIN PROFILE</div>
                     <div class="select-box-option" data-value="jeeadv">JEE ADVANCED PROFILE</div>
                     <div class="select-box-option" data-value="neet">NEET UG PROFILE</div>
@@ -123,25 +73,25 @@
             </div>
         </div>
 
-        <div class="fluent-layout-row">
+        <div class="fluent-layout-row" id="globalTotalQsRow">
             <div class="input-field-group">
                 <label class="soft-field-label">Total Questions <span class="req-star">*</span></label>
-                <input type="number" id="totalQs" placeholder="0" min="1" required class="v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="totalQs" placeholder="0" min="1" required class="v-keyboard-target numeric-only-target" inputmode="none">
             </div>
             <div class="input-field-group">
                 <label class="soft-field-label">Max Marks <span class="req-star">*</span></label>
-                <input type="number" id="maxMarks" placeholder="0" min="1" required class="v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="maxMarks" placeholder="0" min="1" required class="v-keyboard-target numeric-only-target" inputmode="none">
             </div>
         </div>
 
         <div class="fluent-layout-row">
             <div class="input-field-group">
                 <label class="soft-field-label">Total Attempts <span class="req-star">*</span></label>
-                <input type="number" id="attempted" placeholder="0" min="0" required class="v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="attempted" placeholder="0" min="0" required class="v-keyboard-target numeric-only-target" inputmode="none">
             </div>
             <div class="input-field-group">
                 <label class="soft-field-label">Incorrect <span class="req-star">*</span></label>
-                <input type="number" id="wrong" placeholder="0" min="0" required class="v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="wrong" placeholder="0" min="0" required class="v-keyboard-target numeric-only-target" inputmode="none">
             </div>
         </div>
 
@@ -170,9 +120,9 @@
         </div>
 
         <div id="subjectSection" class="subject-breakdown-wrapper">
-            <div class="mandatory-input-notice-bar">
-                <i class="fa-solid fa-circle-info"></i>
-                <span><strong>Mandatory Metrics Rule:</strong> Provide exactly 2 variables per row among (Correct, Wrong, Not Attempted). The residual data points evaluate instantly.</span>
+            <div class="mandatory-input-notice-bar" id="profileLockNoticeBar" style="display: none;">
+                <i class="fa-solid fa-lock"></i>
+                <span>Question metrics locked by the active Curriculum Matrix Profile configuration rule.</span>
             </div>
 
             <div class="subject-grid-layout-header">
@@ -183,28 +133,28 @@
                 <span>NOT ATTM</span>
             </div>
              
-            <div class="subject-grid-row" data-subject="phy">
+            <div class="subject-grid-row" data-subject="phy" id="phyRowContainer">
                 <label class="sub-identity-lbl">PHYSICS</label>
-                <input type="number" id="phyA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="phyC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="phyW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="phyN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0" data-kb-type="numpad">
+                <input type="number" id="phyA" placeholder="0" class="sub-input sub-tot v-keyboard-target numeric-only-target" min="0" inputmode="none">
+                <input type="number" id="phyC" placeholder="0" class="sub-input sub-cor v-keyboard-target numeric-only-target" min="0" inputmode="none">
+                <input type="number" id="phyW" placeholder="0" class="sub-input sub-wro v-keyboard-target numeric-only-target" min="0" inputmode="none">
+                <input type="number" id="phyN" placeholder="0" class="sub-input sub-not v-keyboard-target numeric-only-target" min="0" inputmode="none">
             </div>
 
-            <div class="subject-grid-row" data-subject="chem">
+            <div class="subject-grid-row" data-subject="chem" id="chemRowContainer">
                 <label class="sub-identity-lbl">CHEMISTRY</label>
-                <input type="number" id="chemA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="chemC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="chemW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="chemN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0" data-kb-type="numpad">
+                <input type="number" id="chemA" placeholder="0" class="sub-input sub-tot v-keyboard-target numeric-only-target" min="0" inputmode="none">
+                <input type="number" id="chemC" placeholder="0" class="sub-input sub-cor v-keyboard-target numeric-only-target" min="0" inputmode="none">
+                <input type="number" id="chemW" placeholder="0" class="sub-input sub-wro v-keyboard-target numeric-only-target" min="0" inputmode="none">
+                <input type="number" id="chemN" placeholder="0" class="sub-input sub-not v-keyboard-target numeric-only-target" min="0" inputmode="none">
             </div>
 
-            <div class="subject-grid-row" data-subject="mathBio">
+            <div class="subject-grid-row" data-subject="mathBio" id="mathBioRowContainer">
                 <label class="sub-identity-lbl" id="mathBioLabel">MATH/BIO</label>
-                <input type="number" id="mathBioA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="mathBioC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="mathBioW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="mathBioN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0" data-kb-type="numpad">
+                <input type="number" id="mathBioA" placeholder="0" class="sub-input sub-tot v-keyboard-target numeric-only-target" min="0" inputmode="none">
+                <input type="number" id="mathBioC" placeholder="0" class="sub-input sub-cor v-keyboard-target numeric-only-target" min="0" inputmode="none">
+                <input type="number" id="mathBioW" placeholder="0" class="sub-input sub-wro v-keyboard-target numeric-only-target" min="0" inputmode="none">
+                <input type="number" id="mathBioN" placeholder="0" class="sub-input sub-not v-keyboard-target numeric-only-target" min="0" inputmode="none">
             </div>
             
             <div class="quantum-intel-status">
@@ -241,18 +191,35 @@
 <div id="glassmorphicKeyboardPanel" class="glass-keyboard-container structural-mode-numpad">
     <div class="keyboard-drag-notch-handle"></div>
     
-    <div class="keyboard-matrix-qwerty-layout" id="qwertyMatrixRoot">
-        <div class="kb-compact-row row-numbers-strip">
-            <button type="button" class="kb-character-key" data-key="1">1</button>
-            <button type="button" class="kb-character-key" data-key="2">2</button>
-            <button type="button" class="kb-character-key" data-key="3">3</button>
-            <button type="button" class="kb-character-key" data-key="4">4</button>
-            <button type="button" class="kb-character-key" data-key="5">5</button>
-            <button type="button" class="kb-character-key" data-key="6">6</button>
-            <button type="button" class="kb-character-key" data-key="7">7</button>
-            <button type="button" class="kb-character-key" data-key="8">8</button>
-            <button type="button" class="kb-character-key" data-key="9">9</button>
-            <button type="button" class="kb-character-key" data-key="0">0</button>
+    <div class="keyboard-matrix-grid" id="pureNumpadLayout">
+        <button type="button" class="kb-matrix-key" data-key="1">1</button>
+        <button type="button" class="kb-matrix-key" data-key="2">2</button>
+        <button type="button" class="kb-matrix-key" data-key="3">3</button>
+        <button type="button" class="kb-matrix-key" data-key="4">4</button>
+        <button type="button" class="kb-matrix-key" data-key="5">5</button>
+        <button type="button" class="kb-matrix-key" data-key="6">6</button>
+        <button type="button" class="kb-matrix-key" data-key="7">7</button>
+        <button type="button" class="kb-matrix-key" data-key="8">8</button>
+        <button type="button" class="kb-matrix-key" data-key="9">9</button>
+        <button type="button" class="kb-matrix-key kb-functional-accent-key" data-key="clear">CLR</button>
+        <button type="button" class="kb-matrix-key" data-key="0">0</button>
+        <button type="button" class="kb-matrix-key kb-functional-backspace-key" data-key="backspace">
+            <i class="fa-solid fa-delete-left"></i>
+        </button>
+    </div>
+
+    <div class="keyboard-matrix-qwerty-layout" id="unifiedAlphanumericLayout">
+        <div class="kb-compact-row alphanumeric-number-strip">
+            <button type="button" class="kb-character-key num-strip-btn" data-key="1">1</button>
+            <button type="button" class="kb-character-key num-strip-btn" data-key="2">2</button>
+            <button type="button" class="kb-character-key num-strip-btn" data-key="3">3</button>
+            <button type="button" class="kb-character-key num-strip-btn" data-key="4">4</button>
+            <button type="button" class="kb-character-key num-strip-btn" data-key="5">5</button>
+            <button type="button" class="kb-character-key num-strip-btn" data-key="6">6</button>
+            <button type="button" class="kb-character-key num-strip-btn" data-key="7">7</button>
+            <button type="button" class="kb-character-key num-strip-btn" data-key="8">8</button>
+            <button type="button" class="kb-character-key num-strip-btn" data-key="9">9</button>
+            <button type="button" class="kb-character-key num-strip-btn" data-key="0">0</button>
         </div>
         <div class="kb-compact-row">
             <button type="button" class="kb-character-key" data-key="Q">Q</button>
@@ -285,34 +252,20 @@
             <button type="button" class="kb-character-key" data-key="B">B</button>
             <button type="button" class="kb-character-key" data-key="N">N</button>
             <button type="button" class="kb-character-key" data-key="M">M</button>
-        </div>
-        <div class="kb-compact-row functional-utility-row">
-            <button type="button" class="kb-character-key kb-functional-accent-key text-utility-ctrl" data-key="clear">CLR</button>
-            <button type="button" class="kb-character-key spacebar-layout-key" data-key=" ">SPACE</button>
-            <button type="button" class="kb-character-key kb-functional-backspace-key text-utility-ctrl" data-key="backspace">
+            <button type="button" class="kb-character-key kb-functional-backspace-key text-utility-button" data-key="backspace">
                 <i class="fa-solid fa-delete-left"></i>
             </button>
         </div>
+        <div class="kb-compact-row action-utility-row">
+            <button type="button" class="kb-character-key kb-functional-accent-key text-utility-button" data-key="clear">CLEAR</button>
+            <button type="button" class="kb-character-key spacing-bar-key" data-key=" ">SPACE BAR</button>
+            <button type="button" class="kb-character-key" data-key="-">-</button>
+            <button type="button" class="kb-character-key" data-key="/">/</button>
+        </div>
     </div>
 
-    <div class="keyboard-matrix-grid" id="numpadMatrixRoot">
-        <button type="button" class="kb-matrix-key" data-key="1">1</button>
-        <button type="button" class="kb-matrix-key" data-key="2">2</button>
-        <button type="button" class="kb-matrix-key" data-key="3">3</button>
-        <button type="button" class="kb-matrix-key" data-key="4">4</button>
-        <button type="button" class="kb-matrix-key" data-key="5">5</button>
-        <button type="button" class="kb-matrix-key" data-key="6">6</button>
-        <button type="button" class="kb-matrix-key" data-key="7">7</button>
-        <button type="button" class="kb-matrix-key" data-key="8">8</button>
-        <button type="button" class="kb-matrix-key" data-key="9">9</button>
-        <button type="button" class="kb-matrix-key kb-functional-accent-key" data-key="clear">CLR</button>
-        <button type="button" class="kb-matrix-key" data-key="0">0</button>
-        <button type="button" class="kb-matrix-key kb-functional-backspace-key" data-key="backspace">
-            <i class="fa-solid fa-delete-left"></i>
-        </button>
-    </div>
     <button type="button" class="keyboard-dismiss-control-btn" onclick="dismissVirtualKeyboardPanel()">
-        <span>Confirm Entry Matrix</span> <i class="fa-solid fa-circle-check"></i>
+        <span>Confirm Entry</span> <i class="fa-solid fa-circle-check"></i>
     </button>
 </div>
 
