@@ -735,6 +735,20 @@ input.validation-error {
     margin-bottom: 8px;
 }
 
+/* --- PROFILE MOUNT ENGINE FUNCTIONAL LOCKED MASK --- */
+.profile-locked-row {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-color: rgba(255, 255, 255, 0.03) !important;
+    color: var(--text-muted) !important;
+    opacity: 0.55;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    user-select: none;
+}
+
+/* ============================================================================
+/* VIEWPORT RESPONSIVE MEDIA QUERIES
+/* ============================================================================ */
 @media (max-width: 480px) {
     body { padding: 12px 4px; }
     .soft-glass-container { padding: 32px 10px; border-radius: 20px; }
@@ -771,12 +785,4 @@ input.validation-error {
         height: 34px;
         font-size: 0.85rem;
     }
-    /* --- PREMIUM PROFILE MOUNT LOCKED ROW FEEDBACK MASK --- */
-    .profile-locked-input {
-    background: rgba(255, 255, 255, 0.02) !important;
-    border-color: rgba(255, 255, 255, 0.03) !important;
-    color: var(--text-muted) !important;
-    cursor: not-allowed !important;
-    opacity: 0.6;
-    box-shadow: none !important;
 }
