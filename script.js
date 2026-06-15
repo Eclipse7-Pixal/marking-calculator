@@ -94,7 +94,6 @@ function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, call
 // 3. CENTRALIZED LIFE-CYCLE INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Determine platform layout configurations
     isTouchFormFactorDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 1024);
 
     initDropdownSystem('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectSectionDisplay);
@@ -136,16 +135,14 @@ function applySelectedExamProfile(profileKey) {
 
     if (profileKey === 'custom') {
         if (totalQsInput) {
-            totalQsInput.removeAttribute('readonly');
-            totalQsInput.classList.remove('profile-locked-input');
+            totalQsInput.classList.remove('profile-locked-row');
         }
         return;
     }
 
-    // Dynamic enforcement: Lock total questions input row for official curriculum presets
+    // Apply UI lock pattern to Total Questions instead of standard HTML readonly attribute
     if (totalQsInput) {
-        totalQsInput.setAttribute('readonly', 'true');
-        totalQsInput.classList.add('profile-locked-input');
+        totalQsInput.classList.add('profile-locked-row');
     }
 
     document.getElementById('totalQs').value = profile.totalQs;
@@ -171,11 +168,9 @@ function setProfileToCustomOverride() {
     const hiddenProf = document.getElementById('examProfile');
     const triggerProf = document.getElementById('examProfileLabel');
     
-    // Release locking structures from total question row configuration instantly
     const totalQsInput = document.getElementById('totalQs');
     if (totalQsInput) {
-        totalQsInput.removeAttribute('readonly');
-        totalQsInput.classList.remove('profile-locked-input');
+        totalQsInput.classList.remove('profile-locked-row');
     }
 
     if(hiddenProf && hiddenProf.value !== 'custom') {
@@ -211,7 +206,14 @@ function setupReactiveSubjectSyncObservers() {
 }
 
 function processSubjectRowRecalculationSequence(targetNode) {
-    setProfileToCustomOverride();
+    // If user edited an allowed input field, check if it should push to custom mode
+    if (targetNode.id !== 'totalQs' && !targetNode.classList.contains('profile-locked-row')) {
+        const selectedProfile = document.getElementById('examProfile').value;
+        if (selectedProfile === 'custom' || targetNode.classList.contains('sub-input')) {
+            // Let algebra continue smoothly
+        }
+    }
+    
     const row = targetNode.closest('.subject-grid-row');
     if (row) {
         const subjectKey = row.getAttribute('data-subject');
@@ -270,7 +272,7 @@ function setupMainFallbackInputObservers() {
         const el = document.getElementById(id);
         if(el) {
             el.addEventListener('input', () => {
-                if(id !== 'studentName' && id !== 'testName') {
+                if(id !== 'studentName' && id !== 'testName' && id !== 'totalQs') {
                     setProfileToCustomOverride();
                 }
                 el.classList.remove('validation-error');
@@ -298,7 +300,6 @@ function syncSubjectBreakdownToMainInputs() {
         aggregateWrong += w;
     });
 
-    // Mirror calculated aggregate back to core input data tracking matrix
     const totalQsInput = document.getElementById('totalQs');
     if(aggregateTotal > 0 && totalQsInput) {
         totalQsInput.value = aggregateTotal;
@@ -320,15 +321,14 @@ function setupPremiumVirtualKeyboardCoreEngine() {
     targets.forEach(input => {
         if (isTouchFormFactorDevice) {
             input.setAttribute('inputmode', 'none');
-            // Never explicitly lock write access here across calculations matrix rows
-            if (input.id !== 'totalQs' || document.getElementById('examProfile').value === 'custom') {
-                input.removeAttribute('readonly');
-            }
         }
 
         input.addEventListener('click', (e) => {
-            // Guard: If input is explicitly marked readonly, do not activate keyboard panel
-            if (input.hasAttribute('readonly')) return;
+            // Guard against choosing elements locked by current preset profile selection state
+            if (input.classList.contains('profile-locked-row')) {
+                e.preventDefault();
+                return;
+            }
             
             if (!isTouchFormFactorDevice) return; 
             e.stopPropagation();
