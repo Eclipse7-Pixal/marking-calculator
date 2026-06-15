@@ -94,6 +94,7 @@ function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, call
 // 3. CENTRALIZED LIFE-CYCLE INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Determine platform layout configurations
     isTouchFormFactorDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 1024);
 
     initDropdownSystem('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectSectionDisplay);
@@ -131,15 +132,7 @@ function applySelectedExamProfile(profileKey) {
     const intelBox = document.getElementById('intelMessage');
     if (intelBox) intelBox.textContent = profile.intel;
 
-    const subjectSectionNode = document.getElementById('subjectSection');
-
-    // Dynamic Smart Curriculum Locked Logic Evaluator
-    if (profileKey === 'custom') {
-        if (subjectSectionNode) subjectSectionNode.classList.remove('section-locked');
-        return;
-    } else {
-        if (subjectSectionNode) subjectSectionNode.classList.add('section-locked');
-    }
+    if (profileKey === 'custom') return;
 
     document.getElementById('totalQs').value = profile.totalQs;
     document.getElementById('maxMarks').value = profile.maxMarks;
@@ -168,9 +161,6 @@ function setProfileToCustomOverride() {
         if(triggerProf) triggerProf.textContent = EXAM_PROFILES.custom.label;
         const intelBox = document.getElementById('intelMessage');
         if (intelBox) intelBox.textContent = EXAM_PROFILES.custom.intel;
-        
-        const subjectSectionNode = document.getElementById('subjectSection');
-        if (subjectSectionNode) subjectSectionNode.classList.remove('section-locked');
     }
 }
 
@@ -199,15 +189,7 @@ function setupReactiveSubjectSyncObservers() {
 }
 
 function processSubjectRowRecalculationSequence(targetNode) {
-    // If subject row elements are explicitly locked by active profile presets, do not trigger updates
-    const isLocked = document.getElementById('subjectSection')?.classList.contains('section-locked');
-    const isSubjectInput = targetNode.classList.contains('sub-input');
-    if (isLocked && isSubjectInput) return;
-
-    if (isSubjectInput) {
-        setProfileToCustomOverride();
-    }
-
+    setProfileToCustomOverride();
     const row = targetNode.closest('.subject-grid-row');
     if (row) {
         const subjectKey = row.getAttribute('data-subject');
@@ -311,19 +293,15 @@ function setupPremiumVirtualKeyboardCoreEngine() {
 
     targets.forEach(input => {
         if (isTouchFormFactorDevice) {
+            // Suppress native layout popup cleanly without locking write access
             input.setAttribute('inputmode', 'none');
-            input.setAttribute('readonly', 'true');
+            input.removeAttribute('readonly'); 
         }
 
+        // Dedicated event wire hooks for active configuration context
         input.addEventListener('click', (e) => {
             if (!isTouchFormFactorDevice) return; 
             e.stopPropagation();
-
-            // Prevent launching the virtual keyboard layout if the subject section inputs are locked
-            const isLocked = document.getElementById('subjectSection')?.classList.contains('section-locked');
-            if (isLocked && input.classList.contains('sub-input')) {
-                return; 
-            }
 
             if (currentlyFocusedInputFieldNode) {
                 currentlyFocusedInputFieldNode.classList.remove('v-keyboard-focused-node');
@@ -332,61 +310,44 @@ function setupPremiumVirtualKeyboardCoreEngine() {
             currentlyFocusedInputFieldNode = input;
             input.classList.add('v-keyboard-focused-node');
             
-            // Toggle view configurations based on targeted element configuration types
-            const currentKbType = input.getAttribute('data-kb-type') || 'numpad';
-            if (currentKbType === 'qwerty') {
-                kbContainer.classList.remove('structural-mode-numpad');
-                kbContainer.classList.add('structural-mode-qwerty');
-            } else {
-                kbContainer.classList.remove('structural-mode-qwerty');
-                kbContainer.classList.add('structural-mode-numpad');
-            }
-
             kbContainer.classList.add('panel-active');
-            adjustViewportPaddingForVirtualKeyboardPanel(true, currentKbType);
+            adjustViewportPaddingForVirtualKeyboardPanel(true);
         });
     });
 
-    // Unified Input Routing Handler 
-    const executeKeyInsertionAction = (commandKeyValue, elementKeyBtn) => {
-        if (!currentlyFocusedInputFieldNode) return;
-        let baseStringValue = currentlyFocusedInputFieldNode.value;
+    // Wire operational click interception matrices for key elements
+    const matrixKeys = kbContainer.querySelectorAll('.kb-matrix-key');
+    matrixKeys.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!currentlyFocusedInputFieldNode) return;
 
-        elementKeyBtn.style.transform = 'scale(0.9)';
-        setTimeout(() => { elementKeyBtn.style.transform = 'none'; }, 70);
+            const commandKeyValue = btn.getAttribute('data-key');
+            let baseStringValue = currentlyFocusedInputFieldNode.value;
 
-        if (commandKeyValue === 'clear') {
-            currentlyFocusedInputFieldNode.value = '';
-        } else if (commandKeyValue === 'backspace') {
-            currentlyFocusedInputFieldNode.value = baseStringValue.slice(0, -1);
-        } else {
-            // Apply maximum validation string limit restrictions safely
-            const maxInputLength = currentlyFocusedInputFieldNode.getAttribute('type') === 'text' ? 40 : 4;
-            if (baseStringValue.length < maxInputLength) {
-                currentlyFocusedInputFieldNode.value = baseStringValue + commandKeyValue;
+            // Soft tactile click response simulation profile
+            btn.style.transform = 'scale(0.92)';
+            setTimeout(() => { btn.style.transform = 'none'; }, 80);
+
+            if (commandKeyValue === 'clear') {
+                currentlyFocusedInputFieldNode.value = '';
+            } else if (commandKeyValue === 'backspace') {
+                currentlyFocusedInputFieldNode.value = baseStringValue.slice(0, -1);
+            } else {
+                // Buffer input sequences constraints validation safety
+                if (baseStringValue.length < 4) {
+                    currentlyFocusedInputFieldNode.value = baseStringValue + commandKeyValue;
+                }
             }
-        }
 
-        currentlyFocusedInputFieldNode.dispatchEvent(new Event('input', { bubbles: true }));
-        processSubjectRowRecalculationSequence(currentlyFocusedInputFieldNode);
-    };
-
-    // Bind Event Hooks to standard Grid Numpad buttons
-    kbContainer.querySelectorAll('.kb-matrix-key').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            executeKeyInsertionAction(btn.getAttribute('data-key'), btn);
+            // Fire standard event update listeners pipelines manually
+            currentlyFocusedInputFieldNode.dispatchEvent(new Event('input', { bubbles: true }));
+            processSubjectRowRecalculationSequence(currentlyFocusedInputFieldNode);
         });
     });
 
-    // Bind Event Hooks to alphanumeric QWERTY buttons
-    kbContainer.querySelectorAll('.kb-character-key').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            executeKeyInsertionAction(btn.getAttribute('data-key'), btn);
-        });
-    });
-
+    // Intercept clicks on structural elements to maintain input stream stability
     window.addEventListener('click', (e) => {
         if (kbContainer.classList.contains('panel-active') && 
             !kbContainer.contains(e.target) && 
@@ -408,10 +369,9 @@ function dismissVirtualKeyboardPanel() {
     adjustViewportPaddingForVirtualKeyboardPanel(false);
 }
 
-function adjustViewportPaddingForVirtualKeyboardPanel(isOpening, kbType = 'numpad') {
+function adjustViewportPaddingForVirtualKeyboardPanel(isOpening) {
     if (isOpening) {
-        const structuralPaddingHeight = kbType === 'qwerty' ? "260px" : "210px";
-        document.body.style.paddingBottom = structuralPaddingHeight;
+        document.body.style.paddingBottom = "360px";
     } else {
         document.body.style.paddingBottom = "24px";
     }
@@ -499,7 +459,7 @@ function scanAndValidateSystemInputs() {
 
     if (invalidNodes.length > 0) {
         invalidNodes.forEach(node => node.classList.add('validation-error'));
-        triggerSystemToastNotification("Action Blocked: Please populate required fields with valid data.");
+        triggerSystemToastNotification("Action Blocked: Please populate required fields with valid numerical data.");
         animateContainerShake();
         return false;
     }
@@ -709,7 +669,7 @@ async function downloadPDFReportSequence() {
 
                 doc.setFillColor(16, 185, 129); if(cW > 0) doc.rect(74, meterY, cW, 4.0, 'F');
                 doc.setFillColor(244, 63, 94); if(wW > 0) doc.rect(74 + cW, meterY, wW, 4.0, 'F');
-                doc.setFillColor(241, 245, 249); if(iW > 0) doc.rect(74 + cW + wW, iW, 4.0, 'F');
+                doc.setFillColor(241, 245, 249); if(iW > 0) doc.rect(74 + cW + wW, meterY, iW, 4.0, 'F');
                 
                 doc.setDrawColor(203, 213, 225); doc.rect(74, meterY, maxWidth, 4.0, 'D');
                 doc.setFontSize(5.5); doc.setTextColor(15, 23, 42); doc.setFont("courier", "bold");
