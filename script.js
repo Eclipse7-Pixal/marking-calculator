@@ -140,6 +140,10 @@ function applySelectedExamProfile(profileKey) {
 
     clearImplicitTransientResiduals();
     clearInputValidationStyles();
+    
+    // Automatically solve rows using new defaults matching the loaded profile
+    ['phy', 'chem', 'mathBio'].forEach(sub => executeRowAlgebraSolver(sub));
+    syncSubjectBreakdownToMainInputs();
 }
 
 function setProfileToCustomOverride() {
@@ -157,13 +161,14 @@ function clearImplicitTransientResiduals() {
     ['phy', 'chem', 'mathBio'].forEach(sub => {
         document.getElementById(`${sub}C`).value = '';
         document.getElementById(`${sub}W`).value = '';
+        document.getElementById(`${sub}N`).value = '';
     });
     document.getElementById('attempted').value = '';
     document.getElementById('wrong').value = '';
 }
 
 // ============================================================================
-// 5. BIDIRECTIONAL DYNAMIC CROSS-INPUT LINKER
+// 5. BIDIRECTIONAL DYNAMIC CROSS-INPUT LINKER & ALGEBRA MATRIX SOLVER
 // ============================================================================
 function setupReactiveSubjectSyncObservers() {
     const subPanel = document.getElementById('subjectSection');
@@ -172,9 +177,71 @@ function setupReactiveSubjectSyncObservers() {
     subPanel.addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT') {
             setProfileToCustomOverride();
+            
+            // Find parent row attribute to scope execution
+            const row = e.target.closest('.subject-grid-row');
+            if (row) {
+                const subjectKey = row.getAttribute('data-subject');
+                executeRowAlgebraSolver(subjectKey, e.target);
+            }
+            
             syncSubjectBreakdownToMainInputs();
         }
     });
+}
+
+function executeRowAlgebraSolver(sub, activeElement = null) {
+    const elTot = document.getElementById(`${sub}A`);
+    const elCor = document.getElementById(`${sub}C`);
+    const elWro = document.getElementById(`${sub}W`);
+    const elNot = document.getElementById(`${sub}N`);
+
+    const tot = elTot.value !== "" ? parseFloat(elTot.value) : null;
+    const cor = elCor.value !== "" ? parseFloat(elCor.value) : null;
+    const wro = elWro.value !== "" ? parseFloat(elWro.value) : null;
+    const not = elNot.value !== "" ? parseFloat(elNot.value) : null;
+
+    if (tot === null) return; 
+
+    // Capture state tracking variable sets
+    let filledFields = [];
+    if (cor !== null) filledFields.push({ id: 'C', val: cor, el: elCor });
+    if (wro !== null) filledFields.push({ id: 'W', val: wro, el: elWro });
+    if (not !== null) filledFields.push({ id: 'N', val: not, el: elNot });
+
+    // Scenario A: User populated all parameters, balance the non-active elements
+    if (filledFields.length === 3) {
+        if (activeElement === elNot) {
+            // Recalculate Correct based on newly modified Not Attempted + existing Wrong
+            let updatedCor = Math.max(0, tot - not - wro);
+            elCor.value = updatedCor;
+        } else if (activeElement === elWro) {
+            // Recalculate Correct based on newly modified Wrong + existing Not Attempted
+            let updatedCor = Math.max(0, tot - wro - not);
+            elCor.value = updatedCor;
+        } else {
+            // Balance Not Attempted as fallback constraint
+            let updatedNot = Math.max(0, tot - cor - wro);
+            elNot.value = updatedNot;
+        }
+        return;
+    }
+
+    // Scenario B: Rule Matrix triggered when exactly any two values are supplied
+    if (filledFields.length === 2) {
+        const structuralMask = filledFields.map(f => f.id).join('');
+        
+        if (structuralMask === 'CW') {
+            // Missing: Not Attempted
+            elNot.value = Math.max(0, tot - cor - wro);
+        } else if (structuralMask === 'WN') {
+            // Missing: Correct (Crucial requirement for speed workflow)
+            elCor.value = Math.max(0, tot - wro - not);
+        } else if (structuralMask === 'CN') {
+            // Missing: Wrong
+            elWro.value = Math.max(0, tot - cor - not);
+        }
+    }
 }
 
 function setupMainFallbackInputObservers() {
@@ -213,10 +280,8 @@ function syncSubjectBreakdownToMainInputs() {
     if(aggregateTotal > 0) document.getElementById('totalQs').value = aggregateTotal;
     
     let computedAttempts = aggregateCorrect + aggregateWrong;
-    if(computedAttempts > 0 || aggregateWrong > 0) {
-        document.getElementById('attempted').value = computedAttempts;
-        document.getElementById('wrong').value = aggregateWrong;
-    }
+    document.getElementById('attempted').value = computedAttempts > 0 || aggregateWrong > 0 ? computedAttempts : '';
+    document.getElementById('wrong').value = aggregateWrong > 0 ? aggregateWrong : '';
 }
 
 // ============================================================================
@@ -276,10 +341,12 @@ function scanAndValidateSystemInputs() {
             const ta = document.getElementById(`${sub}A`);
             const tc = document.getElementById(`${sub}C`);
             const tw = document.getElementById(`${sub}W`);
+            const tn = document.getElementById(`${sub}N`);
             
             if (!ta.value || parseFloat(ta.value) < 0) invalidNodes.push(ta);
             if (tc.value === "" || parseFloat(tc.value) < 0) invalidNodes.push(tc);
             if (tw.value === "" || parseFloat(tw.value) < 0) invalidNodes.push(tw);
+            if (tn.value === "" || parseFloat(tn.value) < 0) invalidNodes.push(tn);
         });
     }
 
@@ -303,7 +370,7 @@ function scanAndValidateSystemInputs() {
 
     if (invalidNodes.length > 0) {
         invalidNodes.forEach(node => node.classList.add('validation-error'));
-        triggerSystemToastNotification("Action Blocked: Please populate all required fields marked * with valid numerical data.");
+        triggerSystemToastNotification("Action Blocked: Please populate required fields with valid numerical data.");
         animateContainerShake();
         return false;
     }
@@ -315,7 +382,7 @@ function animateContainerShake() {
     const container = document.getElementById('mainAppContainer');
     if (!container) return;
     container.style.animation = 'none';
-    container.offsetHeight; // Force Layout Reflow Matrix
+    container.offsetHeight; 
     container.style.animation = 'fluentContainerShake 0.45s cubic-bezier(.36,.07,.19,.97) both';
 }
 
@@ -355,12 +422,8 @@ function executeCalculationSequence() {
 // 8. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT)
 // ============================================================================
 async function downloadPDFReportSequence() {
-    // CRITICAL ENGINE SAFEGUARD GATE: Execution halts if inputs fail diagnostics
     const telemetryData = executeCalculationSequence();
-    if (!telemetryData) {
-        // Validation messages are handled directly inside the validation loop.
-        return;
-    }
+    if (!telemetryData) return;
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'mm', 'a4');
@@ -375,7 +438,6 @@ async function downloadPDFReportSequence() {
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, 'F');
     
-    // Light Technical Grid Architecture
     doc.setDrawColor(240, 244, 248);
     doc.setLineWidth(0.25);
     for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
@@ -569,7 +631,6 @@ async function downloadPDFReportSequence() {
     doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(5, 150, 105);
     doc.text("STATUS: INTEGRITY MATRIX APPROVED & DIGITAL RECORD VERIFIED VIA CORE STREAM", 14, finalFooterY + 14);
 
-    // Async Local Image Retrieval Channel For Stamp Embeds
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.src = "stamp.jpg"; 
