@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <title>Negative Marking Engine | ECLIPSE7 Premium Core</title>
     <meta name="description" content="Official Negative Marking Engine by Eclipse7. Calculate JEE and NEET scores with precision. Created by Saiprasad Barure.">
     <link rel="icon" type="image/x-icon" href="logo.ico">
@@ -14,241 +15,154 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="fluent-ambient-canvas">
-    <div class="ambient-fluid-orb orb-alpha"></div>
-    <div class="ambient-fluid-orb orb-beta"></div>
-    <div class="ambient-fluid-orb orb-gamma"></div>
-</div>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
 
-<div class="soft-glass-container" id="mainAppContainer">
-    <div id="systemNotification" class="fluent-toast">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span id="notificationMessage">Validation Engine Standby.</span>
+    <div class="soft-glass-container">
+        
+        <header class="app-header">
+            <div class="branding-pill">ECLIPSE7 PREMIUM ENGINE</div>
+            <h1>Negative Marking Engine</h1>
+            <p class="app-subtitle">High-fidelity metrics system for JEE Main, Advanced, and NEET UG curriculum telemetry tracking.</p>
+        </header>
+
+        <div class="fluent-layout-row">
+            <div class="input-group-wrapper">
+                <label class="soft-field-label">CURRICULUM PROFILE</label>
+                <div class="select-box-wrapper">
+                    <select id="examProfileSelect" class="select-box-trigger">
+                        <option value="jeemain">JEE MAIN PROFILE (75 Q)</option>
+                        <option value="jeeadv">JEE ADVANCED PROFILE (54 Q)</option>
+                        <option value="neet">NEET UG PROFILE (180 Q)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group-wrapper">
+                <label class="soft-field-label">CANDIDATE IDENTIFIER</label>
+                <input type="text" id="candidateNameInput" placeholder="Enter Student Name" value="STUDENT ACCESS PROFILE">
+            </div>
+        </div>
+
+        <div class="intel-banner" id="intelMetricsBanner">
+            <i class="fa-solid fa-microchip-ai intel-icon"></i>
+            <span id="intelMetricsText">Curriculum: JEE Main successfully mapped. [25 Q per Subject Base]. Matrix +4 / -1.</span>
+        </div>
+
+        <div class="score-hero-card">
+            <div class="hero-metric-split">
+                <div class="hero-sub-block">
+                    <span class="hero-sub-label">TOTAL MARKS DETECTED</span>
+                    <div class="score-hero-val" id="netScoreDisplay">000</div>
+                </div>
+                <div class="hero-divider-line"></div>
+                <div class="hero-sub-block">
+                    <span class="hero-sub-label">ACCURACY RATIO</span>
+                    <div class="accuracy-hero-val" id="accuracyDisplay">0.00%</div>
+                </div>
+            </div>
+            
+            <div class="metrics-progress-bar-container">
+                <div class="metrics-progress-fill" id="accuracyProgressFill"></div>
+            </div>
+        </div>
+
+        <div class="subject-breakdown-wrapper visible" id="subjectSectionWrapper">
+            <div class="subject-grid-layout-header">
+                <div>SUBJECT CONTENT</div>
+                <div>TOTAL Q</div>
+                <div class="text-success">CORRECT (+4)</div>
+                <div class="text-danger">WRONG (-1)</div>
+                <div class="text-muted">LEFT</div>
+            </div>
+
+            <div class="subject-grid-row" data-subject="phy">
+                <div class="subject-title-tag">PHYSICS</div>
+                <div><input type="number" class="table-input total-q-field" readonly value="25"></div>
+                <div><input type="number" class="table-input correct-q-field input-targetable" data-type="correct" placeholder="0"></div>
+                <div><input type="number" class="table-input wrong-q-field input-targetable" data-type="wrong" placeholder="0"></div>
+                <div><input type="number" class="table-input unattempted-q-field" readonly value="25"></div>
+            </div>
+
+            <div class="subject-grid-row" data-subject="chem">
+                <div class="subject-title-tag">CHEMISTRY</div>
+                <div><input type="number" class="table-input total-q-field" readonly value="25"></div>
+                <div><input type="number" class="table-input correct-q-field input-targetable" data-type="correct" placeholder="0"></div>
+                <div><input type="number" class="table-input wrong-q-field input-targetable" data-type="wrong" placeholder="0"></div>
+                <div><input type="number" class="table-input unattempted-q-field" readonly value="25"></div>
+            </div>
+
+            <div class="subject-grid-row" data-subject="mathBio">
+                <div class="subject-title-tag" id="mathBioSubjectLabel">MATHEMATICS</div>
+                <div><input type="number" class="table-input total-q-field" readonly value="25"></div>
+                <div><input type="number" class="table-input correct-q-field input-targetable" data-type="correct" placeholder="0"></div>
+                <div><input type="number" class="table-input wrong-q-field input-targetable" data-type="wrong" placeholder="0"></div>
+                <div><input type="number" class="table-input unattempted-q-field" readonly value="25"></div>
+            </div>
+        </div>
+
+        <div class="telemetry-readout-grid">
+            <div class="telemetry-pill">
+                <span class="telemetry-label">Maximum Scale Capacity</span>
+                <span class="telemetry-value" id="maxMarksLabel">300</span>
+            </div>
+            <div class="telemetry-pill">
+                <span class="telemetry-label">Gross Positive Yield</span>
+                <span class="telemetry-value text-success" id="grossPositiveLabel">+0</span>
+            </div>
+            <div class="telemetry-pill">
+                <span class="telemetry-label">Negative Penalty Drain</span>
+                <span class="telemetry-value text-danger" id="penaltyDrainLabel">-0</span>
+            </div>
+            <div class="telemetry-pill">
+                <span class="telemetry-label">Total Selected Layout Qs</span>
+                <span class="telemetry-value" id="totalQuestionsLabel">75</span>
+            </div>
+        </div>
+
+        <div class="action-buttons-flex-row">
+            <button type="button" class="btn-action-primary" id="generatePdfButton">
+                <i class="fa-solid fa-file-pdf"></i> GENERATE OFFICIALLY SIGNED PDF
+            </button>
+            <button type="button" class="btn-action-secondary" id="resetEngineFieldsButton">
+                <i class="fa-solid fa-rotate-left"></i> SYSTEM REBOOT
+            </button>
+        </div>
+
     </div>
 
-    <header class="app-header">
-        <div class="fluent-badge">E7 Core Premium v2.5</div>
-        <h1>Negative Marking Engine</h1>
-        <div class="meta-branding-container">
-            <p class="platform-title-meta">ECLIPSE7 FLUID EVALUATION PLATFORM</p>
-            <p class="author-attribution-meta">By Saiprasad Barure</p>
-        </div>
-    </header>
-
-    <form id="evaluationForm" onsubmit="event.preventDefault();">
-        <div class="input-field-group">
-            <label class="soft-field-label">Student Authentication <span class="req-star">*</span></label>
-            <div class="fluent-input-wrapper">
-                <i class="fa-solid fa-fingerprint input-field-icon"></i>
-                <input type="text" id="studentName" placeholder="Enter student identity" required autocomplete="off">
+    <div class="virtual-keyboard-viewport-dock" id="virtualKeyboardPanelDock">
+        <div class="keyboard-dock-header">
+            <div class="keyboard-active-context-title">
+                <i class="fa-solid fa-keyboard Context-kb-icon"></i>
+                <span id="keyboardContextDescriptor">SELECT ANY CELL DATA FIELD</span>
             </div>
-        </div>
-
-        <div class="input-field-group">
-            <label class="soft-field-label">Assessment Token <span class="req-star">*</span></label>
-            <div class="fluent-input-wrapper">
-                <i class="fa-solid fa-hashtag input-field-icon"></i>
-                <input type="text" id="testName" placeholder="Assessment name (e.g., Grand Test - 05)" required autocomplete="off">
-            </div>
-        </div>
-
-        <div class="fluent-layout-row dropdown-adjustment">
-            <div class="input-field-group">
-                <label class="soft-field-label">Curriculum Performance Profile</label>
-                <div class="custom-select-box" id="examProfileSelectContainer">
-                    <div class="select-box-trigger" id="examProfileLabel">JEE MAIN PROFILE</div>
-                    <div class="select-box-dropdown" id="examProfileOptions">
-                        <div class="select-box-option" data-value="jeemain">JEE MAIN PROFILE</div>
-                        <div class="select-box-option" data-value="jeeadv">JEE ADVANCED PROFILE</div>
-                        <div class="select-box-option" data-value="neet">NEET UG PROFILE</div>
-                        <div class="select-box-option" data-value="custom">CUSTOM MODE (MANUAL OVERRIDE)</div>
-                    </div>
-                    <input type="hidden" id="examProfile" value="jeemain">
-                </div>
-            </div>
-
-            <div class="input-field-group">
-                <label class="soft-field-label">Evaluation Schema Type</label>
-                <div class="custom-select-box" id="customSelect">
-                    <div class="select-box-trigger" id="selectedLabel">Subject-Wise Analytics</div>
-                    <div class="select-box-dropdown" id="selectOptions">
-                        <div class="select-box-option" data-value="subjectwise">Subject-Wise Analytics</div>
-                        <div class="select-box-option" data-value="overall">Global Snapshot Only</div>
-                    </div>
-                    <input type="hidden" id="reportType" value="subjectwise">
-                </div>
-            </div>
-        </div>
-
-        <div class="intel-info-bar" id="intelMessage">
-            Curriculum: JEE Main successfully mapped. [25 Q per Subject Base]. Matrix +4 / -1.
-        </div>
-
-        <div class="fluent-layout-row">
-            <div class="input-field-group">
-                <label class="soft-field-label">Total Matrix Questions</label>
-                <input type="number" id="totalQs" value="75" placeholder="Total questions">
-            </div>
-            <div class="input-field-group">
-                <label class="soft-field-label">Maximum Assessment Marks</label>
-                <input type="number" id="maxMarks" value="300" placeholder="Max marks">
-            </div>
-        </div>
-
-        <div class="fluent-layout-row">
-            <div class="input-field-group">
-                <label class="soft-field-label">Correct Question Weight</label>
-                <input type="number" id="correctMarks" value="4" placeholder="e.g. 4">
-            </div>
-            <div class="input-field-group">
-                <label class="soft-field-label">Negative Penalty Ratio</label>
-                <div class="custom-select-box" id="ratioSelectContainer">
-                    <div class="select-box-trigger" id="ratioLabel">Ratio: 1/4</div>
-                    <div class="select-box-dropdown" id="ratioOptions">
-                        <div class="select-box-option" data-value="0.25">1/4 (Standard JEE/NEET)</div>
-                        <div class="select-box-option" data-value="0.5">1/2 (High Penalty)</div>
-                        <div class="select-box-option" data-value="0.333">1/3 (Advanced Mode)</div>
-                        <div class="select-box-option" data-value="0">0 (No Negative Marking)</div>
-                    </div>
-                    <input type="hidden" id="markingRatio" value="0.25">
-                </div>
-            </div>
-        </div>
-
-        <div class="subject-breakdown-wrapper" id="subjectSection">
-            <h3 class="inner-block-headline"><i class="fa-solid fa-graduation-cap"></i> Subject Performance Matrices</h3>
-            
-            <div class="subject-deck">
-                <div class="subject-card-panel physics-edge" data-subject="phy">
-                    <div class="card-title-header">
-                        <span class="indicator-dot phy-bg"></span>
-                        <h4>Physics</h4>
-                    </div>
-                    <div class="card-fields-grid">
-                        <div class="sub-field">
-                            <label>Total Questions</label>
-                            <input type="number" id="phyA" class="sub-input input-total" placeholder="0">
-                        </div>
-                        <div class="sub-field">
-                            <label class="text-success-label">Correct Answers</label>
-                            <input type="number" id="phyC" class="sub-input input-correct" placeholder="0">
-                        </div>
-                        <div class="sub-field">
-                            <label class="text-danger-label">Incorrect Answers</label>
-                            <input type="number" id="phyW" class="sub-input input-incorrect" placeholder="0">
-                        </div>
-                        <div class="sub-field">
-                            <label class="text-muted-label">Unattempted</label>
-                            <input type="number" id="phyN" class="sub-input input-unattempted" placeholder="0">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="subject-card-panel chemistry-edge" data-subject="chem">
-                    <div class="card-title-header">
-                        <span class="indicator-dot chem-bg"></span>
-                        <h4>Chemistry</h4>
-                    </div>
-                    <div class="card-fields-grid">
-                        <div class="sub-field">
-                            <label>Total Questions</label>
-                            <input type="number" id="chemA" class="sub-input input-total" placeholder="0">
-                        </div>
-                        <div class="sub-field">
-                            <label class="text-success-label">Correct Answers</label>
-                            <input type="number" id="chemC" class="sub-input input-correct" placeholder="0">
-                        </div>
-                        <div class="sub-field">
-                            <label class="text-danger-label">Incorrect Answers</label>
-                            <input type="number" id="chemW" class="sub-input input-incorrect" placeholder="0">
-                        </div>
-                        <div class="sub-field">
-                            <label class="text-muted-label">Unattempted</label>
-                            <input type="number" id="chemN" class="sub-input input-unattempted" placeholder="0">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="subject-card-panel math-edge" data-subject="mathBio">
-                    <div class="card-title-header">
-                        <span class="indicator-dot math-bg"></span>
-                        <h4 id="mathBioLabel">Mathematics</h4>
-                    </div>
-                    <div class="card-fields-grid">
-                        <div class="sub-field">
-                            <label>Total Questions</label>
-                            <input type="number" id="mathBioA" class="sub-input input-total" placeholder="0">
-                        </div>
-                        <div class="sub-field">
-                            <label class="text-success-label">Correct Answers</label>
-                            <input type="number" id="mathBioC" class="sub-input input-correct" placeholder="0">
-                        </div>
-                        <div class="sub-field">
-                            <label class="text-danger-label">Incorrect Answers</label>
-                            <input type="number" id="mathBioW" class="sub-input input-incorrect" placeholder="0">
-                        </div>
-                        <div class="sub-field">
-                            <label class="text-muted-label">Unattempted</label>
-                            <input type="number" id="mathBioN" class="sub-input input-unattempted" placeholder="0">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="fallback-variables-container" style="display: none;">
-            <input type="number" id="attempted">
-            <input type="number" id="wrong">
-        </div>
-
-        <div class="engine-buttons-dock">
-            <button type="button" class="action-trigger-btn btn-compute" id="computeEngineMetricsBtn">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Compute Diagnostics
-            </button>
-            <button type="button" class="action-trigger-btn btn-reset" id="resetEngineStateBtn">
-                <i class="fa-solid fa-rotate-left"></i> Reset Engine
+            <button type="button" class="kb-dismiss-trigger-btn" id="hideVirtualKeyboardTrigger" title="Collapse Dock">
+                <i class="fa-solid fa-delete-left"></i>
             </button>
         </div>
-    </form>
+    </div>
 
-    <div class="diagnostic-report-panel" id="diagnosticReportDashboard">
-        <div class="dashboard-hero-score-block">
-            <span class="hero-metric-label">NET MATRIX SCORE</span>
-            <div class="score-hero-val" id="renderNetScore">000</div>
-            <span class="hero-metric-subtext" id="renderScoreRatio">Out of 300 Maximum Limit</span>
-        </div>
-
-        <div class="telemetry-metrics-matrix">
-            <div class="telemetry-card">
-                <span class="t-label">Accuracy Index</span>
-                <span class="t-val text-cyan" id="renderAccuracy">0.00%</span>
-            </div>
-            <div class="telemetry-card">
-                <span class="t-label">Total Attempted</span>
-                <span class="t-val" id="renderAttempted">0</span>
-            </div>
-            <div class="telemetry-card">
-                <span class="t-label">Penalty Deductions</span>
-                <span class="t-val text-red" id="renderPenalty">-0</span>
-            </div>
-            <div class="telemetry-card">
-                <span class="t-label">Unattempted Units</span>
-                <span class="t-val text-orange" id="renderUnattempted">0</span>
-            </div>
-        </div>
-
-        <div id="dynamicSubjectSummaryNode" class="summary-node-wrapper"></div>
-
-        <button type="button" class="pdf-export-trigger-btn" id="generatePdfReportBtn">
-            <i class="fa-solid fa-file-pdf"></i> Export Certified Cryptographic PDF Analysis Report
+    <div class="keyboard-matrix-grid" id="numpadMatrixRoot">
+        <button type="button" class="kb-matrix-key" data-key="1">1</button>
+        <button type="button" class="kb-matrix-key" data-key="2">2</button>
+        <button type="button" class="kb-matrix-key" data-key="3">3</button>
+        <button type="button" class="kb-matrix-key" data-key="4">4</button>
+        <button type="button" class="kb-matrix-key" data-key="5">5</button>
+        <button type="button" class="kb-matrix-key" data-key="6">6</button>
+        <button type="button" class="kb-matrix-key" data-key="7">7</button>
+        <button type="button" class="kb-matrix-key" data-key="8">8</button>
+        <button type="button" class="kb-matrix-key" data-key="9">9</button>
+        <button type="button" class="kb-matrix-key kb-functional-accent-key" data-key="clear">CLR</button>
+        <button type="button" class="kb-matrix-key" data-key="0">0</button>
+        <button type="button" class="kb-matrix-key kb-functional-backspace-key" data-key="backspace">
+            <i class="fa-solid fa-backspace"></i>
         </button>
     </div>
-</div>
 
+    <script src="script.js"></script>
 </body>
 </html>
