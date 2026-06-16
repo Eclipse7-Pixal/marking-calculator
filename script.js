@@ -30,511 +30,383 @@ const EXAM_PROFILES = {
         labelRatio: "Ratio: 1/4",
         subjects: { phy: 45, chem: 45, mathBio: 90 },
         labelMathBio: "BIOLOGY",
-        intel: "Curriculum: NEET UG mapped. [Phy: 45, Chem: 45, Bio: 90]. Matrix +4 / -1."
-    },
-    custom: {
-        label: "CUSTOM MODE (MANUAL OVERRIDE)",
-        intel: "Manual Override operational. Custom constraints active across input modules."
+        intel: "Curriculum: NEET UG matrix structured. Double weight mapped directly to Biology (90 Q)."
     }
 };
 
-// ============================================================================
-// 2. MODERN RE-ENGINEERED FLUENT DROPDOWN CONTROLLER
-// ============================================================================
-function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, callback) {
-    const container = document.getElementById(containerId);
-    const trigger = document.getElementById(triggerId);
-    const panel = document.getElementById(panelId);
-    const hidden = document.getElementById(hiddenInputId);
-    if (!container || !trigger || !panel) return;
-
-    const options = panel.querySelectorAll('.select-box-option');
-
-    trigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.querySelectorAll('.select-box-dropdown').forEach(p => {
-            if(p !== panel) p.classList.remove('show');
-        });
-        document.querySelectorAll('.custom-select-box').forEach(c => {
-            if(c !== container) c.classList.remove('active');
-        });
-        panel.classList.toggle('show');
-        container.classList.toggle('active');
-    });
-
-    options.forEach(item => {
-        item.addEventListener('click', () => {
-            const chosenVal = item.getAttribute('data-value');
-            hidden.value = chosenVal;
-            
-            if (containerId === 'ratioSelectContainer') {
-                trigger.textContent = `Ratio: ${item.textContent.split(' ')[0]}`;
-            } else {
-                trigger.textContent = item.textContent;
-            }
-
-            panel.classList.remove('show');
-            container.classList.remove('active');
-            if (callback) callback(chosenVal);
-        });
-    });
-
-    window.addEventListener('click', (e) => {
-        if (!container.contains(e.target)) {
-            panel.classList.remove('show');
-            container.classList.remove('active');
-        }
-    });
-}
+// Global Performance State Tracker
+let activeInputContextField = null;
 
 // ============================================================================
-// 3. CENTRALIZED LIFE-CYCLE INITIALIZATION
+// 2. DOM INITIALIZATION AND ENGINE EVENT BINDINGS
 // ============================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    initDropdownSystem('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectSectionDisplay);
-    initDropdownSystem('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', () => { setProfileToCustomOverride(); });
-    initDropdownSystem('examProfileSelectContainer', 'examProfileLabel', 'examProfileOptions', 'examProfile', applySelectedExamProfile);
-    
-    setupReactiveSubjectSyncObservers();
-    setupMainFallbackInputObservers();
-    
-    toggleSubjectSectionDisplay();
+document.addEventListener("DOMContentLoaded", () => {
+    setupExamProfileLayout();
+    initializeVirtualKeyboardLinkage();
+    registerRealtimeInputValidationListeners();
 
-    // Hook buttons
-    document.getElementById('computeEngineMetricsBtn').addEventListener('click', triggerEvaluationSequence);
-    document.getElementById('resetEngineStateBtn').addEventListener('click', clearFormResetEngineState);
-    document.getElementById('generatePdfReportBtn').addEventListener('click', exportCertifiedPdfReportDocument);
+    // Attach Action Control Executions
+    document.getElementById("examProfileSelect").addEventListener("change", setupExamProfileLayout);
+    document.getElementById("resetEngineFieldsButton").addEventListener("change", performSystemRebootClear);
+    document.getElementById("resetEngineFieldsButton").addEventListener("click", performSystemRebootClear);
+    document.getElementById("generatePdfButton").addEventListener("click", compileTelemetryReportPDF);
 });
 
-function toggleSubjectSectionDisplay() {
-    const type = document.getElementById('reportType').value;
-    const section = document.getElementById('subjectSection');
-    if (!section) return;
-
-    if (type === 'subjectwise') {
-        section.classList.add('visible');
-        syncSubjectBreakdownToMainInputs();
-    } else {
-        section.classList.remove('visible');
-    }
-}
-
 // ============================================================================
-// 4. SMART PROFILING ARCHITECTURE
+// 3. CURRICULUM PROFILE GENERATION & DATA LOCKING
 // ============================================================================
-function applySelectedExamProfile(profileKey) {
-    const profile = EXAM_PROFILES[profileKey];
+function setupExamProfileLayout() {
+    const chosenProfileKey = document.getElementById("examProfileSelect").value;
+    const profile = EXAM_PROFILES[chosenProfileKey];
+
     if (!profile) return;
 
-    const intelBox = document.getElementById('intelMessage');
-    if (intelBox) intelBox.textContent = profile.intel;
+    // Update Text Configurations UI
+    document.getElementById("intelMetricsText").innerText = profile.intel;
+    document.getElementById("mathBioSubjectLabel").innerText = profile.labelMathBio;
+    document.getElementById("maxMarksLabel").innerText = profile.maxMarks;
+    document.getElementById("totalQuestionsLabel").innerText = profile.totalQs;
 
-    const totalQsInput = document.getElementById('totalQs');
-
-    if (profileKey === 'custom') {
-        if (totalQsInput) {
-            totalQsInput.classList.remove('profile-locked-row');
+    // Update Subject Sections & Hard Lock the Total Question Counts
+    for (const [subjKey, targetTotalVal] of Object.entries(profile.subjects)) {
+        const rowScope = document.querySelector(`.subject-grid-row[data-subject="${subjKey}"]`);
+        if (rowScope) {
+            const totalField = rowScope.querySelector(".total-q-field");
+            totalField.value = targetTotalVal;
+            totalField.setAttribute("readonly", "true"); // Strict lockdown enforcement
         }
-        return;
     }
 
-    if (totalQsInput) {
-        totalQsInput.classList.add('profile-locked-row');
-    }
-
-    document.getElementById('totalQs').value = profile.totalQs;
-    document.getElementById('maxMarks').value = profile.maxMarks;
-    document.getElementById('markingRatio').value = profile.ratio;
-    document.getElementById('ratioLabel').textContent = profile.labelRatio;
-
-    const mbLabel = document.getElementById('mathBioLabel');
-    if (mbLabel && profile.labelMathBio) mbLabel.textContent = profile.labelMathBio;
-
-    document.getElementById('phyA').value = profile.subjects.phy;
-    document.getElementById('chemA').value = profile.subjects.chem;
-    document.getElementById('mathBioA').value = profile.subjects.mathBio;
-
-    clearImplicitTransientResiduals();
-    clearInputValidationStyles();
-    
-    ['phy', 'chem', 'mathBio'].forEach(sub => executeRowAlgebraSolver(sub));
-    syncSubjectBreakdownToMainInputs();
-}
-
-function setProfileToCustomOverride() {
-    const hiddenProf = document.getElementById('examProfile');
-    const triggerProf = document.getElementById('examProfileLabel');
-    
-    const totalQsInput = document.getElementById('totalQs');
-    if (totalQsInput) {
-        totalQsInput.classList.remove('profile-locked-row');
-    }
-
-    if(hiddenProf && hiddenProf.value !== 'custom') {
-        hiddenProf.value = 'custom';
-        if(triggerProf) triggerProf.textContent = EXAM_PROFILES.custom.label;
-        const intelBox = document.getElementById('intelMessage');
-        if (intelBox) intelBox.textContent = EXAM_PROFILES.custom.intel;
-    }
-}
-
-function clearImplicitTransientResiduals() {
-    ['phy', 'chem', 'mathBio'].forEach(sub => {
-        document.getElementById(`${sub}C`).value = '';
-        document.getElementById(`${sub}W`).value = '';
-        document.getElementById(`${sub}N`).value = '';
-    });
-    document.getElementById('attempted').value = '';
-    document.getElementById('wrong').value = '';
+    recalculateEngineTelemetryMetrics();
 }
 
 // ============================================================================
-// 5. BIDIRECTIONAL DYNAMIC CROSS-INPUT LINKER & ALGEBRA MATRIX SOLVER
+// 4. REALTIME METRICS COMPUTATION AND ARITHMETIC CORE
 // ============================================================================
-function setupReactiveSubjectSyncObservers() {
-    const subPanel = document.getElementById('subjectSection');
-    if (!subPanel) return;
-
-    subPanel.addEventListener('input', (e) => {
-        if (e.target.tagName === 'INPUT') {
-            processSubjectRowRecalculationSequence(e.target);
-        }
-    });
-}
-
-function processSubjectRowRecalculationSequence(targetNode) {
-    if (targetNode.id !== 'totalQs' && !targetNode.classList.contains('profile-locked-row')) {
-        const selectedProfile = document.getElementById('examProfile').value;
-        if (selectedProfile === 'custom' || targetNode.classList.contains('sub-input')) {
-            // Allowed override flows
-        }
-    }
-    const card = targetNode.closest('.subject-card-panel');
-    if (card) {
-        const subjectKey = card.getAttribute('data-subject');
-        executeRowAlgebraSolver(subjectKey, targetNode);
-    }
-    syncSubjectBreakdownToMainInputs();
-}
-
-function executeRowAlgebraSolver(sub, activeElement = null) {
-    const elTot = document.getElementById(`${sub}A`);
-    const elCor = document.getElementById(`${sub}C`);
-    const elWro = document.getElementById(`${sub}W`);
-    const elNot = document.getElementById(`${sub}N`);
-    const tot = elTot.value !== "" ? parseFloat(elTot.value) : null;
-    const cor = elCor.value !== "" ? parseFloat(elCor.value) : null;
-    const wro = elWro.value !== "" ? parseFloat(elWro.value) : null;
-    const not = elNot.value !== "" ? parseFloat(elNot.value) : null;
-
-    if (tot === null) return;
-    let filledFields = [];
-    if (cor !== null) filledFields.push({ id: 'C', val: cor, el: elCor });
-    if (wro !== null) filledFields.push({ id: 'W', val: wro, el: elWro });
-    if (not !== null) filledFields.push({ id: 'N', val: not, el: elNot });
-
-    if (filledFields.length === 3) {
-        if (activeElement === elNot) {
-            let updatedCor = Math.max(0, tot - not - wro);
-            elCor.value = updatedCor === 0 ? '' : updatedCor;
-        } else if (activeElement === elWro) {
-            let updatedCor = Math.max(0, tot - wro - not);
-            elCor.value = updatedCor === 0 ? '' : updatedCor;
-        } else {
-            let updatedNot = Math.max(0, tot - cor - wro);
-            elNot.value = updatedNot === 0 ? '' : updatedNot;
-        }
-    } else if (filledFields.length === 2) {
-        const containsC = filledFields.some(f => f.id === 'C');
-        const containsW = filledFields.some(f => f.id === 'W');
-        const containsN = filledFields.some(f => f.id === 'N');
-
-        if (containsC && containsW) {
-            let val = tot - cor - wro;
-            elNot.value = val <= 0 ? '' : val;
-        } else if (containsC && containsN) {
-            let val = tot - cor - not;
-            elWro.value = val <= 0 ? '' : val;
-        } else if (containsW && containsN) {
-            let val = tot - wro - not;
-            elCor.value = val <= 0 ? '' : val;
-        }
-    }
-}
-
-function syncSubjectBreakdownToMainInputs() {
-    if (document.getElementById('reportType').value !== 'subjectwise') return;
-
-    let aggregateAttempted = 0;
-    let aggregateWrong = 0;
-    let aggregateTotalQs = 0;
-
-    ['phy', 'chem', 'mathBio'].forEach(sub => {
-        const c = parseFloat(document.getElementById(`${sub}C`).value) || 0;
-        const w = parseFloat(document.getElementById(`${sub}W`).value) || 0;
-        const t = parseFloat(document.getElementById(`${sub}A`).value) || 0;
-
-        aggregateAttempted += (c + w);
-        aggregateWrong += w;
-        aggregateTotalQs += t;
-    });
-
-    document.getElementById('attempted').value = aggregateAttempted || '';
-    document.getElementById('wrong').value = aggregateWrong || '';
-
-    if (document.getElementById('examProfile').value === 'custom' && aggregateTotalQs > 0) {
-        document.getElementById('totalQs').value = aggregateTotalQs;
-    }
-}
-
-function setupMainFallbackInputObservers() {
-    ['totalQs', 'correctMarks'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', () => {
-                if (id === 'totalQs' || id === 'correctMarks') {
-                    setProfileToCustomOverride();
-                }
+function registerRealtimeInputValidationListeners() {
+    const structuralTargets = document.querySelectorAll(".input-targetable");
+    
+    structuralTargets.forEach(inputElement => {
+        ["input", "change", "blur"].forEach(evtName => {
+            inputElement.addEventListener(evtName, (e) => {
+                let parsedVal = parseInt(e.target.value) || 0;
+                if (parsedVal < 0) parsedVal = 0;
+                e.target.value = parsedVal === 0 ? "" : parsedVal;
+                
+                validateAndClampRowConstraints(e.target);
+                recalculateEngineTelemetryMetrics();
             });
-        }
+        });
     });
 }
 
-// ============================================================================
-// 6. CRYPTOGRAPHIC DATA PACK TELEMETRY MATRIX COMPILER
-// ============================================================================
-let evaluationTelemetryPacket = null;
+function validateAndClampRowConstraints(activeInputNode) {
+    const rowScope = activeInputNode.closest(".subject-grid-row");
+    if (!rowScope) return;
 
-function triggerEvaluationSequence() {
-    clearInputValidationStyles();
+    const totalCapacity = parseInt(rowScope.querySelector(".total-q-field").value) || 0;
+    const correctInput = rowScope.querySelector(".correct-q-field");
+    const wrongInput = rowScope.querySelector(".wrong-q-field");
 
-    const studentName = document.getElementById('studentName').value.trim();
-    const testName = document.getElementById('testName').value.trim();
-    const isSubjectWise = document.getElementById('reportType').value === 'subjectwise';
+    let currentCorrect = parseInt(correctInput.value) || 0;
+    let currentWrong = parseInt(wrongInput.value) || 0;
 
-    if (!studentName || !testName) {
-        showSystemToastNotification("Authentication Profiles incomplete. Please authenticate identity details.");
-        if(!studentName) flagFieldAsViolated('studentName');
-        if(!testName) flagFieldAsViolated('testName');
-        return;
+    // Boundary Constraint Rule Check
+    if (currentCorrect > totalCapacity) {
+        currentCorrect = totalCapacity;
+        correctInput.value = currentCorrect;
+    }
+    if (currentCorrect + currentWrong > totalCapacity) {
+        currentWrong = totalCapacity - currentCorrect;
+        wrongInput.value = currentWrong === 0 ? "" : currentWrong;
+    }
+}
+
+function recalculateEngineTelemetryMetrics() {
+    let globalGrossCorrect = 0;
+    let globalGrossWrong = 0;
+    let globalTotalQsInLayout = 0;
+
+    const rowScopes = document.querySelectorAll(".subject-grid-row");
+    rowScopes.forEach(row => {
+        const totalLayoutQ = parseInt(row.querySelector(".total-q-field").value) || 0;
+        const correctCount = parseInt(row.querySelector(".correct-q-field").value) || 0;
+        const wrongCount = parseInt(row.querySelector(".wrong-q-field").value) || 0;
+
+        const leftCount = totalLayoutQ - (correctCount + wrongCount);
+        row.querySelector(".unattempted-q-field").value = leftCount;
+
+        globalGrossCorrect += correctCount;
+        globalGrossWrong += wrongCount;
+        globalTotalQsInLayout += totalLayoutQ;
+    });
+
+    // Score Calculations Engine
+    const positiveMarksYield = globalGrossCorrect * 4;
+    const penaltyMarksDrain = globalGrossWrong * 1;
+    const totalNetScoreComputed = positiveMarksYield - penaltyMarksDrain;
+
+    // Accuracy Calculation Core
+    const totalAttempted = globalGrossCorrect + globalGrossWrong;
+    let accuracyRatioPercentage = 0;
+    if (totalAttempted > 0) {
+        accuracyRatioPercentage = (globalGrossCorrect / totalAttempted) * 100;
     }
 
-    const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
-    const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
-    const plusWeight = parseFloat(document.getElementById('correctMarks').value) || 0;
-    const ratio = parseFloat(document.getElementById('markingRatio').value) || 0;
-    const minusWeight = plusWeight * ratio;
+    // Reflect Metrics Inside UI Display Panels
+    document.getElementById("netScoreDisplay").innerText = totalNetScoreComputed;
+    document.getElementById("accuracyDisplay").innerText = accuracyRatioPercentage.toFixed(2) + "%";
+    document.getElementById("grossPositiveLabel").innerText = `+${positiveMarksYield}`;
+    document.getElementById("penaltyDrainLabel").innerText = `-${penaltyMarksDrain}`;
+    document.getElementById("accuracyProgressFill").style.width = `${accuracyRatioPercentage}%`;
+}
 
-    if (totalQs <= 0 || maxMarks <= 0 || plusWeight <= 0) {
-        showSystemToastNotification("Core marking parameters must hold absolute positive limits.");
-        return;
+// ============================================================================
+// 5. UPGRADED & LOCKED MOBILE-OPTIMIZED VIRTUAL KEYBOARD ENGINE
+// ============================================================================
+function initializeVirtualKeyboardLinkage() {
+    const targetInputs = document.querySelectorAll(".input-targetable");
+    const dockContainer = document.getElementById("virtualKeyboardPanelDock");
+    const matrixRoot = document.getElementById("numpadMatrixRoot");
+    const dismissBtn = document.getElementById("hideVirtualKeyboardTrigger");
+    const contextText = document.getElementById("keyboardContextDescriptor");
+
+    // Nest the layout elements properly inside our glass dock drawer chassis
+    if (dockContainer && matrixRoot && !dockContainer.contains(matrixRoot)) {
+        dockContainer.appendChild(matrixRoot);
     }
 
-    let globalCorrect = 0, globalWrong = 0, globalAttempted = 0, globalUnattempted = 0;
-    let subjectsTelemetry = {};
+    // Intercept Selection Foci
+    targetInputs.forEach(input => {
+        input.addEventListener("focus", (e) => {
+            e.preventDefault();
+            activeInputContextField = e.target;
+            
+            // Format descriptive meta contextual headings inside the header block
+            const rowContext = activeInputContextField.closest(".subject-grid-row").getAttribute("data-subject").toUpperCase();
+            const inputTypeLabel = activeInputContextField.getAttribute("data-type").toUpperCase();
+            contextText.innerText = `${rowContext} RUNTIME :: DATA FIELD -> ${inputTypeLabel}`;
 
-    if (isSubjectWise) {
-        let logicalViolationDetected = false;
-
-        ['phy', 'chem', 'mathBio'].forEach(sub => {
-            const label = sub === 'mathBio' ? document.getElementById('mathBioLabel').textContent : sub.toUpperCase();
-            const alloc = parseFloat(document.getElementById(`${sub}A`).value) || 0;
-            const cor = parseFloat(document.getElementById(`${sub}C`).value) || 0;
-            const wro = parseFloat(document.getElementById(`${sub}W`).value) || 0;
-            const not = parseFloat(document.getElementById(`${sub}N`).value) || 0;
-
-            if (alloc < (cor + wro + not) && alloc > 0) {
-                showSystemToastNotification(`Mathematical Overflow in ${label} parameters.`);
-                flagFieldAsViolated(`${sub}A`);
-                logicalViolationDetected = true;
-            }
-
-            const subScore = (cor * plusWeight) - (wro * minusWeight);
-            subjectsTelemetry[sub] = { label, allocated: alloc, correct: cor, wrong: wro, unattempted: not, score: subScore };
-
-            globalCorrect += cor;
-            globalWrong += wro;
-            globalUnattempted += not;
-            globalAttempted += (cor + wro);
+            // Smooth viewport layout spacer padding alignment updates
+            dockContainer.classList.add("active");
+            document.body.style.paddingBottom = `${dockContainer.offsetHeight + 20}px`;
+            
+            // Bring target cleanly into layout viewport viewing zone frames
+            setTimeout(() => {
+                activeInputContextField.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 180);
         });
 
-        if (logicalViolationDetected) return;
+        // Block native on-screen mobile visual boards from masking up overlays
+        input.addEventListener("mousedown", (e) => {
+            if (window.innerWidth <= 1024) {
+                e.preventDefault();
+                input.focus();
+            }
+        });
+    });
 
-    } else {
-        globalAttempted = parseFloat(document.getElementById('attempted').value) || 0;
-        globalWrong = parseFloat(document.getElementById('wrong').value) || 0;
-        globalCorrect = Math.max(0, globalAttempted - globalWrong);
-        globalUnattempted = Math.max(0, totalQs - globalAttempted);
+    // Handle Matrix Key Typing Sequences natively with robust filtering switches
+    matrixRoot.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const buttonTarget = e.target.closest(".kb-matrix-key");
+        if (!buttonTarget || !activeInputContextField) return;
+
+        const commandKey = buttonTarget.getAttribute("data-key");
+        let initialStringValue = activeInputContextField.value.toString();
+
+        if (commandKey === "clear") {
+            activeInputContextField.value = "";
+        } else if (commandKey === "backspace") {
+            if (initialStringValue.length > 0) {
+                activeInputContextField.value = initialStringValue.slice(0, -1);
+            }
+        } else {
+            // Append value strings seamlessly
+            activeInputContextField.value = initialStringValue + commandKey;
+        }
+
+        // Fire input lifecycle change mutations explicitly to maintain metrics accuracy
+        activeInputContextField.dispatchEvent(new Event("input", { bubbles: true }));
+        validateAndClampRowConstraints(activeInputContextField);
+        recalculateEngineTelemetryMetrics();
+    });
+
+    // Dismiss Actions Closure Wire-up
+    if (dismissBtn) {
+        dismissBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            dockContainer.classList.remove("active");
+            document.body.style.paddingBottom = "40px";
+            if (activeInputContextField) {
+                activeInputContextField.blur();
+                activeInputContextField = null;
+            }
+        });
     }
 
-    const compiledNetScore = (globalCorrect * plusWeight) - (globalWrong * minusWeight);
-    const totalPenaltyLoss = globalWrong * minusWeight;
-    const exactAccuracyIndex = globalAttempted > 0 ? (globalCorrect / globalAttempted) * 100 : 0;
+    // Close on clicking outside container borders safely 
+    document.addEventListener("click", (e) => {
+        if (window.innerWidth <= 1024 && 
+            !e.target.closest(".soft-glass-container") && 
+            !e.target.closest("#virtualKeyboardPanelDock")) {
+            dockContainer.classList.remove("active");
+            document.body.style.paddingBottom = "40px";
+            if (activeInputContextField) activeInputContextField.blur();
+        }
+    });
+}
 
-    evaluationTelemetryPacket = {
-        studentName, testName, totalQs, maxMarks, plusWeight, minusWeight, ratio,
-        globalCorrect, globalWrong, globalAttempted, globalUnattempted,
-        compiledNetScore, totalPenaltyLoss, exactAccuracyIndex,
-        isSubjectWise, subjects: subjectsTelemetry,
-        timestamp: new Date().toLocaleString()
+// ============================================================================
+// 6. SYSTEM REBOOT COLD PURGE UTILITY
+// ============================================================================
+function performSystemRebootClear() {
+    const inputFields = document.querySelectorAll(".input-targetable");
+    inputFields.forEach(cell => {
+        cell.value = "";
+    });
+    
+    const dockContainer = document.getElementById("virtualKeyboardPanelDock");
+    if(dockContainer) {
+        dockContainer.classList.remove("active");
+        document.body.style.paddingBottom = "40px";
+    }
+    
+    setupExamProfileLayout();
+}
+
+// ============================================================================
+// 7. HIGH-FIDELITY AUTOMATED PDF COMPILATION REPORT ENGINE
+// ============================================================================
+function compileTelemetryReportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "mm", "a4");
+
+    const candidateProfileName = document.getElementById("candidateNameInput").value.toUpperCase() || "UNREGISTERED PROFILE ACCESS";
+    const selectedProfileKey = document.getElementById("examProfileSelect").value;
+    const currentProfileData = EXAM_PROFILES[selectedProfileKey];
+
+    // Collect telemetry variables
+    const calculatedScore = document.getElementById("netScoreDisplay").innerText;
+    const accuracyPercent = document.getElementById("accuracyDisplay").innerText;
+    const maxCapacityScale = document.getElementById("maxMarksLabel").innerText;
+    const grossPositivePoints = document.getElementById("grossPositiveLabel").innerText;
+    const penaltyDrainPoints = document.getElementById("penaltyDrainLabel").innerText;
+
+    // Secondary processing for sub-table extraction loops
+    const telemetryData = {
+        phy: { total: 0, correct: 0, wrong: 0, unattempted: 0 },
+        chem: { total: 0, correct: 0, wrong: 0, unattempted: 0 },
+        mathBio: { total: 0, correct: 0, wrong: 0, unattempted: 0 }
     };
 
-    renderTelemetryDashboardOutputs();
-}
-
-function renderTelemetryDashboardOutputs() {
-    const data = evaluationTelemetryPacket;
-    if (!data) return;
-
-    document.getElementById('renderNetScore').textContent = data.compiledNetScore.toFixed(0);
-    document.getElementById('renderScoreRatio').textContent = `Out of ${data.maxMarks} Maximum Limit`;
-    document.getElementById('renderAccuracy').textContent = `${data.exactAccuracyIndex.toFixed(2)}%`;
-    document.getElementById('renderAttempted').textContent = data.globalAttempted;
-    document.getElementById('renderPenalty').textContent = `-${data.totalPenaltyLoss.toFixed(1)}`;
-    document.getElementById('renderUnattempted').textContent = data.globalUnattempted;
-
-    const wrapper = document.getElementById('dynamicSubjectSummaryNode');
-    wrapper.innerHTML = '';
-
-    if (data.isSubjectWise) {
-        Object.keys(data.subjects).forEach(key => {
-            const s = data.subjects[key];
-            const div = document.createElement('div');
-            div.className = `subject-summary-row`;
-            div.innerHTML = `
-                <span class="summary-row-label">${s.label}</span>
-                <span class="summary-row-stats">Score: <strong>${s.score.toFixed(0)}</strong> | Att: ${s.correct + s.wrong} [R: ${s.correct} / W: ${s.wrong}]</span>
-            `;
-            wrapper.appendChild(div);
-        });
+    let totalAttemptedCount = 0;
+    for (const contextKey of Object.keys(telemetryData)) {
+        const scopeRow = document.querySelector(`.subject-grid-row[data-subject="${contextKey}"]`);
+        if (scopeRow) {
+            telemetryData[contextKey].total = parseInt(scopeRow.querySelector(".total-q-field").value) || 0;
+            telemetryData[contextKey].correct = parseInt(scopeRow.querySelector(".correct-q-field").value) || 0;
+            telemetryData[contextKey].wrong = parseInt(scopeRow.querySelector(".wrong-q-field").value) || 0;
+            telemetryData[contextKey].unattempted = parseInt(scopeRow.querySelector(".unattempted-q-field").value) || 0;
+            totalAttemptedCount += (telemetryData[contextKey].correct + telemetryData[contextKey].wrong);
+        }
     }
 
-    const reportPanel = document.getElementById('diagnosticReportDashboard');
-    reportPanel.classList.add('activated');
-    reportPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
+    // Draw Vector Theme Container Borders
+    doc.setDrawColor(124, 58, 237); doc.setLineWidth(1); doc.rect(10, 10, 190, 277);
+    doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.2); doc.rect(11, 11, 188, 275);
 
-// ============================================================================
-// 7. JSPDF OFFICIAL CRITICAL CORE EXPORT REPORT MECHANICS
-// ============================================================================
-function exportCertifiedPdfReportDocument() {
-    const data = evaluationTelemetryPacket;
-    if (!data) {
-        showSystemToastNotification("No telemetry data compiled. Run diagnostics first.");
-        return;
-    }
+    // Header Branding Configuration
+    doc.setFillColor(15, 23, 42); doc.rect(12, 12, 186, 24, "F");
+    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(15);
+    doc.text("ECLIPSE7 PERFORMANCE MATRIX ANALYTICS ENGINE", 16, 22);
+    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(139, 92, 246);
+    doc.text("CORE PROTOCOL REPORT GENERATED SECURELY", 16, 28);
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
+    // Meta Block
+    doc.setTextColor(51, 65, 85); doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+    doc.text(`CANDIDATE STAMP : ${candidateProfileName}`, 15, 46);
+    doc.text(`TARGET PROFILE  : ${currentProfileData.label}`, 15, 52);
+    doc.text(`SYSTEM TIMELINE : ${new Date().toLocaleString().toUpperCase()}`, 15, 58);
 
-    // Structural Geometry coordinates mapping
-    doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 40, 'F'); 
-    doc.setFillColor(124, 58, 237); doc.rect(0, 40, 210, 2.5, 'F');
+    doc.setDrawColor(203, 213, 225); doc.line(15, 63, 195, 63);
 
-    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(22);
-    doc.text("ECLIPSE7 PERFORMANCE CORE", 14, 18);
-    doc.setFont("courier", "bold"); doc.setFontSize(8.5); doc.setTextColor(147, 197, 253);
-    doc.text(">> NEGATIVE MARKING DIAGNOSTIC ENGINE COMPILER // VER 2.5", 14, 25);
+    // Primary Summary KPI Grid Blocks
+    doc.setFillColor(248, 250, 252); doc.rect(15, 68, 85, 32, "F"); doc.setDrawColor(226, 232, 240); doc.rect(15, 68, 85, 32);
+    doc.setFillColor(248, 250, 252); doc.rect(110, 68, 85, 32, "F"); doc.rect(110, 68, 85, 32);
 
-    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "normal"); doc.setFontSize(8);
-    doc.text(`GENERATED: ${data.timestamp.toUpperCase()}`, 144, 25);
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+    doc.text("NET COMPUTED SYSTEM SCORE", 20, 75);
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(22);
+    doc.text(`${calculatedScore} / ${maxCapacityScale}`, 20, 88);
 
-    // Profile Blocks metadata 
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(10);
-    doc.text("STUDENT IDENTITY  :", 14, 54);
-    doc.setFont("helvetica", "normal"); doc.text(data.studentName.toUpperCase(), 54, 54);
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+    doc.text("CURRICULUM ACCURACY RATIO", 115, 75);
+    doc.setTextColor(52, 211, 153); doc.setFont("helvetica", "bold"); doc.setFontSize(22);
+    doc.text(accuracyPercent, 115, 88);
 
-    doc.setFont("helvetica", "bold"); doc.text("ASSESSMENT TOKEN  :", 14, 60);
-    doc.setFont("helvetica", "normal"); doc.text(data.testName.toUpperCase(), 54, 60);
+    // Secondary Telemetry Matrix Grid Data Block
+    doc.setFillColor(250, 250, 250); doc.rect(15, 106, 180, 22, "F"); doc.rect(15, 106, 180, 22);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(71, 85, 105);
+    
+    doc.text(`Gross Positive Capacity Yield : ${grossPositivePoints} Points`, 20, 113);
+    doc.text(`Negative Penalty Mark Drains : ${penaltyDrainPoints} Points`, 20, 121);
+    doc.text(`Total Segment Layout Scale    : ${currentProfileData.totalQs} Base Questions`, 112, 113);
+    doc.text(`Total Active Matrix Attempts : ${totalAttemptedCount} Registered`, 112, 121);
 
-    doc.setFont("helvetica", "bold"); doc.text("EVALUATION SCHEMA :", 14, 66);
-    doc.setFont("helvetica", "normal"); doc.text(document.getElementById('examProfileLabel').textContent, 54, 66);
-
-    // Primary Score Board Matrix
-    doc.setFillColor(248, 250, 252); doc.roundedRect(14, 74, 182, 34, 4, 4, 'FD');
-    doc.setDrawColor(226, 232, 240); doc.rect(14, 74, 182, 34);
-
-    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-    doc.text("NET MATRIX SCORE SECURED", 24, 86);
-    doc.setTextColor(124, 58, 237); doc.setFontSize(36);
-    doc.text(`${data.compiledNetScore.toFixed(0)}`, 24, 101);
-
-    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-    doc.text("ACCURACY RATING INDEX", 124, 86);
-    doc.setTextColor(15, 23, 42); doc.setFontSize(26);
-    doc.text(`${data.exactAccuracyIndex.toFixed(2)}%`, 124, 100);
-
-    // Dynamic Tabular Array Compilation
-    let tableBody = [];
-    if (data.isSubjectWise) {
-        Object.keys(data.subjects).forEach(k => {
-            const s = data.subjects[k];
-            tableBody.push([s.label, s.allocated, s.correct + s.wrong, s.correct, s.wrong, s.unattempted, s.score.toFixed(0)]);
-        });
-    } else {
-        tableBody.push(["Global Overview Profile", data.totalQs, data.globalAttempted, data.globalCorrect, data.globalWrong, data.globalUnattempted, data.compiledNetScore.toFixed(0)]);
-    }
+    // Render Data Breakdown Grid via AutoTable plugin architecture
+    const tableSourceBodyData = [
+        ["PHYSICS CORE SEGMENT", telemetryData.phy.total, telemetryData.phy.correct, telemetryData.phy.wrong, telemetryData.phy.unattempted],
+        ["CHEMISTRY CORE SEGMENT", telemetryData.chem.total, telemetryData.chem.correct, telemetryData.chem.wrong, telemetryData.chem.unattempted],
+        [`${currentProfileData.labelMathBio} SEGMENT`, telemetryData.mathBio.total, telemetryData.mathBio.correct, telemetryData.mathBio.wrong, telemetryData.mathBio.unattempted]
+    ];
 
     doc.autoTable({
-        startY: 118,
-        head: [['PERFORMANCE EVALUATION DOMAIN', 'TOTAL Q', 'ATTEMPTED', 'CORRECT (R)', 'INCORRECT (W)', 'UNATTEMPTED', 'NET WEIGHT']],
-        body: tableBody,
-        theme: 'striped',
-        headStyles: { fillColor: [15, 23, 42], fontSize: 8.5, font: 'helvetica', fontStyle: 'bold' },
-        bodyStyles: { fontSize: 9, font: 'helvetica', textColor: [30, 41, 59] },
-        columnStyles: { 0: { fontStyle: 'bold' }, 6: { fontStyle: 'bold' } }
+        startY: 136,
+        margin: { left: 15, right: 15 },
+        head: [["CURRICULUM METRIC SPECIFICATION", "TOTAL Q", "CORRECT (+4)", "WRONG (-1)", "UNATTEMPTED"]],
+        body: tableSourceBodyData,
+        theme: "striped",
+        headStyles: { fillColor: [124, 58, 237], textColor: [255, 255, 255], fontStyle: "bold", fontSize: 8.5 },
+        bodyStyles: { font: "helvetica", fontSize: 9, textColor: [30, 41, 59] },
+        columnStyles: { 0: { fontStyle: "bold" }, 1: { halign: "center" }, 2: { halign: "center" }, 3: { halign: "center" }, 4: { halign: "center" } }
     });
 
-    let currentY = doc.lastAutoTable.finalY + 12;
-
-    // Diagnostic System Recommendations Box
-    doc.setFillColor(241, 245, 249); doc.roundedRect(14, currentY, 182, 38, 3, 3, 'F');
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9.5);
-    doc.text("ENGINE TELEMETRY SYSTEM DIAGNOSTICS", 20, currentY + 7);
-
-    doc.setFont("courier", "bold"); doc.setFontSize(8.5); doc.setTextColor(51, 65, 85);
+    // Strategy Optimization Recommendation Blocks
+    let finalAutoTableY = doc.lastAutoTable.finalY || 170;
+    const tBoxY = finalAutoTableY + 12;
     
-    let recommStr = data.exactAccuracyIndex > 80 ? "CRITICAL EFFICIENCY ACCELERATION CONFIRMED." : "CONSOLIDATE ERRORS IMMEDIATELY TO REMOVE PENALTY DRAINS.";
-    doc.text(`>> RECOM_STRATEGY : ${recommStr}`, 20, currentY + 16);
-    doc.text(`>> PENALTY_DECAY  : REGISTERED LOSS SUBTRACTS ${data.totalPenaltyLoss.toFixed(1)} MARKS FROM ASSIGNED CAPACITY.`, 20, currentY + 23);
-    doc.text(`>> EFFICIENCY_GAP : ${data.globalUnattempted} UNATTEMPTED SEGMENTS IDENTIFIED FOR PERFORMANCE OPTIMIZATION.`, 20, currentY + 30);
+    doc.setFillColor(15, 23, 42); doc.rect(15, tBoxY, 180, 36, "F");
+    doc.setTextColor(56, 189, 248); doc.setFont("courier", "bold"); doc.setFontSize(8.5);
+    doc.text(">> ALGORITHMIC ENGINE INTELLIGENT SYSTEM RECOMMENDATION", 18, tBoxY + 6);
 
-    // Official Verification Signature Dock Footer
-    const finalFooterY = 265;
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(14, finalFooterY - 4, 196, finalFooterY - 4);
+    doc.setTextColor(241, 245, 249); doc.setFont("courier", "normal"); doc.setFontSize(7.5);
+    
+    let parsedAccuracy = parseFloat(accuracyPercent) || 0;
+    let strategyAdviceText = parsedAccuracy >= 80 
+        ? "CRITICAL EFFICIENCY MET METRICS PROFILE. KEEP ATTACK VELOCITY STABLE." 
+        : "MITIGATE RASH GUESSWORK PATTERNS IMMEDIATELY TO REMOVE PENALTY DRAINS.";
 
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-    doc.text("MR. SAIPRASAD BARURE", 14, finalFooterY + 4);
+    doc.text(`>> RECOM_STRATEGY : ${strategyAdviceText}`, 18, tBoxY + 14);
+    doc.text(`>> PENALTY_DECAY  : REGISTERED DRAINS SUBTRACTED ${penaltyDrainPoints} MARKS FROM CAPACITY ABSOLUTE.`, 18, tBoxY + 22);
+    
+    let totalUnattempted = telemetryData.phy.unattempted + telemetryData.chem.unattempted + telemetryData.mathBio.unattempted;
+    doc.text(`>> EFFICIENCY_GAP : ${totalUnattempted} UNATTEMPTED SECTORS IDENTIFIED IN ACTIVE SELECTION PROFILE.`, 18, tBoxY + 30);
+
+    // Footer Block Signing Verification Section
+    const footerY = 265;
+    doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.4); doc.line(15, footerY - 4, 195, footerY - 4);
+
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+    doc.text("MR. PRASAD BARURE", 15, footerY + 3);
     doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
-    doc.text("Chief Executive Officer & Founder of ECLIPSE7", 14, finalFooterY + 9);
+    doc.text("Chief Executive Officer & Founder of ECLIPSE7", 15, footerY + 8);
+    
+    doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(148, 163, 184);
+    doc.text("VERIFICATION EMBED CODE SHA-256 SYSTEM ACTIVE", 125, footerY + 5);
 
-    doc.save(`E7_Marking_Report_${data.studentName.replace(/\s+/g, '_')}.pdf`);
-}
-
-// Helper styling state engines
-function showSystemToastNotification(msg) {
-    const toast = document.getElementById('systemNotification');
-    document.getElementById('notificationMessage').textContent = msg;
-    toast.classList.add('active');
-    setTimeout(() => { toast.classList.remove('active'); }, 4000);
-}
-
-function flagFieldAsViolated(id) {
-    const el = document.getElementById(id);
-    if(el) el.style.borderColor = '#ef4444';
-}
-
-function clearInputValidationStyles() {
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach(i => i.style.borderColor = '');
-}
-
-function clearFormResetEngineState() {
-    document.getElementById('evaluationForm').reset();
-    clearInputValidationStyles();
-    document.getElementById('diagnosticReportDashboard').classList.remove('activated');
-    applySelectedExamProfile('jeemain');
-    document.getElementById('examProfileLabel').textContent = EXAM_PROFILES.jeemain.label;
-    document.getElementById('examProfile').value = 'jeemain';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Save File Download Execute
+    doc.save(`ECLIPSE7-METRICS-REPORT-${candidateProfileName.replace(/\s+/g, "-")}.pdf`);
 }
