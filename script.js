@@ -38,9 +38,6 @@ const EXAM_PROFILES = {
     }
 };
 
-let currentlyFocusedInputFieldNode = null;
-let isTouchFormFactorDevice = false;
-
 // ============================================================================
 // 2. MODERN RE-ENGINEERED FLUENT DROPDOWN CONTROLLER
 // ============================================================================
@@ -94,17 +91,19 @@ function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, call
 // 3. CENTRALIZED LIFE-CYCLE INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    isTouchFormFactorDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 1024);
-
     initDropdownSystem('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectSectionDisplay);
     initDropdownSystem('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', () => { setProfileToCustomOverride(); });
     initDropdownSystem('examProfileSelectContainer', 'examProfileLabel', 'examProfileOptions', 'examProfile', applySelectedExamProfile);
     
     setupReactiveSubjectSyncObservers();
     setupMainFallbackInputObservers();
-    setupPremiumVirtualKeyboardCoreEngine();
     
     toggleSubjectSectionDisplay();
+
+    // Hook buttons
+    document.getElementById('computeEngineMetricsBtn').addEventListener('click', triggerEvaluationSequence);
+    document.getElementById('resetEngineStateBtn').addEventListener('click', clearFormResetEngineState);
+    document.getElementById('generatePdfReportBtn').addEventListener('click', exportCertifiedPdfReportDocument);
 });
 
 function toggleSubjectSectionDisplay() {
@@ -117,7 +116,6 @@ function toggleSubjectSectionDisplay() {
         syncSubjectBreakdownToMainInputs();
     } else {
         section.classList.remove('visible');
-        dismissVirtualKeyboardPanel();
     }
 }
 
@@ -132,20 +130,17 @@ function applySelectedExamProfile(profileKey) {
     if (intelBox) intelBox.textContent = profile.intel;
 
     const totalQsInput = document.getElementById('totalQs');
-    const maxMarksInput = document.getElementById('maxMarks');
-    const subInputsTotal = [document.getElementById('phyA'), document.getElementById('chemA'), document.getElementById('mathBioA')];
 
     if (profileKey === 'custom') {
-        if (totalQsInput) totalQsInput.classList.remove('profile-locked-row');
-        if (maxMarksInput) maxMarksInput.classList.remove('profile-locked-row');
-        subInputsTotal.forEach(inp => { if(inp) inp.classList.remove('profile-locked-row'); });
+        if (totalQsInput) {
+            totalQsInput.classList.remove('profile-locked-row');
+        }
         return;
     }
 
-    // Apply UI lock pattern to elements across presets instead of standard HTML readonly attribute
-    if (totalQsInput) totalQsInput.classList.add('profile-locked-row');
-    if (maxMarksInput) maxMarksInput.classList.add('profile-locked-row');
-    subInputsTotal.forEach(inp => { if(inp) inp.classList.add('profile-locked-row'); });
+    if (totalQsInput) {
+        totalQsInput.classList.add('profile-locked-row');
+    }
 
     document.getElementById('totalQs').value = profile.totalQs;
     document.getElementById('maxMarks').value = profile.maxMarks;
@@ -171,12 +166,9 @@ function setProfileToCustomOverride() {
     const triggerProf = document.getElementById('examProfileLabel');
     
     const totalQsInput = document.getElementById('totalQs');
-    const maxMarksInput = document.getElementById('maxMarks');
-    const subInputsTotal = [document.getElementById('phyA'), document.getElementById('chemA'), document.getElementById('mathBioA')];
-    
-    if (totalQsInput) totalQsInput.classList.remove('profile-locked-row');
-    if (maxMarksInput) maxMarksInput.classList.remove('profile-locked-row');
-    subInputsTotal.forEach(inp => { if(inp) inp.classList.remove('profile-locked-row'); });
+    if (totalQsInput) {
+        totalQsInput.classList.remove('profile-locked-row');
+    }
 
     if(hiddenProf && hiddenProf.value !== 'custom') {
         hiddenProf.value = 'custom';
@@ -214,13 +206,12 @@ function processSubjectRowRecalculationSequence(targetNode) {
     if (targetNode.id !== 'totalQs' && !targetNode.classList.contains('profile-locked-row')) {
         const selectedProfile = document.getElementById('examProfile').value;
         if (selectedProfile === 'custom' || targetNode.classList.contains('sub-input')) {
-            // Processing allocation pipelines smoothly
+            // Allowed override flows
         }
     }
-    
-    const row = targetNode.closest('.subject-grid-row');
-    if (row) {
-        const subjectKey = row.getAttribute('data-subject');
+    const card = targetNode.closest('.subject-card-panel');
+    if (card) {
+        const subjectKey = card.getAttribute('data-subject');
         executeRowAlgebraSolver(subjectKey, targetNode);
     }
     syncSubjectBreakdownToMainInputs();
@@ -231,14 +222,12 @@ function executeRowAlgebraSolver(sub, activeElement = null) {
     const elCor = document.getElementById(`${sub}C`);
     const elWro = document.getElementById(`${sub}W`);
     const elNot = document.getElementById(`${sub}N`);
-
     const tot = elTot.value !== "" ? parseFloat(elTot.value) : null;
     const cor = elCor.value !== "" ? parseFloat(elCor.value) : null;
     const wro = elWro.value !== "" ? parseFloat(elWro.value) : null;
     const not = elNot.value !== "" ? parseFloat(elNot.value) : null;
 
-    if (tot === null) return; 
-
+    if (tot === null) return;
     let filledFields = [];
     if (cor !== null) filledFields.push({ id: 'C', val: cor, el: elCor });
     if (wro !== null) filledFields.push({ id: 'W', val: wro, el: elWro });
@@ -247,407 +236,305 @@ function executeRowAlgebraSolver(sub, activeElement = null) {
     if (filledFields.length === 3) {
         if (activeElement === elNot) {
             let updatedCor = Math.max(0, tot - not - wro);
-            elCor.value = updatedCor === 0 && not === 0 && wro === 0 ? "" : updatedCor;
+            elCor.value = updatedCor === 0 ? '' : updatedCor;
         } else if (activeElement === elWro) {
             let updatedCor = Math.max(0, tot - wro - not);
-            elCor.value = updatedCor === 0 && wro === 0 && not === 0 ? "" : updatedCor;
+            elCor.value = updatedCor === 0 ? '' : updatedCor;
         } else {
             let updatedNot = Math.max(0, tot - cor - wro);
-            elNot.value = updatedNot === 0 && cor === 0 && wro === 0 ? "" : updatedNot;
+            elNot.value = updatedNot === 0 ? '' : updatedNot;
         }
-        return;
-    }
+    } else if (filledFields.length === 2) {
+        const containsC = filledFields.some(f => f.id === 'C');
+        const containsW = filledFields.some(f => f.id === 'W');
+        const containsN = filledFields.some(f => f.id === 'N');
 
-    if (filledFields.length === 2) {
-        const structuralMask = filledFields.map(f => f.id).join('');
-        
-        if (structuralMask === 'CW') {
-            elNot.value = Math.max(0, tot - cor - wro);
-        } else if (structuralMask === 'WN') {
-            elCor.value = Math.max(0, tot - wro - not);
-        } else if (structuralMask === 'CN') {
-            elWro.value = Math.max(0, tot - cor - not);
+        if (containsC && containsW) {
+            let val = tot - cor - wro;
+            elNot.value = val <= 0 ? '' : val;
+        } else if (containsC && containsN) {
+            let val = tot - cor - not;
+            elWro.value = val <= 0 ? '' : val;
+        } else if (containsW && containsN) {
+            let val = tot - wro - not;
+            elCor.value = val <= 0 ? '' : val;
         }
     }
 }
 
+function syncSubjectBreakdownToMainInputs() {
+    if (document.getElementById('reportType').value !== 'subjectwise') return;
+
+    let aggregateAttempted = 0;
+    let aggregateWrong = 0;
+    let aggregateTotalQs = 0;
+
+    ['phy', 'chem', 'mathBio'].forEach(sub => {
+        const c = parseFloat(document.getElementById(`${sub}C`).value) || 0;
+        const w = parseFloat(document.getElementById(`${sub}W`).value) || 0;
+        const t = parseFloat(document.getElementById(`${sub}A`).value) || 0;
+
+        aggregateAttempted += (c + w);
+        aggregateWrong += w;
+        aggregateTotalQs += t;
+    });
+
+    document.getElementById('attempted').value = aggregateAttempted || '';
+    document.getElementById('wrong').value = aggregateWrong || '';
+
+    if (document.getElementById('examProfile').value === 'custom' && aggregateTotalQs > 0) {
+        document.getElementById('totalQs').value = aggregateTotalQs;
+    }
+}
+
 function setupMainFallbackInputObservers() {
-    ['studentName', 'testName', 'totalQs', 'maxMarks', 'attempted', 'wrong'].forEach(id => {
+    ['totalQs', 'correctMarks'].forEach(id => {
         const el = document.getElementById(id);
-        if(el) {
+        if (el) {
             el.addEventListener('input', () => {
-                if(id !== 'studentName' && id !== 'testName' && id !== 'totalQs' && id !== 'maxMarks') {
+                if (id === 'totalQs' || id === 'correctMarks') {
                     setProfileToCustomOverride();
                 }
-                el.classList.remove('validation-error');
             });
         }
     });
 }
 
-function syncSubjectBreakdownToMainInputs() {
-    const reportType = document.getElementById('reportType').value;
-    if (reportType !== 'subjectwise') return;
-
-    let aggregateTotal = 0;
-    let aggregateCorrect = 0;
-    let aggregateWrong = 0;
-
-    const subjects = ['phy', 'chem', 'mathBio'];
-    subjects.forEach(sub => {
-        const t = parseFloat(document.getElementById(`${sub}A`).value) || 0;
-        const c = parseFloat(document.getElementById(`${sub}C`).value) || 0;
-        const w = parseFloat(document.getElementById(`${sub}W`).value) || 0;
-
-        aggregateTotal += t;
-        aggregateCorrect += c;
-        aggregateWrong += w;
-    });
-
-    const totalQsInput = document.getElementById('totalQs');
-    if(aggregateTotal > 0 && totalQsInput && !totalQsInput.classList.contains('profile-locked-row')) {
-        totalQsInput.value = aggregateTotal;
-    }
-    
-    let computedAttempts = aggregateCorrect + aggregateWrong;
-    document.getElementById('attempted').value = computedAttempts > 0 || aggregateWrong > 0 ? computedAttempts : '';
-    document.getElementById('wrong').value = aggregateWrong > 0 ? aggregateWrong : '';
-}
-
 // ============================================================================
-// 6. GLOSSY TOUCH-OPTIMIZED VIRTUAL KEYPAD CORE SUBSYSTEM
+// 6. CRYPTOGRAPHIC DATA PACK TELEMETRY MATRIX COMPILER
 // ============================================================================
-function setupPremiumVirtualKeyboardCoreEngine() {
-    const targets = document.querySelectorAll('.v-keyboard-target');
-    const kbContainer = document.getElementById('glassmorphicKeyboardPanel');
-    if (!kbContainer) return;
+let evaluationTelemetryPacket = null;
 
-    targets.forEach(input => {
-        if (isTouchFormFactorDevice) {
-            input.setAttribute('inputmode', 'none');
-        }
-
-        input.addEventListener('click', (e) => {
-            // Guard against choosing elements locked by current preset profile selection state
-            if (input.classList.contains('profile-locked-row')) {
-                e.preventDefault();
-                return;
-            }
-            
-            if (!isTouchFormFactorDevice) return; 
-            e.stopPropagation();
-
-            if (currentlyFocusedInputFieldNode) {
-                currentlyFocusedInputFieldNode.classList.remove('v-keyboard-focused-node');
-            }
-
-            currentlyFocusedInputFieldNode = input;
-            input.classList.add('v-keyboard-focused-node');
-            
-            const layoutType = input.getAttribute('data-kb-type') || 'numpad';
-            const displayLabel = document.getElementById('keyboardCurrentTargetMetadata');
-            if(displayLabel) {
-                displayLabel.textContent = `TARGET: ${input.placeholder || 'NUMERICAL DATA MODULE'}`;
-            }
-
-            if (layoutType === 'qwerty') {
-                document.getElementById('numpadMatrixRoot').style.display = 'none';
-                document.getElementById('qwertyMatrixRoot').style.display = 'flex';
-            } else {
-                document.getElementById('qwertyMatrixRoot').style.display = 'none';
-                document.getElementById('numpadMatrixRoot').style.display = 'grid';
-            }
-
-            kbContainer.classList.add('panel-active');
-            adjustViewportPaddingForVirtualKeyboardPanel(true);
-        });
-    });
-
-    const matrixKeys = kbContainer.querySelectorAll('.kb-matrix-key, .kb-character-key');
-    matrixKeys.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (!currentlyFocusedInputFieldNode) return;
-
-            const commandKeyValue = btn.getAttribute('data-key');
-            let baseStringValue = currentlyFocusedInputFieldNode.value;
-
-            btn.style.transform = 'scale(0.92)';
-            setTimeout(() => { btn.style.transform = 'none'; }, 80);
-
-            if (commandKeyValue === 'clear') {
-                currentlyFocusedInputFieldNode.value = '';
-            } else if (commandKeyValue === 'backspace') {
-                currentlyFocusedInputFieldNode.value = baseStringValue.slice(0, -1);
-            } else {
-                const maxLen = currentlyFocusedInputFieldNode.getAttribute('data-kb-type') === 'qwerty' ? 32 : 4;
-                if (baseStringValue.length < maxLen) {
-                    currentlyFocusedInputFieldNode.value = baseStringValue + commandKeyValue;
-                }
-            }
-
-            currentlyFocusedInputFieldNode.dispatchEvent(new Event('input', { bubbles: true }));
-            processSubjectRowRecalculationSequence(currentlyFocusedInputFieldNode);
-        });
-    });
-
-    window.addEventListener('click', (e) => {
-        if (kbContainer.classList.contains('panel-active') && !kbContainer.contains(e.target) && !e.target.classList.contains('v-keyboard-target')) {
-            dismissVirtualKeyboardPanel();
-        }
-    });
-}
-
-function dismissVirtualKeyboardPanel() {
-    const kbContainer = document.getElementById('glassmorphicKeyboardPanel');
-    if (kbContainer) {
-        kbContainer.classList.remove('panel-active');
-    }
-    if (currentlyFocusedInputFieldNode) {
-        currentlyFocusedInputFieldNode.classList.remove('v-keyboard-focused-node');
-        currentlyFocusedInputFieldNode = null;
-    }
-    adjustViewportPaddingForVirtualKeyboardPanel(false);
-}
-
-function adjustViewportPaddingForVirtualKeyboardPanel(isActiveState) {
-    if (!isTouchFormFactorDevice) return;
-    if (isActiveState) {
-        const panelHeight = document.getElementById('glassmorphicKeyboardPanel').offsetHeight || 280;
-        document.body.style.paddingBottom = `${panelHeight + 20}px`;
-    } else {
-        document.body.style.paddingBottom = '24px';
-    }
-}
-
-function clearInputValidationStyles() {
-    const targets = document.querySelectorAll('.v-keyboard-target');
-    targets.forEach(node => node.classList.remove('validation-error'));
-}
-
-// ============================================================================
-// 7. HIGH-PRECISION SCORE ENGINE MATHEMATICAL CALCULATIONS
-// ============================================================================
-function runTelemetryEvaluationPipeline() {
+function triggerEvaluationSequence() {
     clearInputValidationStyles();
-    if (!validateFormStructuralIntegrity()) return;
 
-    const profileKey = document.getElementById('examProfile').value;
-    const studentIdent = document.getElementById('studentName').value;
-    const tokenIdent = document.getElementById('testName').value;
-    const totQs = parseFloat(document.getElementById('totalQs').value);
-    const maxMks = parseFloat(document.getElementById('maxMarks').value);
-    const attQs = parseFloat(document.getElementById('attempted').value);
-    const wrgQs = parseFloat(document.getElementById('wrong').value);
-    const penRatio = parseFloat(document.getElementById('markingRatio').value);
+    const studentName = document.getElementById('studentName').value.trim();
+    const testName = document.getElementById('testName').value.trim();
+    const isSubjectWise = document.getElementById('reportType').value === 'subjectwise';
 
-    const corQs = attQs - wrgQs;
-    const unattQs = totQs - attQs;
-    
-    const valuePerQuestion = maxMks / totQs;
-    const penaltyPerQuestion = valuePerQuestion * penRatio;
+    if (!studentName || !testName) {
+        showSystemToastNotification("Authentication Profiles incomplete. Please authenticate identity details.");
+        if(!studentName) flagFieldAsViolated('studentName');
+        if(!testName) flagFieldAsViolated('testName');
+        return;
+    }
 
-    const absoluteScore = (corQs * valuePerQuestion) - (wrgQs * penaltyPerQuestion);
-    const totalPenaltyIncurred = wrgQs * (valuePerQuestion + penaltyPerQuestion);
-    const accuracyPercent = attQs > 0 ? (corQs / attQs) * 100 : 0;
+    const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
+    const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
+    const plusWeight = parseFloat(document.getElementById('correctMarks').value) || 0;
+    const ratio = parseFloat(document.getElementById('markingRatio').value) || 0;
+    const minusWeight = plusWeight * ratio;
 
-    const analyticsDataDump = {
-        profile: profileKey,
-        student: studentIdent,
-        test: tokenIdent,
-        totalQuestions: totQs,
-        maximumMarks: maxMks,
-        attempts: attQs,
-        correct: corQs,
-        incorrect: wrgQs,
-        unattempted: unattQs,
-        score: absoluteScore,
-        totalPenalty: totalPenaltyIncurred,
-        accuracy: accuracyPercent
+    if (totalQs <= 0 || maxMarks <= 0 || plusWeight <= 0) {
+        showSystemToastNotification("Core marking parameters must hold absolute positive limits.");
+        return;
+    }
+
+    let globalCorrect = 0, globalWrong = 0, globalAttempted = 0, globalUnattempted = 0;
+    let subjectsTelemetry = {};
+
+    if (isSubjectWise) {
+        let logicalViolationDetected = false;
+
+        ['phy', 'chem', 'mathBio'].forEach(sub => {
+            const label = sub === 'mathBio' ? document.getElementById('mathBioLabel').textContent : sub.toUpperCase();
+            const alloc = parseFloat(document.getElementById(`${sub}A`).value) || 0;
+            const cor = parseFloat(document.getElementById(`${sub}C`).value) || 0;
+            const wro = parseFloat(document.getElementById(`${sub}W`).value) || 0;
+            const not = parseFloat(document.getElementById(`${sub}N`).value) || 0;
+
+            if (alloc < (cor + wro + not) && alloc > 0) {
+                showSystemToastNotification(`Mathematical Overflow in ${label} parameters.`);
+                flagFieldAsViolated(`${sub}A`);
+                logicalViolationDetected = true;
+            }
+
+            const subScore = (cor * plusWeight) - (wro * minusWeight);
+            subjectsTelemetry[sub] = { label, allocated: alloc, correct: cor, wrong: wro, unattempted: not, score: subScore };
+
+            globalCorrect += cor;
+            globalWrong += wro;
+            globalUnattempted += not;
+            globalAttempted += (cor + wro);
+        });
+
+        if (logicalViolationDetected) return;
+
+    } else {
+        globalAttempted = parseFloat(document.getElementById('attempted').value) || 0;
+        globalWrong = parseFloat(document.getElementById('wrong').value) || 0;
+        globalCorrect = Math.max(0, globalAttempted - globalWrong);
+        globalUnattempted = Math.max(0, totalQs - globalAttempted);
+    }
+
+    const compiledNetScore = (globalCorrect * plusWeight) - (globalWrong * minusWeight);
+    const totalPenaltyLoss = globalWrong * minusWeight;
+    const exactAccuracyIndex = globalAttempted > 0 ? (globalCorrect / globalAttempted) * 100 : 0;
+
+    evaluationTelemetryPacket = {
+        studentName, testName, totalQs, maxMarks, plusWeight, minusWeight, ratio,
+        globalCorrect, globalWrong, globalAttempted, globalUnattempted,
+        compiledNetScore, totalPenaltyLoss, exactAccuracyIndex,
+        isSubjectWise, subjects: subjectsTelemetry,
+        timestamp: new Date().toLocaleString()
     };
 
-    triggerTelemetryReportGeneration(analyticsDataDump);
+    renderTelemetryDashboardOutputs();
 }
 
-function validateFormStructuralIntegrity() {
-    const reportType = document.getElementById('reportType').value;
-    const studentName = document.getElementById('studentName');
-    const testName = document.getElementById('testName');
-    const totalQs = document.getElementById('totalQs');
-    const maxMarks = document.getElementById('maxMarks');
-    const attempted = document.getElementById('attempted');
-    const wrong = document.getElementById('wrong');
+function renderTelemetryDashboardOutputs() {
+    const data = evaluationTelemetryPacket;
+    if (!data) return;
 
-    let invalidNodes = [];
+    document.getElementById('renderNetScore').textContent = data.compiledNetScore.toFixed(0);
+    document.getElementById('renderScoreRatio').textContent = `Out of ${data.maxMarks} Maximum Limit`;
+    document.getElementById('renderAccuracy').textContent = `${data.exactAccuracyIndex.toFixed(2)}%`;
+    document.getElementById('renderAttempted').textContent = data.globalAttempted;
+    document.getElementById('renderPenalty').textContent = `-${data.totalPenaltyLoss.toFixed(1)}`;
+    document.getElementById('renderUnattempted').textContent = data.globalUnattempted;
 
-    if (!studentName.value.trim()) invalidNodes.push(studentName);
-    if (!testName.value.trim()) invalidNodes.push(testName);
-    if (!totalQs.value || parseFloat(totalQs.value) <= 0) invalidNodes.push(totalQs);
-    if (!maxMarks.value || parseFloat(maxMarks.value) <= 0) invalidNodes.push(maxMarks);
-    if (attempted.value === "" || parseFloat(attempted.value) < 0) invalidNodes.push(attempted);
-    if (wrong.value === "" || parseFloat(wrong.value) < 0) invalidNodes.push(wrong);
+    const wrapper = document.getElementById('dynamicSubjectSummaryNode');
+    wrapper.innerHTML = '';
 
-    if (reportType === 'subjectwise') {
-        ['phy', 'chem', 'mathBio'].forEach(sub => {
-            const ta = document.getElementById(`${sub}A`);
-            const tc = document.getElementById(`${sub}C`);
-            const tw = document.getElementById(`${sub}W`);
-            const tn = document.getElementById(`${sub}N`);
-            if (!ta.value || parseFloat(ta.value) < 0) invalidNodes.push(ta);
-            if (tc.value === "" || parseFloat(tc.value) < 0) invalidNodes.push(tc);
-            if (tw.value === "" || parseFloat(tw.value) < 0) invalidNodes.push(tw);
-            if (tn.value === "" || parseFloat(tn.value) < 0) invalidNodes.push(tn);
+    if (data.isSubjectWise) {
+        Object.keys(data.subjects).forEach(key => {
+            const s = data.subjects[key];
+            const div = document.createElement('div');
+            div.className = `subject-summary-row`;
+            div.innerHTML = `
+                <span class="summary-row-label">${s.label}</span>
+                <span class="summary-row-stats">Score: <strong>${s.score.toFixed(0)}</strong> | Att: ${s.correct + s.wrong} [R: ${s.correct} / W: ${s.wrong}]</span>
+            `;
+            wrapper.appendChild(div);
         });
     }
 
-    if (invalidNodes.length === 0) {
-        if (parseFloat(wrong.value) > parseFloat(attempted.value)) {
-            invalidNodes.push(wrong); invalidNodes.push(attempted);
-            triggerSystemToastNotification("Logic Error: Incorrect faults cannot exceed total attempts.");
-            animateContainerShake(); return false;
-        }
-        if (parseFloat(attempted.value) > parseFloat(totalQs.value)) {
-            invalidNodes.push(attempted); invalidNodes.push(totalQs);
-            triggerSystemToastNotification("Logic Error: Total attempts cannot exceed total questions.");
-            animateContainerShake(); return false;
-        }
-    }
-
-    if (invalidNodes.length > 0) {
-        invalidNodes.forEach(node => node.classList.add('validation-error'));
-        triggerSystemToastNotification("Action Blocked: Please populate required fields with valid numerical data.");
-        animateContainerShake(); return false;
-    }
-    return true;
-}
-
-function triggerSystemToastNotification(msg) {
-    const toast = document.getElementById('systemNotification');
-    const label = document.getElementById('notificationMessage');
-    if (!toast || !label) return;
-
-    label.textContent = msg;
-    toast.classList.add('toast-active');
-
-    setTimeout(() => { toast.classList.remove('toast-active'); }, 4000);
-}
-
-function animateContainerShake() {
-    const container = document.getElementById('mainAppContainer');
-    if (!container) return;
-    container.style.animation = 'none';
-    setTimeout(() => { container.style.animation = 'fluentContainerShakeAlert 0.4s cubic-bezier(.36,.07,.19,.97) both'; }, 10);
+    const reportPanel = document.getElementById('diagnosticReportDashboard');
+    reportPanel.classList.add('activated');
+    reportPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // ============================================================================
-// 8. AUTONOMOUS SEAMLESS PDF TRANSCRIPT COMPILATION PIPELINE
+// 7. JSPDF OFFICIAL CRITICAL CORE EXPORT REPORT MECHANICS
 // ============================================================================
-function triggerTelemetryReportGeneration(telemetryData) {
+function exportCertifiedPdfReportDocument() {
+    const data = evaluationTelemetryPacket;
+    if (!data) {
+        showSystemToastNotification("No telemetry data compiled. Run diagnostics first.");
+        return;
+    }
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'mm', 'a4');
 
-    const currentProfile = telemetryData.profile.toUpperCase();
+    // Structural Geometry coordinates mapping
+    doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 40, 'F'); 
+    doc.setFillColor(124, 58, 237); doc.rect(0, 40, 210, 2.5, 'F');
 
-    doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3); doc.rect(8, 8, 194, 281);
-    doc.setFillColor(248, 250, 252); doc.rect(10, 10, 190, 32, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5); doc.rect(10, 10, 190, 32, 'D');
+    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(22);
+    doc.text("ECLIPSE7 PERFORMANCE CORE", 14, 18);
+    doc.setFont("courier", "bold"); doc.setFontSize(8.5); doc.setTextColor(147, 197, 253);
+    doc.text(">> NEGATIVE MARKING DIAGNOSTIC ENGINE COMPILER // VER 2.5", 14, 25);
 
-    doc.setFillColor(14, 165, 233); doc.rect(10, 41, 130, 1, 'F');
-    doc.setFillColor(168, 85, 247); doc.rect(140, 41, 60, 1, 'F');
+    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "normal"); doc.setFontSize(8);
+    doc.text(`GENERATED: ${data.timestamp.toUpperCase()}`, 144, 25);
 
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("NEGATIVE MARKING PERFORMANCE REPORT", 16, 21);
-    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
-    doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v5.5`, 16, 27);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
-    doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
+    // Profile Blocks metadata 
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+    doc.text("STUDENT IDENTITY  :", 14, 54);
+    doc.setFont("helvetica", "normal"); doc.text(data.studentName.toUpperCase(), 54, 54);
 
-    let cardY = 48;
-    doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" METRIC PROFILE SUMMARY LABELS", 12, cardY + 4.5);
+    doc.setFont("helvetica", "bold"); doc.text("ASSESSMENT TOKEN  :", 14, 60);
+    doc.setFont("helvetica", "normal"); doc.text(data.testName.toUpperCase(), 54, 60);
 
-    doc.setFillColor(241, 245, 249); doc.rect(108, cardY, 92, 6, 'F');
-    doc.rect(108, cardY, 92, 6, 'D');
-    doc.text(" ASSESSMENT METADATA TRACK", 110, cardY + 4.5);
+    doc.setFont("helvetica", "bold"); doc.text("EVALUATION SCHEMA :", 14, 66);
+    doc.setFont("helvetica", "normal"); doc.text(document.getElementById('examProfileLabel').textContent, 54, 66);
 
-    let infoBoxY = cardY + 6;
-    doc.rect(10, infoBoxY, 92, 26);
-    doc.rect(108, infoBoxY, 92, 26);
+    // Primary Score Board Matrix
+    doc.setFillColor(248, 250, 252); doc.roundedRect(14, 74, 182, 34, 4, 4, 'FD');
+    doc.setDrawColor(226, 232, 240); doc.rect(14, 74, 182, 34);
 
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(51, 65, 85);
-    doc.setFont("helvetica", "bold"); doc.text("STUDENT IDENTITY :", 14, infoBoxY + 7);
-    doc.setFont("helvetica", "normal"); doc.text(telemetryData.student.toUpperCase(), 47, infoBoxY + 7);
-    doc.setFont("helvetica", "bold"); doc.text("EVALUATION DATE :", 14, infoBoxY + 14);
-    doc.setFont("helvetica", "normal"); doc.text(new Date().toLocaleString(), 47, infoBoxY + 14);
-    doc.setFont("helvetica", "bold"); doc.text("CURRICULUM BASE :", 14, infoBoxY + 21);
-    doc.setFont("helvetica", "normal"); doc.text(currentProfile, 47, infoBoxY + 21);
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
+    doc.text("NET MATRIX SCORE SECURED", 24, 86);
+    doc.setTextColor(124, 58, 237); doc.setFontSize(36);
+    doc.text(`${data.compiledNetScore.toFixed(0)}`, 24, 101);
 
-    doc.setFont("helvetica", "bold"); doc.text("ASSESSMENT TOKEN :", 112, infoBoxY + 7);
-    doc.setFont("helvetica", "normal"); doc.text(telemetryData.test.toUpperCase(), 148, infoBoxY + 7);
-    doc.setFont("helvetica", "bold"); doc.text("TOTAL QUESTIONS  :", 112, infoBoxY + 14);
-    doc.setFont("helvetica", "normal"); doc.text(`${telemetryData.totalQuestions} UNITS`, 148, infoBoxY + 14);
-    doc.setFont("helvetica", "bold"); doc.text("MAX ASSIGNED MKS :", 112, infoBoxY + 21);
-    doc.setFont("helvetica", "normal"); doc.text(`${telemetryData.maximumMarks} POINTS`, 148, infoBoxY + 14 + 7);
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
+    doc.text("ACCURACY RATING INDEX", 124, 86);
+    doc.setTextColor(15, 23, 42); doc.setFontSize(26);
+    doc.text(`${data.exactAccuracyIndex.toFixed(2)}%`, 124, 100);
 
-    let tableY = infoBoxY + 32;
+    // Dynamic Tabular Array Compilation
+    let tableBody = [];
+    if (data.isSubjectWise) {
+        Object.keys(data.subjects).forEach(k => {
+            const s = data.subjects[k];
+            tableBody.push([s.label, s.allocated, s.correct + s.wrong, s.correct, s.wrong, s.unattempted, s.score.toFixed(0)]);
+        });
+    } else {
+        tableBody.push(["Global Overview Profile", data.totalQs, data.globalAttempted, data.globalCorrect, data.globalWrong, data.globalUnattempted, data.compiledNetScore.toFixed(0)]);
+    }
+
     doc.autoTable({
-        startY: tableY,
-        margin: { left: 10, right: 10 },
-        head: [['PERFORMANCE EVALUATION METRIC SEGMENT', 'QUANTITATIVE COMPUTATION VALUE']],
-        body: [
-            ['TOTAL EVALUATION ATTEMPTS RECORDED', `${telemetryData.attempts} / ${telemetryData.totalQuestions}`],
-            ['SUCCESSFUL CORRECT VALIDATIONS (+)', `${telemetryData.correct} SEGMENTS`],
-            ['INCORRECT NEGATIVE FAULTS INFLICTED (-)', `${telemetryData.incorrect} SEGMENTS`],
-            ['UNATTEMPTED TRANSIENT VACANCIES (0)', `${telemetryData.unattempted} UNITS`],
-            ['NET ACCURACY RATIO FACTOR', `${telemetryData.accuracy.toFixed(2)} %`],
-            ['TOTAL PENALTY SCORE CAPACITY DRAIN', `${telemetryData.totalPenalty.toFixed(2)} MARK POINTS`]
-        ],
-        theme: 'grid',
-        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9, halign: 'center' },
-        bodyStyles: { fontSize: 8.5, font: 'helvetica', textColor: [30, 41, 59] },
-        columnStyles: { 0: { cellWidth: 130 }, 1: { cellWidth: 60, halign: 'center', fontStyle: 'bold' } }
+        startY: 118,
+        head: [['PERFORMANCE EVALUATION DOMAIN', 'TOTAL Q', 'ATTEMPTED', 'CORRECT (R)', 'INCORRECT (W)', 'UNATTEMPTED', 'NET WEIGHT']],
+        body: tableBody,
+        theme: 'striped',
+        headStyles: { fillColor: [15, 23, 42], fontSize: 8.5, font: 'helvetica', fontStyle: 'bold' },
+        bodyStyles: { fontSize: 9, font: 'helvetica', textColor: [30, 41, 59] },
+        columnStyles: { 0: { fontStyle: 'bold' }, 6: { fontStyle: 'bold' } }
     });
 
-    let scoreHeroY = doc.lastAutoTable.finalY + 8;
-    doc.setFillColor(15, 23, 42); doc.rect(10, scoreHeroY, 190, 24, 'F');
-    doc.setDrawColor(14, 165, 233); doc.setLineWidth(1); doc.line(10, scoreHeroY, 10, scoreHeroY + 24);
+    let currentY = doc.lastAutoTable.finalY + 12;
 
-    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(10);
-    doc.text("ABSOLUTE CAPACITY SCORE QUANTIFIED", 16, scoreHeroY + 9);
+    // Diagnostic System Recommendations Box
+    doc.setFillColor(241, 245, 249); doc.roundedRect(14, currentY, 182, 38, 3, 3, 'F');
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9.5);
+    doc.text("ENGINE TELEMETRY SYSTEM DIAGNOSTICS", 20, currentY + 7);
+
+    doc.setFont("courier", "bold"); doc.setFontSize(8.5); doc.setTextColor(51, 65, 85);
     
-    doc.setFontSize(20); doc.setTextColor(14, 165, 233);
-    doc.text(`${telemetryData.score.toFixed(2)}`, 16, scoreHeroY + 19);
-    doc.setFontSize(10); doc.setTextColor(148, 163, 184);
-    doc.text(`/ ${telemetryData.maximumMarks}.00 NET MARK MATRIX POINTS`, 60, scoreHeroY + 18);
+    let recommStr = data.exactAccuracyIndex > 80 ? "CRITICAL EFFICIENCY ACCELERATION CONFIRMED." : "CONSOLIDATE ERRORS IMMEDIATELY TO REMOVE PENALTY DRAINS.";
+    doc.text(`>> RECOM_STRATEGY : ${recommStr}`, 20, currentY + 16);
+    doc.text(`>> PENALTY_DECAY  : REGISTERED LOSS SUBTRACTS ${data.totalPenaltyLoss.toFixed(1)} MARKS FROM ASSIGNED CAPACITY.`, 20, currentY + 23);
+    doc.text(`>> EFFICIENCY_GAP : ${data.globalUnattempted} UNATTEMPTED SEGMENTS IDENTIFIED FOR PERFORMANCE OPTIMIZATION.`, 20, currentY + 30);
 
-    let tBoxY = scoreHeroY + 30;
-    doc.setFillColor(248, 250, 252); doc.rect(10, tBoxY, 190, 35, 'F');
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.rect(10, tBoxY, 190, 35, 'D');
-
-    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(30, 41, 59);
-    doc.text(">> ANALYTICAL TELEMETRY RECOMMENDATIONS:", 14, tBoxY + 6);
-
-    let systemRecommendationText = "";
-    if (telemetryData.accuracy >= 90) systemRecommendationText = "CRITICAL ACCURACY STABLE. MAINTAIN PACE RATIO CONSTRAINTS.";
-    else if (telemetryData.accuracy >= 75) systemRecommendationText = "ACCURACY OPTIMAL. TARGET ELIMINATION OF IMPLICIT FAULTS.";
-    else systemRecommendationText = "CRITICAL PENALTY INFLICTED. MINIMIZE GUESSWORK PATTERNS IMMEDIATELY TO REMOVE PENALTY DRAINS.";
-
-    doc.text(`>> RECOM_STRATEGY : ${systemRecommendationText}`, 15, tBoxY + 14);
-    doc.text(`>> PENALTY_DECAY  : THE REGISTERED PENALTY INFLICTED SUBTRACTS ${telemetryData.totalPenalty.toFixed(2)} POINTS FROM ABSOLUTE CAPACITY.`, 15, tBoxY + 21);
-    doc.text(`>> EFFICIENCY_GAP : ${telemetryData.unattempted} UNATTEMPTED SEGMENTS IDENTIFIED FOR LOW-COST SCORE OPTIMIZATION.`, 15, tBoxY + 28);
-
-    const finalFooterY = 254;
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, finalFooterY - 4, 200, finalFooterY - 4);
+    // Official Verification Signature Dock Footer
+    const finalFooterY = 265;
+    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(14, finalFooterY - 4, 196, finalFooterY - 4);
 
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-    doc.text("MR. PRASAD BARURE", 14, finalFooterY + 4);
+    doc.text("MR. SAIPRASAD BARURE", 14, finalFooterY + 4);
     doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
     doc.text("Chief Executive Officer & Founder of ECLIPSE7", 14, finalFooterY + 9);
-    doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(14, 165, 233);
-    doc.text("// TRANSACTION VERIFIED BY TELEMETRY ENGINE CORE SYSTEM GATEWAY", 14, finalFooterY + 15);
 
-    doc.save(`E7_METRIC_REPORT_${telemetryData.student.replace(/\s+/g, '_')}.pdf`);
+    doc.save(`E7_Marking_Report_${data.studentName.replace(/\s+/g, '_')}.pdf`);
+}
+
+// Helper styling state engines
+function showSystemToastNotification(msg) {
+    const toast = document.getElementById('systemNotification');
+    document.getElementById('notificationMessage').textContent = msg;
+    toast.classList.add('active');
+    setTimeout(() => { toast.classList.remove('active'); }, 4000);
+}
+
+function flagFieldAsViolated(id) {
+    const el = document.getElementById(id);
+    if(el) el.style.borderColor = '#ef4444';
+}
+
+function clearInputValidationStyles() {
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(i => i.style.borderColor = '');
+}
+
+function clearFormResetEngineState() {
+    document.getElementById('evaluationForm').reset();
+    clearInputValidationStyles();
+    document.getElementById('diagnosticReportDashboard').classList.remove('activated');
+    applySelectedExamProfile('jeemain');
+    document.getElementById('examProfileLabel').textContent = EXAM_PROFILES.jeemain.label;
+    document.getElementById('examProfile').value = 'jeemain';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
