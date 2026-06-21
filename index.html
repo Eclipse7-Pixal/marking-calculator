@@ -170,135 +170,143 @@
         </div>
 
         <div id="subjectSection" class="subject-breakdown-wrapper">
-            <!-- Dynamic Rule Mandate Notice Bar -->
             <div class="mandatory-input-notice-bar">
                 <i class="fa-solid fa-circle-info"></i>
                 <span><strong>Mandatory Metrics Rule:</strong> Provide exactly 2 variables per row among (Correct, Wrong, Not Attempted). The residual data points evaluate instantly.</span>
             </div>
-
+            
             <div class="subject-grid-layout-header">
-                <div></div> 
+                <div></div>
                 <span>TOTAL Q.</span>
                 <span>CORRECT</span>
                 <span>WRONG</span>
                 <span>NOT ATTM</span>
             </div>
-             
+
             <div class="subject-grid-row" data-subject="phy">
-                <label class="sub-identity-lbl">PHYSICS</label>
-                <input type="number" id="phyA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="phyC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="phyW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="phyN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0" data-kb-type="numpad">
+                <span class="sub-label">PHYSICS</span>
+                <input type="number" id="phyA" placeholder="0" min="0" class="sub-input sub-tot v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="phyC" placeholder="0" min="0" class="sub-input v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="phyW" placeholder="0" min="0" class="sub-input v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="phyN" placeholder="0" min="0" class="sub-input v-keyboard-target" data-kb-type="numpad">
             </div>
 
             <div class="subject-grid-row" data-subject="chem">
-                <label class="sub-identity-lbl">CHEMISTRY</label>
-                <input type="number" id="chemA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="chemC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="chemW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="chemN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0" data-kb-type="numpad">
+                <span class="sub-label">CHEMISTRY</span>
+                <input type="number" id="chemA" placeholder="0" min="0" class="sub-input sub-tot v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="chemC" placeholder="0" min="0" class="sub-input v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="chemW" placeholder="0" min="0" class="sub-input v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="chemN" placeholder="0" min="0" class="sub-input v-keyboard-target" data-kb-type="numpad">
             </div>
 
             <div class="subject-grid-row" data-subject="mathBio">
-                <label class="sub-identity-lbl" id="mathBioLabel">MATH/BIO</label>
-                <input type="number" id="mathBioA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="mathBioC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="mathBioW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="mathBioN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0" data-kb-type="numpad">
-            </div>
-            
-            <div class="quantum-intel-status">
-                <i class="fa-solid fa-microchip"></i> 
-                <span id="intelMessage">Quantum cross-input synchronization layer active.</span>
+                <span class="sub-label" id="mathBioLabel">MATHEMATICS</span>
+                <input type="number" id="mathBioA" placeholder="0" min="0" class="sub-input sub-tot v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="mathBioC" placeholder="0" min="0" class="sub-input v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="mathBioW" placeholder="0" min="0" class="sub-input v-keyboard-target" data-kb-type="numpad">
+                <input type="number" id="mathBioN" placeholder="0" min="0" class="sub-input v-keyboard-target" data-kb-type="numpad">
             </div>
         </div>
 
-        <button type="button" onclick="executeCalculationSequence()" class="fluent-btn btn-primary-gradient">
-            <span>Compute Assessment Metrics</span>
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </button>
-
-        <div class="fluent-score-hero-display">
-            <label class="score-hero-title">CALCULATED METRIC SCORE</label>
-            <div id="score" class="score-hero-val">0.00</div>
-            <div class="fluent-wave-shimmer"></div>
+        <div class="curriculum-intel-banner">
+            <i class="fa-solid fa-microchip intel-chip-icon"></i>
+            <span id="intelMessage">Manual Override operational. Custom constraints active across input modules.</span>
         </div>
 
-        <button type="button" onclick="downloadPDFReportSequence()" class="fluent-btn btn-secondary-frosted">
-            <i class="fa-solid fa-file-pdf"></i>
-            <span>Export E7 Intelligence Document</span>
-        </button>
+        <div class="form-action-row-wrapper">
+            <button type="button" class="fluent-action-button primary-accent-trigger" id="evaluateMetricsBtn">
+                <i class="fa-solid fa-bolt"></i> Compute Operational Metrics
+            </button>
+            <button type="button" class="fluent-action-button auxiliary-reset-trigger" id="resetSystemBtn">
+                <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+            </button>
+        </div>
     </form>
 
-    <footer class="fluent-footer">
-        <span class="secure-badge">
-            <i class="fa-solid fa-shield-halved"></i> YOUR DATA IS 100% PRIVATE:
-        </span> 
-        All marks are calculated instantly inside your device's browser. No data is saved or tracked. Built by <b>Saiprasad Barure / Prasad Reddy</b>.
-    </footer>
+    <div class="telemetry-output-panel" id="telemetryOutputPanel">
+        <div class="metric-score-hero-card">
+            <span class="score-hero-lbl">OPERATIONAL SCORE CAPACITY</span>
+            <div class="score-hero-val"><span id="computedScore">0</span><span class="max-cap-denominator">/ <span id="outOfMarks">300</span></span></div>
+            <div class="score-percentage-capsule" id="scorePercentCapsule">0.0% Efficiency</div>
+        </div>
+
+        <div class="telemetry-grid-matrix">
+            <div class="telemetry-node-card">
+                <div class="node-label">ACCURACY RATE</div>
+                <div class="node-value text-emerald" id="accuracyRate">0.0%</div>
+            </div>
+            <div class="telemetry-node-card">
+                <div class="node-label">PENALTY IMPACT</div>
+                <div class="node-value text-crimson" id="penaltyImpact">0.00</div>
+            </div>
+            <div class="telemetry-node-card">
+                <div class="node-label">CORRECT PICKS</div>
+                <div class="node-value" id="correctCount">0</div>
+            </div>
+            <div class="telemetry-node-card">
+                <div class="node-label">UNATTEMPTED Q.</div>
+                <div class="node-value text-amber" id="unattemptedCount">0</div>
+            </div>
+        </div>
+
+        <button type="button" class="pdf-export-button" id="exportPdfBtn">
+            <i class="fa-solid fa-file-pdf"></i> Generate Official Audit Ledger
+        </button>
+    </div>
 </div>
 
-<!-- Re-Engineered Dual-Mode Adaptive Custom Virtual Keyboard View -->
-<div id="glassmorphicKeyboardPanel" class="glass-keyboard-container structural-mode-numpad">
-    <div class="keyboard-drag-notch-handle"></div>
+<div class="glassmorphic-virtual-keyboard-panel" id="glassmorphicKeyboardPanel">
+    <div class="keyboard-header-action-strip">
+        <span class="keyboard-active-input-indicator" id="keyboardInputIndicator">Virtual Matrix Input</span>
+        <button type="button" class="keyboard-panel-dismiss-trigger" onclick="dismissVirtualKeyboardPanel()">
+            <i class="fa-solid fa-chevron-down"></i>
+        </button>
+    </div>
     
-    <!-- Dynamic Alphanumeric QWERTY Matrix View Structure -->
-    <div class="keyboard-matrix-qwerty-layout" id="qwertyMatrixRoot">
-        <div class="kb-compact-row row-numbers-strip">
-            <button type="button" class="kb-character-key" data-key="1">1</button>
-            <button type="button" class="kb-character-key" data-key="2">2</button>
-            <button type="button" class="kb-character-key" data-key="3">3</button>
-            <button type="button" class="kb-character-key" data-key="4">4</button>
-            <button type="button" class="kb-character-key" data-key="5">5</button>
-            <button type="button" class="kb-character-key" data-key="6">6</button>
-            <button type="button" class="kb-character-key" data-key="7">7</button>
-            <button type="button" class="kb-character-key" data-key="8">8</button>
-            <button type="button" class="kb-character-key" data-key="9">9</button>
-            <button type="button" class="kb-character-key" data-key="0">0</button>
+    <div class="keyboard-matrix-grid qwerty-layout" id="qwertyMatrixRoot" style="display: none;">
+        <div class="qwerty-row">
+            <button type="button" class="kb-matrix-key" data-key="Q">Q</button>
+            <button type="button" class="kb-matrix-key" data-key="W">W</button>
+            <button type="button" class="kb-matrix-key" data-key="E">E</button>
+            <button type="button" class="kb-matrix-key" data-key="R">R</button>
+            <button type="button" class="kb-matrix-key" data-key="T">T</button>
+            <button type="button" class="kb-matrix-key" data-key="Y">Y</button>
+            <button type="button" class="kb-matrix-key" data-key="U">U</button>
+            <button type="button" class="kb-matrix-key" data-key="I">I</button>
+            <button type="button" class="kb-matrix-key" data-key="O">O</button>
+            <button type="button" class="kb-matrix-key" data-key="P">P</button>
         </div>
-        <div class="kb-compact-row">
-            <button type="button" class="kb-character-key" data-key="Q">Q</button>
-            <button type="button" class="kb-character-key" data-key="W">W</button>
-            <button type="button" class="kb-character-key" data-key="E">E</button>
-            <button type="button" class="kb-character-key" data-key="R">R</button>
-            <button type="button" class="kb-character-key" data-key="T">T</button>
-            <button type="button" class="kb-character-key" data-key="Y">Y</button>
-            <button type="button" class="kb-character-key" data-key="U">U</button>
-            <button type="button" class="kb-character-key" data-key="I">I</button>
-            <button type="button" class="kb-character-key" data-key="O">O</button>
-            <button type="button" class="kb-character-key" data-key="P">P</button>
+        <div class="qwerty-row">
+            <button type="button" class="kb-matrix-key" data-key="A">A</button>
+            <button type="button" class="kb-matrix-key" data-key="S">S</button>
+            <button type="button" class="kb-matrix-key" data-key="D">D</button>
+            <button type="button" class="kb-matrix-key" data-key="F">F</button>
+            <button type="button" class="kb-matrix-key" data-key="G">G</button>
+            <button type="button" class="kb-matrix-key" data-key="H">H</button>
+            <button type="button" class="kb-matrix-key" data-key="J">J</button>
+            <button type="button" class="kb-matrix-key" data-key="K">K</button>
+            <button type="button" class="kb-matrix-key" data-key="L">L</button>
         </div>
-        <div class="kb-compact-row">
-            <button type="button" class="kb-character-key" data-key="A">A</button>
-            <button type="button" class="kb-character-key" data-key="S">S</button>
-            <button type="button" class="kb-character-key" data-key="D">D</button>
-            <button type="button" class="kb-character-key" data-key="F">F</button>
-            <button type="button" class="kb-character-key" data-key="G">G</button>
-            <button type="button" class="kb-character-key" data-key="H">H</button>
-            <button type="button" class="kb-character-key" data-key="J">J</button>
-            <button type="button" class="kb-character-key" data-key="K">K</button>
-            <button type="button" class="kb-character-key" data-key="L">L</button>
-        </div>
-        <div class="kb-compact-row">
-            <button type="button" class="kb-character-key" data-key="Z">Z</button>
-            <button type="button" class="kb-character-key" data-key="X">X</button>
-            <button type="button" class="kb-character-key" data-key="C">C</button>
-            <button type="button" class="kb-character-key" data-key="V">V</button>
-            <button type="button" class="kb-character-key" data-key="B">B</button>
-            <button type="button" class="kb-character-key" data-key="N">N</button>
-            <button type="button" class="kb-character-key" data-key="M">M</button>
-        </div>
-        <div class="kb-compact-row functional-utility-row">
-            <button type="button" class="kb-character-key kb-functional-accent-key text-utility-ctrl" data-key="clear">CLR</button>
-            <button type="button" class="kb-character-key spacebar-layout-key" data-key=" ">SPACE</button>
-            <button type="button" class="kb-character-key kb-functional-backspace-key text-utility-ctrl" data-key="backspace">
+        <div class="qwerty-row">
+            <button type="button" class="kb-matrix-key kb-functional-accent-key" data-key="clear">CLR</button>
+            <button type="button" class="kb-matrix-key" data-key="Z">Z</button>
+            <button type="button" class="kb-matrix-key" data-key="X">X</button>
+            <button type="button" class="kb-matrix-key" data-key="C">C</button>
+            <button type="button" class="kb-matrix-key" data-key="V">V</button>
+            <button type="button" class="kb-matrix-key" data-key="B">B</button>
+            <button type="button" class="kb-matrix-key" data-key="N">N</button>
+            <button type="button" class="kb-matrix-key" data-key="M">M</button>
+            <button type="button" class="kb-matrix-key kb-functional-backspace-key" data-key="backspace">
                 <i class="fa-solid fa-delete-left"></i>
             </button>
         </div>
+        <div class="qwerty-row">
+            <button type="button" class="kb-matrix-key" data-key="-">-</button>
+            <button type="button" class="kb-matrix-key kb-space-key" data-key=" ">SPACE</button>
+            <button type="button" class="kb-matrix-key" data-key=".">.</button>
+        </div>
     </div>
 
-    <!-- Standard Numerical Input Layout Grid View -->
     <div class="keyboard-matrix-grid" id="numpadMatrixRoot">
         <button type="button" class="kb-matrix-key" data-key="1">1</button>
         <button type="button" class="kb-matrix-key" data-key="2">2</button>
@@ -315,9 +323,6 @@
             <i class="fa-solid fa-delete-left"></i>
         </button>
     </div>
-    <button type="button" class="keyboard-dismiss-control-btn" onclick="dismissVirtualKeyboardPanel()">
-        <span>Confirm Entry Matrix</span> <i class="fa-solid fa-circle-check"></i>
-    </button>
 </div>
 
 <script src="script.js"></script>
