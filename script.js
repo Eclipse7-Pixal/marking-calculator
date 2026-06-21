@@ -734,3 +734,39 @@ function generateAuditLedgerDocument() {
 
     doc.save(`E7_LEDGER_${calculatedTelemetryData.student}_${calculatedTelemetryData.test}.pdf`);
 }
+
+// ============================================================================
+// ECLIPSE7 PLATFORM LINKER - TRANSMIT SCORING DATA TO BACKEND LOGS
+// ============================================================================
+async function transmitTelemetryToServer(telemetryData) {
+    try {
+        const payload = {
+            studentName: document.getElementById('studentName').value,
+            testName: document.getElementById('testName').value,
+            examProfile: document.getElementById('examProfile').value,
+            totalQs: document.getElementById('totalQs').value,
+            maxMarks: document.getElementById('maxMarks').value,
+            attempted: document.getElementById('attempted').value,
+            wrong: document.getElementById('wrong').value,
+            scoreMetrics: {
+                finalScore: telemetryData.netScore,
+                accuracyPercentage: telemetryData.accuracy,
+                totalPenalty: telemetryData.totalPenalty,
+                unattemptedCount: telemetryData.unattempted
+            }
+        };
+
+        const response = await fetch('/api/telemetry/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        if(data.success) {
+            console.log(">> SYSTEM TELEMETRY INDEX SECURED SUCCESSFULLY. ID: " + data.recordId);
+        }
+    } catch (error) {
+        console.warn(">> Server backend unreachable. Evaluation running in stand-alone localized state.");
+    }
+}
