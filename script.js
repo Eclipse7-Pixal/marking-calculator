@@ -105,6 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
     setupPremiumVirtualKeyboardCoreEngine();
     
     toggleSubjectSectionDisplay();
+
+    document.getElementById('evaluateMetricsBtn').addEventListener('click', processMetricsComputationPipeline);
+    document.getElementById('resetSystemBtn').addEventListener('click', resetEvaluationEngineFrame);
+    document.getElementById('exportPdfBtn').addEventListener('click', generateAuditLedgerDocument);
 });
 
 function toggleSubjectSectionDisplay() {
@@ -132,18 +136,16 @@ function applySelectedExamProfile(profileKey) {
     if (intelBox) intelBox.textContent = profile.intel;
 
     const totalQsInput = document.getElementById('totalQs');
+    const sectionWrapper = document.getElementById('subjectSection');
 
     if (profileKey === 'custom') {
-        if (totalQsInput) {
-            totalQsInput.classList.remove('profile-locked-row');
-        }
+        if (totalQsInput) totalQsInput.classList.remove('profile-locked-row');
+        if (sectionWrapper) sectionWrapper.classList.remove('section-locked');
         return;
     }
 
-    // Apply UI lock pattern to Total Questions instead of standard HTML readonly attribute
-    if (totalQsInput) {
-        totalQsInput.classList.add('profile-locked-row');
-    }
+    if (totalQsInput) totalQsInput.classList.add('profile-locked-row');
+    if (sectionWrapper) sectionWrapper.classList.add('section-locked');
 
     document.getElementById('totalQs').value = profile.totalQs;
     document.getElementById('maxMarks').value = profile.maxMarks;
@@ -169,9 +171,10 @@ function setProfileToCustomOverride() {
     const triggerProf = document.getElementById('examProfileLabel');
     
     const totalQsInput = document.getElementById('totalQs');
-    if (totalQsInput) {
-        totalQsInput.classList.remove('profile-locked-row');
-    }
+    const sectionWrapper = document.getElementById('subjectSection');
+    
+    if (totalQsInput) totalQsInput.classList.remove('profile-locked-row');
+    if (sectionWrapper) sectionWrapper.classList.remove('section-locked');
 
     if(hiddenProf && hiddenProf.value !== 'custom') {
         hiddenProf.value = 'custom';
@@ -206,14 +209,6 @@ function setupReactiveSubjectSyncObservers() {
 }
 
 function processSubjectRowRecalculationSequence(targetNode) {
-    // If user edited an allowed input field, check if it should push to custom mode
-    if (targetNode.id !== 'totalQs' && !targetNode.classList.contains('profile-locked-row')) {
-        const selectedProfile = document.getElementById('examProfile').value;
-        if (selectedProfile === 'custom' || targetNode.classList.contains('sub-input')) {
-            // Let algebra continue smoothly
-        }
-    }
-    
     const row = targetNode.closest('.subject-grid-row');
     if (row) {
         const subjectKey = row.getAttribute('data-subject');
@@ -316,7 +311,9 @@ function syncSubjectBreakdownToMainInputs() {
 function setupPremiumVirtualKeyboardCoreEngine() {
     const targets = document.querySelectorAll('.v-keyboard-target');
     const kbContainer = document.getElementById('glassmorphicKeyboardPanel');
-    if (!kbContainer) return;
+    const qwertyRoot = document.getElementById('qwertyMatrixRoot');
+    const numpadRoot = document.getElementById('numpadMatrixRoot');
+    if (!kbContainer || !qwertyRoot || !numpadRoot) return;
 
     targets.forEach(input => {
         if (isTouchFormFactorDevice) {
@@ -324,8 +321,9 @@ function setupPremiumVirtualKeyboardCoreEngine() {
         }
 
         input.addEventListener('click', (e) => {
-            // Guard against choosing elements locked by current preset profile selection state
-            if (input.classList.contains('profile-locked-row')) {
+            const isLockedPreset = input.closest('#subjectSection') && 
+                                   document.getElementById('subjectSection').classList.contains('section-locked');
+            if (input.classList.contains('profile-locked-row') || isLockedPreset) {
                 e.preventDefault();
                 return;
             }
@@ -339,6 +337,15 @@ function setupPremiumVirtualKeyboardCoreEngine() {
 
             currentlyFocusedInputFieldNode = input;
             input.classList.add('v-keyboard-focused-node');
+
+            const kbType = input.getAttribute('data-kb-type') || 'numpad';
+            if (kbType === 'qwerty') {
+                qwertyRoot.style.display = 'block';
+                numpadRoot.style.display = 'none';
+            } else {
+                qwertyRoot.style.display = 'none';
+                numpadRoot.style.display = 'grid';
+            }
             
             kbContainer.classList.add('panel-active');
             adjustViewportPaddingForVirtualKeyboardPanel(true);
@@ -363,13 +370,17 @@ function setupPremiumVirtualKeyboardCoreEngine() {
             } else if (commandKeyValue === 'backspace') {
                 currentlyFocusedInputFieldNode.value = baseStringValue.slice(0, -1);
             } else {
-                if (baseStringValue.length < 4) {
+                const maxLen = currentlyFocusedInputFieldNode.getAttribute('type') === 'number' ? 4 : 50;
+                if (baseStringValue.length < maxLen) {
                     currentlyFocusedInputFieldNode.value = baseStringValue + commandKeyValue;
                 }
             }
 
             currentlyFocusedInputFieldNode.dispatchEvent(new Event('input', { bubbles: true }));
-            processSubjectRowRecalculationSequence(currentlyFocusedInputFieldNode);
+            
+            if (currentlyFocusedInputFieldNode.classList.contains('sub-input')) {
+                processSubjectRowRecalculationSequence(currentlyFocusedInputFieldNode);
+            }
         });
     });
 
@@ -420,7 +431,6 @@ function triggerSystemToastNotification(message, isError = true) {
         toast.style.borderColor = "rgba(16, 185, 129, 0.3)";
         toast.style.color = "#a7f3d0";
     }
-
     toast.classList.add('show');
     setTimeout(() => { toast.classList.remove('show'); }, 5000);
 }
@@ -433,18 +443,15 @@ function clearInputValidationStyles() {
 function scanAndValidateSystemInputs() {
     clearInputValidationStyles();
     let invalidNodes = [];
-
     const studentName = document.getElementById('studentName');
     const testName = document.getElementById('testName');
-    
-    if (!studentName.value.trim()) invalidNodes.push(studentName);
-    if (!testName.value.trim()) invalidNodes.push(testName);
-
     const totalQs = document.getElementById('totalQs');
     const maxMarks = document.getElementById('maxMarks');
     const attempted = document.getElementById('attempted');
     const wrong = document.getElementById('wrong');
 
+    if (!studentName.value.trim()) invalidNodes.push(studentName);
+    if (!testName.value.trim()) invalidNodes.push(testName);
     if (!totalQs.value || parseFloat(totalQs.value) <= 0) invalidNodes.push(totalQs);
     if (!maxMarks.value || parseFloat(maxMarks.value) <= 0) invalidNodes.push(maxMarks);
     if (attempted.value === "" || parseFloat(attempted.value) < 0) invalidNodes.push(attempted);
@@ -457,7 +464,6 @@ function scanAndValidateSystemInputs() {
             const tc = document.getElementById(`${sub}C`);
             const tw = document.getElementById(`${sub}W`);
             const tn = document.getElementById(`${sub}N`);
-            
             if (!ta.value || parseFloat(ta.value) < 0) invalidNodes.push(ta);
             if (tc.value === "" || parseFloat(tc.value) < 0) invalidNodes.push(tc);
             if (tw.value === "" || parseFloat(tw.value) < 0) invalidNodes.push(tw);
@@ -465,26 +471,25 @@ function scanAndValidateSystemInputs() {
         });
     }
 
-    if (invalidNodes.length === 0) {
-        if (parseFloat(wrong.value) > parseFloat(attempted.value)) {
-            invalidNodes.push(wrong);
-            invalidNodes.push(attempted);
-            triggerSystemToastNotification("Logic Error: Incorrect faults cannot exceed total attempts.");
-            animateContainerShake();
-            return false;
-        }
-        if (parseFloat(attempted.value) > parseFloat(totalQs.value)) {
-            invalidNodes.push(attempted);
-            invalidNodes.push(totalQs);
-            triggerSystemToastNotification("Logic Error: Total attempts cannot exceed total questions.");
-            animateContainerShake();
-            return false;
-        }
-    }
-
     if (invalidNodes.length > 0) {
         invalidNodes.forEach(node => node.classList.add('validation-error'));
-        triggerSystemToastNotification("Action Blocked: Please populate required fields with valid numerical data.");
+        triggerSystemToastNotification("Required Validation Error: Fix highlighted parameters.");
+        animateContainerShake();
+        return false;
+    }
+
+    if (parseFloat(wrong.value) > parseFloat(attempted.value)) {
+        invalidNodes.push(wrong); invalidNodes.push(attempted);
+        wrong.classList.add('validation-error'); attempted.classList.add('validation-error');
+        triggerSystemToastNotification("Logic Error: Incorrect faults cannot exceed total attempts.");
+        animateContainerShake();
+        return false;
+    }
+
+    if (parseFloat(attempted.value) > parseFloat(totalQs.value)) {
+        invalidNodes.push(attempted); invalidNodes.push(totalQs);
+        attempted.classList.add('validation-error'); totalQs.classList.add('validation-error');
+        triggerSystemToastNotification("Logic Error: Total attempts exceed assessment parameters.");
         animateContainerShake();
         return false;
     }
@@ -496,254 +501,236 @@ function animateContainerShake() {
     const container = document.getElementById('mainAppContainer');
     if (!container) return;
     container.style.animation = 'none';
-    container.offsetHeight; 
-    container.style.animation = 'fluentContainerShake 0.45s cubic-bezier(.36,.07,.19,.97) both';
+    setTimeout(() => { container.style.animation = 'fluentShakeAlert 0.45s cubic-bezier(.36,.07,.19,.97) both'; }, 10);
 }
 
 // ============================================================================
-// 8. CALCULATION ENGINE LOGIC UNIFICATION
+// 8. QUANTUM CORE EVALUATION ENGINE METRICS COMPUTATION PIPELINE
 // ============================================================================
-function executeCalculationSequence() {
-    if (!scanAndValidateSystemInputs()) return null;
+let calculatedTelemetryData = null;
 
-    const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
-    const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
-    const attempted = parseFloat(document.getElementById('attempted').value) || 0;
-    const wrong = parseFloat(document.getElementById('wrong').value) || 0;
-    const ratio = parseFloat(document.getElementById('markingRatio').value) || 0;
-    
-    const correct = attempted - wrong;
-    const unattempted = Math.max(0, totalQs - attempted);
-    const marksPerCorrect = totalQs > 0 ? (maxMarks / totalQs) : 0;
-    const totalPenalty = wrong * (marksPerCorrect * ratio); 
-    const finalScore = (correct * marksPerCorrect) - totalPenalty;
-    const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100).toFixed(2) : 0;
+function processMetricsComputationPipeline() {
+    if (!scanAndValidateSystemInputs()) return;
 
-    const scoreDisplayNode = document.getElementById('score');
-    scoreDisplayNode.innerText = finalScore.toFixed(2);
-    
-    scoreDisplayNode.style.animation = 'none';
-    scoreDisplayNode.offsetHeight;
-    scoreDisplayNode.style.animation = 'fluentScalePulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    dismissVirtualKeyboardPanel();
 
-    return { 
-        totalQs, maxMarks, attempted, wrong, correct, 
-        unattempted, finalScore, efficiency, totalPenalty, marksPerCorrect 
+    const tQ = parseFloat(document.getElementById('totalQs').value);
+    const mM = parseFloat(document.getElementById('maxMarks').value);
+    const att = parseFloat(document.getElementById('attempted').value);
+    const wr = parseFloat(document.getElementById('wrong').value);
+    const ratio = parseFloat(document.getElementById('markingRatio').value);
+
+    const cr = att - wr;
+    const unatt = tQ - att;
+    const marksPerQ = mM / tQ;
+
+    const positiveYield = cr * marksPerQ;
+    const totalPenalty = wr * (marksPerQ * ratio);
+    const finalScore = positiveYield - totalPenalty;
+
+    const accuracy = att > 0 ? (cr / att) * 100 : 0;
+    const efficiency = mM > 0 ? (finalScore / mM) * 100 : 0;
+
+    calculatedTelemetryData = {
+        student: document.getElementById('studentName').value.trim().toUpperCase(),
+        test: document.getElementById('testName').value.trim().toUpperCase(),
+        profile: document.getElementById('examProfileLabel').textContent,
+        totalQs: tQ, maxMarks: mM, attempted: att, wrong: wr, correct: cr, unattempted: unatt,
+        finalScore: finalScore, accuracy: accuracy, efficiency: efficiency, totalPenalty: totalPenalty
     };
-}
 
-// ============================================================================
-// 9. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT)
-// ============================================================================
-async function downloadPDFReportSequence() {
-    const telemetryData = executeCalculationSequence();
-    if (!telemetryData) return;
+    document.getElementById('computedScore').textContent = finalScore.toFixed(2).replace(/\.00$/, '');
+    document.getElementById('outOfMarks').textContent = mM;
+    document.getElementById('accuracyRate').textContent = `${accuracy.toFixed(1)}%`;
+    document.getElementById('penaltyImpact').textContent = `-${totalPenalty.toFixed(2).replace(/\.00$/, '')}`;
+    document.getElementById('correctCount').textContent = cr;
+    document.getElementById('unattemptedCount').textContent = unatt;
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
+    const percentCapsule = document.getElementById('scorePercentCapsule');
+    percentCapsule.textContent = `${efficiency.toFixed(1)}% Efficiency`;
     
-    const reportType = document.getElementById('reportType').value;
-    const currentProfile = document.getElementById('examProfile').value.toUpperCase();
-    const student = document.getElementById('studentName').value.toUpperCase();
-    const test = document.getElementById('testName').value.toUpperCase();
-    const timestamp = new Date().toLocaleString().toUpperCase();
-
-    doc.setFillColor(255, 255, 255);
-    doc.rect(0, 0, 210, 297, 'F');
-    
-    doc.setDrawColor(240, 244, 248);
-    doc.setLineWidth(0.25);
-    for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
-    for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j);
-
-    doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3);
-    doc.rect(8, 8, 194, 281);
-
-    doc.setFillColor(248, 250, 252);
-    doc.rect(10, 10, 190, 32, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5);
-    doc.rect(10, 10, 190, 32, 'D');
-    
-    doc.setFillColor(14, 165, 233); doc.rect(10, 41, 130, 1, 'F');
-    doc.setFillColor(168, 85, 247); doc.rect(140, 41, 60, 1, 'F');
-
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("NEGATIVE MARKING PERFORMANCE REPORT", 16, 21);
-    
-    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
-    doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v5.5`, 16, 27);
-    
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
-    doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
-
-    let cardY = 48;
-    doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" SECURE INITIAL IDENTITY MATRIX", 12, cardY + 4.2);
-    
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
-    doc.rect(10, cardY + 6, 92, 26, 'DF');
-    doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
-    doc.text("CANDIDATE INITIALS :", 14, cardY + 14);
-    doc.text("TARGET MATRIX APP  :", 14, cardY + 22);
-    doc.text("SYSTEM TIME STAMP  :", 14, cardY + 30);
-    
-    doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
-    doc.text(student.length > 20 ? student.substring(0, 20) + "..." : student, 44, cardY + 14);
-    doc.text(test.length > 20 ? test.substring(0, 20) + "..." : test, 44, cardY + 22);
-    doc.setFont("courier", "bold"); doc.setFontSize(6.5); doc.text(timestamp, 44, cardY + 30);
-
-    doc.setFillColor(241, 245, 249); doc.rect(108, cardY, 92, 6, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(108, cardY, 92, 6, 'D');
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" LOAD DATA STRUCTURAL CONSTANTS", 110, cardY + 4.2);
-    
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
-    doc.rect(108, cardY + 6, 92, 26, 'DF');
-    doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
-    doc.text("TOTAL QUESTIONS    :", 112, cardY + 13);
-    doc.text("MAX EVAL MARKS      :", 112, cardY + 19);
-    doc.text("EVAL USER ATTEMPTS  :", 112, cardY + 25);
-    doc.text("VERIFIED FAULTS     :", 112, cardY + 31);
-    
-    doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
-    doc.text(`${telemetryData.totalQs} ITEMS`, 148, cardY + 13);
-    doc.text(`${telemetryData.maxMarks} MARKS`, 148, cardY + 19);
-    doc.text(`${telemetryData.attempted} UNITS`, 148, cardY + 25);
-    doc.setTextColor(225, 29, 72); doc.text(`${telemetryData.wrong} FAULTS`, 148, cardY + 31);
-
-    let scoreY = 86;
-    doc.setFillColor(250, 251, 253); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
-    doc.rect(10, scoreY, 190, 24, 'DF');
-    doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.3);
-    doc.line(68, scoreY, 68, scoreY + 24); doc.line(142, scoreY, 142, scoreY + 24);
-    
-    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("COMPUTED GROSS MARKS", 15, scoreY + 6);
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-    doc.text(`${(telemetryData.correct * telemetryData.marksPerCorrect).toFixed(2)}`, 15, scoreY + 14);
-
-    doc.setTextColor(14, 165, 233); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text("INTELLIGENCE ENGINE SCORE RUN", 73, scoreY + 6);
-    doc.setFont("courier", "bold"); doc.setFontSize(20); doc.setTextColor(15, 23, 42);
-    doc.text(`${telemetryData.finalScore.toFixed(2)}`, 73, scoreY + 15);
-
-    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("ENGINE PERFORMANCE EFFICIENCY", 147, scoreY + 6);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(12);
-    doc.text(`${telemetryData.efficiency}%`, 147, scoreY + 14);
-
-    let meterY = 118;
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY - 4, 200, meterY - 4);
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-    doc.text("VISUAL TELEMETRY EVALUATION GRAPH", 11, meterY);
-    meterY += 5;
-
-    const analyticalGauges = [
-        { title: "ACCURACY DENSITY", value: telemetryData.correct, max: telemetryData.totalQs || 1, color: [14, 165, 233] },
-        { title: "PENALTY COEFFICIENT", value: telemetryData.wrong, max: telemetryData.totalQs || 1, color: [168, 85, 247] }
-    ];
-
-    analyticalGauges.forEach(gauge => {
-        doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139);
-        doc.text(gauge.title, 11, meterY + 3.5);
-
-        let segments = 24;
-        let activeBlocks = Math.round((gauge.value / gauge.max) * segments);
-        let startX = 74;
-        
-        for(let s = 0; s < segments; s++) {
-            if(s < activeBlocks) {
-                doc.setFillColor(gauge.color[0], gauge.color[1], gauge.color[2]);
-                doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'F');
-            } else {
-                doc.setDrawColor(226, 232, 240);
-                doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'D');
-            }
-        }
-        meterY += 7;
-    });
-
-    if (reportType === 'subjectwise') {
-        doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY - 1, 200, meterY - 1);
-        doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-        doc.text("CROSS-SUBJECT ANALYTICS MATRIX", 11, meterY + 4);
-        meterY += 9;
-
-        const dynLabel = document.getElementById('mathBioLabel')?.textContent || 'MATH / BIO';
-        const rows = [
-            { name: 'PHYSICS SUBSYSTEM', kA: 'phyA', kC: 'phyC', kW: 'phyW' },
-            { name: 'CHEMISTRY SUBSYSTEM', kA: 'chemA', kC: 'chemC', kW: 'chemW' },
-            { name: `${dynLabel} SUBSYSTEM`, kA: 'mathBioA', kC: 'mathBioC', kW: 'mathBioW' }
-        ];
-
-        rows.forEach(r => {
-            const total = parseInt(document.getElementById(r.kA).value) || 0;
-            const corr = parseInt(document.getElementById(r.kC).value) || 0;
-            const wrng = parseInt(document.getElementById(r.kW).value) || 0;
-
-            doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(71, 85, 105);
-            doc.text(r.name, 11, meterY + 3);
-
-            if (total > 0) {
-                let maxWidth = 122;
-                let cW = (corr / total) * maxWidth;
-                let wW = (wrng / total) * maxWidth;
-                let iW = Math.max(0, maxWidth - (cW + wW));
-
-                doc.setFillColor(16, 185, 129); if(cW > 0) doc.rect(74, meterY, cW, 4.0, 'F');
-                doc.setFillColor(244, 63, 94); if(wW > 0) doc.rect(74 + cW, meterY, wW, 4.0, 'F');
-                doc.setFillColor(241, 245, 249); if(iW > 0) doc.rect(74 + cW + wW, meterY, iW, 4.0, 'F');
-                
-                doc.setDrawColor(203, 213, 225); doc.rect(74, meterY, maxWidth, 4.0, 'D');
-                doc.setFontSize(5.5); doc.setTextColor(15, 23, 42); doc.setFont("courier", "bold");
-                doc.text(`[ OK: ${corr} | WRG: ${wrng} | IDLE: ${Math.max(0, total-(corr+wrng))} ]`, 158, meterY - 1.2);
-            } else {
-                doc.setFont("helvetica", "oblique"); doc.setFontSize(6); doc.setTextColor(148, 163, 184);
-                doc.text("CHANNEL OFFLINE // NO CURRICULUM STREAM LOADED IN DATA MODEM", 74, meterY + 3);
-            }
-            meterY += 7;
-        });
+    if (efficiency >= 75) {
+        percentCapsule.style.background = 'rgba(16, 185, 129, 0.15)';
+        percentCapsule.style.color = '#34d399';
+    } else if (efficiency >= 40) {
+        percentCapsule.style.background = 'rgba(245, 158, 11, 0.15)';
+        percentCapsule.style.color = '#fbbf24';
+    } else {
+        percentCapsule.style.background = 'rgba(239, 68, 68, 0.15)';
+        percentCapsule.style.color = '#f87171';
     }
 
-    let tBoxY = Math.max(meterY + 4, 148);
-    doc.setFillColor(252, 253, 255); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
-    doc.rect(10, tBoxY, 190, 36, 'DF');
-    doc.setFillColor(168, 85, 247); doc.rect(10, tBoxY, 2.5, 36, 'F');
+    const outputPanel = document.getElementById('telemetryOutputPanel');
+    outputPanel.classList.add('panel-visible');
 
-    doc.setTextColor(15, 23, 42); doc.setFontSize(8.5); doc.setFont("helvetica", "bold");
-    doc.text("AUTOMATED ALGORITHMIC INTELLIGENCE RECOMMENDATIONS MATRIX", 16, tBoxY + 6);
-    doc.setFont("courier", "bold"); doc.setFontSize(7.5); doc.setTextColor(51, 65, 85);
+    triggerSystemToastNotification("Computation finalized successfully. Analytics Matrix synchronized.", false);
 
-    let systemRecommendationText = "";
-    if (telemetryData.efficiency > 80) systemRecommendationText = "EXCELLENT CONTEXT ACUITY. MAINTAIN CONSTANT VELOCITY PATTERNS TO PRESERVE CAP LIMIT.";
-    else if (telemetryData.efficiency > 50) systemRecommendationText = "STABLE EQUILIBRIUM. ELIMINATE TRIVIAL FAULT TRIGGERS TO BRIDGE THE SUB-80% ACCURACY DECAY.";
-    else systemRecommendationText = "CRITICAL SYSTEM FAULT DENSITY. ELIMINATE GUESSWORK PATTERNS IMMEDIATELY TO REMOVE PENALTY DRAINS.";
+    setTimeout(() => {
+        outputPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 300);
+}
 
-    doc.text(`>> RECOM_STRATEGY : ${systemRecommendationText}`, 15, tBoxY + 14);
-    doc.text(`>> PENALTY_DECAY  : THE REGISTERED PENALTY INFLICTED SUBTRACTS ${telemetryData.totalPenalty.toFixed(2)} POINTS FROM ABSOLUTE CAPACITY.`, 15, tBoxY + 21);
-    doc.text(`>> EFFICIENCY_GAP : ${telemetryData.unattempted} UNATTEMPTED SEGMENTS IDENTIFIED FOR LOW-COST SCORE OPTIMIZATION.`, 15, tBoxY + 28);
+function resetEvaluationEngineFrame() {
+    document.getElementById('evaluationForm').reset();
+    clearImplicitTransientResiduals();
+    clearInputValidationStyles();
+    dismissVirtualKeyboardPanel();
 
-    const finalFooterY = 254;
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, finalFooterY - 4, 200, finalFooterY - 4);
+    document.getElementById('examProfile').value = 'custom';
+    document.getElementById('examProfileLabel').textContent = 'SELECT EXAM PROFILE';
+    document.getElementById('ratioLabel').textContent = 'Ratio: 1/4';
+    document.getElementById('markingRatio').value = '0.25';
+    document.getElementById('reportType').value = 'overall';
+    document.getElementById('selectedLabel').textContent = 'OVERALL MODE';
+
+    const totalQsInput = document.getElementById('totalQs');
+    if (totalQsInput) totalQsInput.classList.remove('profile-locked-row');
+    const sectionWrapper = document.getElementById('subjectSection');
+    if (sectionWrapper) sectionWrapper.classList.remove('section-locked');
+
+    document.getElementById('intelMessage').textContent = EXAM_PROFILES.custom.intel;
+
+    toggleSubjectSectionDisplay();
+
+    document.getElementById('telemetryOutputPanel').classList.remove('panel-visible');
+    calculatedTelemetryData = null;
+
+    triggerSystemToastNotification("System core framework reset to defaults.", false);
+}
+
+// ============================================================================
+// 9. RE-ENGINEERED HIGH-FIDELITY PDF REPORT GENERATOR LEDGER
+// ============================================================================
+function generateAuditLedgerDocument() {
+    if (!calculatedTelemetryData) return;
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+    // Background Canvas
+    doc.setFillColor(248, 250, 252); doc.rect(0, 0, 210, 297, "F");
+
+    // Header Branding Frame
+    doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 38, "F");
+    
+    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(22);
+    doc.text("ECLIPSE7 PERFORMANCE ANALYTICS", 14, 16);
+    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(56, 189, 248);
+    doc.text(">> ENGINE SYSTEM DISPATCH: METRICS AUDIT REPORT CORE_GEN_V2.5", 14, 22);
+
+    // Decorative Header Accent Block
+    doc.setFillColor(124, 58, 237); doc.rect(0, 35, 210, 3, "F");
+
+    // Metadata Container Block
+    let metaY = 48;
+    doc.setFillColor(255, 255, 255); doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.4);
+    doc.rect(12, metaY, 186, 30, "FD");
+
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text("STUDENT IDENTITY AUTHENTICATION", 16, metaY + 7);
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+    doc.text(calculatedTelemetryData.student, 16, metaY + 13);
+
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text("ASSESSMENT TOKEN SPECIFICATION", 16, metaY + 22);
+    doc.setTextColor(30, 41, 59); doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+    doc.text(calculatedTelemetryData.test, 16, metaY + 27);
+
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text("CURRICULUM SCHEME", 125, metaY + 7);
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+    doc.text(calculatedTelemetryData.profile, 125, metaY + 13);
+
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text("TEMPORAL STAMP LOG", 125, metaY + 22);
+    doc.setTextColor(30, 41, 59); doc.setFont("courier", "bold"); doc.setFontSize(9);
+    doc.text(new Date().toLocaleString(), 125, metaY + 27);
+
+    // Telemetry Structural Table Array Mapping
+    const rows = [
+        ["Total Assessment Capacity Pool", `${calculatedTelemetryData.totalQs} Rows/Questions`, `Absolute Score Limit Cap`, `${calculatedTelemetryData.maxMarks} Points`],
+        ["Registered Attempts Count", `${calculatedTelemetryData.attempted} Units`, `Absolute Accurate Matches`, `${calculatedTelemetryData.correct} Units`],
+        ["Incorrect Fault Disruptions", `${calculatedTelemetryData.wrong} Units`, `Unattempted Void Margins`, `${calculatedTelemetryData.unattempted} Units`],
+        ["Computed Performance Efficiency", `${calculatedTelemetryData.efficiency.toFixed(1)}%`, `Accuracy Frequency Factor`, `${calculatedTelemetryData.accuracy.toFixed(1)}%`]
+    ];
+
+    doc.autoTable({
+        startY: metaY + 36, head: [["METRIC VARIABLE", "QUANTUM VALUES", "CORE PARAMETER", "SCORE VALUES"]], body: rows,
+        theme: "plain", headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: "bold", fontSize: 8.5 },
+        bodyStyles: { font: "helvetica", fontSize: 9, textColor: [51, 65, 85], cellPadding: 4 },
+        columnStyles: { 0: { fontStyle: "bold", textColor: [15, 23, 42] }, 2: { fontStyle: "bold", textColor: [15, 23, 42] } },
+        styles: { lineSplitting: "wrap" }, drawBorder: true,
+        didDrawPage: function(data) {
+            doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4);
+            doc.rect(data.settings.margin.left, data.cursor.startY, 182, data.cursor.y - data.cursor.startY);
+        }
+    });
+
+    let currentPdfY = doc.previousAutoTable.finalY + 8;
+
+    // Subjective Breakdowns Conditional Matrix Section Block
+    const reportType = document.getElementById('reportType').value;
+    if (reportType === 'subjectwise') {
+        const subRows = [];
+        ['phy', 'chem', 'mathBio'].forEach(sub => {
+            const rowLabel = sub === 'mathBio' ? document.getElementById('mathBioLabel').textContent : sub.toUpperCase();
+            const t = document.getElementById(`${sub}A`).value || '0';
+            const c = document.getElementById(`${sub}C`).value || '0';
+            const w = document.getElementById(`${sub}W`).value || '0';
+            const n = document.getElementById(`${sub}N`).value || '0';
+            subRows.push([rowLabel, t, c, w, n]);
+        });
+
+        doc.autoTable({
+            startY: currentPdfY, head: [["SUBJECT COMPARTMENT Matrix", "TOTAL Q.", "CORRECT", "WRONG", "NOT ATTEMPTED"]], body: subRows,
+            theme: "striped", headStyles: { fillColor: [71, 85, 105], textColor: [255, 255, 255], fontStyle: "bold", fontSize: 8 },
+            bodyStyles: { fontSize: 8.5, cellPadding: 3.5 },
+            columnStyles: { 0: { fontStyle: "bold", textColor: [15, 23, 42] } }
+        });
+        currentPdfY = doc.previousAutoTable.finalY + 8;
+    }
+
+    // Performance Summary Highlight Callout Dashboard Section
+    doc.setFillColor(241, 245, 249); doc.setDrawColor(226, 232, 240); doc.rect(12, currentPdfY, 186, 22, "FD");
+    
+    doc.setTextColor(71, 85, 105); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+    doc.text("CRITICAL EVALUATION SCORE LEDGER RESULT", 16, currentPdfY + 6);
+    
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(15);
+    doc.text(`${calculatedTelemetryData.finalScore.toFixed(2).replace(/\.00$/, '')} NET MARKS`, 16, currentPdfY + 15);
+    
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(8.5);
+    doc.text(`Identified penalty deduction drains substracted ${calculatedTelemetryData.totalPenalty.toFixed(2)} total points from capability.`, 74, currentPdfY + 14);
+
+    // AI Algorithmic Telemetry Advisory Section Box
+    let tBoxY = currentPdfY + 28;
+    doc.setFillColor(15, 23, 42); doc.rect(12, tBoxY, 186, 36, "F");
+    doc.setFillColor(2, 132, 199); doc.rect(12, tBoxY, 2, 36, "F");
+
+    doc.setTextColor(14, 165, 233); doc.setFont("courier", "bold"); doc.setFontSize(8.5);
+    doc.text(">> CORE STRATEGIC INTELLIGENCE INTERPRETER LOG", 18, tBoxY + 7);
+    
+    doc.setTextColor(241, 245, 249); doc.setFont("helvetica", "normal"); doc.setFontSize(8);
+
+    let systemRecommendationText = "PERFORMANCE OPTIMAL. RETAIN METHODOLOGY SCHEDULING PLANS.";
+    if (calculatedTelemetryData.accuracy < 70) systemRecommendationText = "CRITICAL PENALTY DANGER: ACCURACY CRITICAL GAP DETECTED. HALT GUESSWORK PATTERNS IMMEDIATELY TO REMOVE PENALTY DRAINS.";
+    else if (calculatedTelemetryData.unattempted > calculatedTelemetryData.totalQs * 0.3) systemRecommendationText = "ATTEMPT GAP IDENTIFIED: AGGRESSIVE ATTACK METRICS STRATEGY NEEDED ON BUFFER TOPICS TO OVERCOME OUTPUT CAPACITY BLOCKS.";
+
+    doc.text(`>> RECOM_STRATEGY : ${systemRecommendationText}`, 18, tBoxY + 14);
+    doc.text(`>> PENALTY_DECAY  : THE REGISTERED PENALTY INFLICTED SUBTRACTS ${calculatedTelemetryData.totalPenalty.toFixed(2)} POINTS FROM ABSOLUTE CAPACITY.`, 18, tBoxY + 21);
+    doc.text(`>> EFFICIENCY_GAP : ${calculatedTelemetryData.unattempted} UNATTEMPTED SEGMENTS IDENTIFIED FOR LOW-COST SCORE OPTIMIZATION.`, 18, tBoxY + 28);
+
+    // Footer Attribution Seal Line Frame Block
+    const finalFooterY = 274;
+    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(12, finalFooterY - 4, 198, finalFooterY - 4);
 
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
     doc.text("MR. PRASAD REDDY", 14, finalFooterY + 4);
     doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
     doc.text("Chief Executive Officer & Founder of ECLIPSE7", 14, finalFooterY + 9);
-    doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(5, 150, 105);
-    doc.text("STATUS: INTEGRITY MATRIX APPROVED & DIGITAL RECORD VERIFIED VIA CORE STREAM", 14, finalFooterY + 14);
-
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = "stamp.jpg"; 
     
-    img.onload = function() {
-        doc.addImage(img, 'JPEG', 158, 244, 34, 34);
-        doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
-    };
-    img.onerror = () => {
-        doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
-    };
+    doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(148, 163, 184);
+    doc.text("https://eclipse7.odoo.com/", 198, finalFooterY + 5, { align: "right" });
+
+    doc.save(`E7_LEDGER_${calculatedTelemetryData.student}_${calculatedTelemetryData.test}.pdf`);
 }
