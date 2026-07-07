@@ -16,8 +16,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <link rel="stylesheet" href="style.css">
 
     <style>
@@ -171,8 +169,7 @@
             </div>
         </div>
 
-        <div id="subjectSection" class="subject-breakdown-wrapper">
-            <!-- Dynamic Rule Mandate Notice Bar -->
+        <div id="subjectSection" class="subject-breakdown-wrapper" style="display: none;">
             <div class="mandatory-input-notice-bar">
                 <i class="fa-solid fa-circle-info"></i>
                 <span><strong>Mandatory Metrics Rule:</strong> Provide exactly 2 variables per row among (Correct, Wrong, Not Attempted). The residual data points evaluate instantly.</span>
@@ -241,11 +238,9 @@
     </footer>
 </div>
 
-<!-- Re-Engineered Dual-Mode Adaptive Custom Virtual Keyboard View -->
 <div id="glassmorphicKeyboardPanel" class="glass-keyboard-container structural-mode-numpad">
     <div class="keyboard-drag-notch-handle"></div>
     
-    <!-- Dynamic Alphanumeric QWERTY Matrix View Structure -->
     <div class="keyboard-matrix-qwerty-layout" id="qwertyMatrixRoot">
         <div class="kb-compact-row row-numbers-strip">
             <button type="button" class="kb-character-key" data-key="1">1</button>
@@ -300,7 +295,6 @@
         </div>
     </div>
 
-    <!-- Standard Numerical Input Layout Grid View -->
     <div class="keyboard-matrix-grid" id="numpadMatrixRoot">
         <button type="button" class="kb-matrix-key" data-key="1">1</button>
         <button type="button" class="kb-matrix-key" data-key="2">2</button>
