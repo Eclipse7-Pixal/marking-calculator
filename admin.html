@@ -3,175 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Core Administrative Center | ECLIPSE7 Premium Core</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>ECLIPSE7 | Intel Admin Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Tailored Administrative Scope Adaptations on Top of style.css Components */
-        .admin-wide-container {
-            max-width: 1100px !important;
-            width: 95% !important;
-            margin: 40px auto;
+        :root {
+            --bg-glass: rgba(15, 23, 42, 0.65);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --accent-blue: #38bdf8;
         }
-        .admin-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 32px;
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #090d16;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
         }
-        .stat-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--fluent-border);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: left;
-            transition: var(--transition-fluent);
-        }
-        .stat-card:hover {
-            border-color: var(--fluent-border-focus);
-            background: rgba(124, 58, 237, 0.04);
-        }
-        .stat-label {
-            font-size: 0.68rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .stat-value {
-            font-size: 1.85rem;
-            font-weight: 800;
-            color: var(--text-core);
-            margin-top: 8px;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .table-responsive-wrapper {
+        .admin-wrapper {
             width: 100%;
-            overflow-x: auto;
-            border: 1px solid var(--fluent-border);
-            border-radius: 16px;
-            background: rgba(10, 10, 16, 0.4);
-            margin-top: 20px;
+            max-width: 1200px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
         }
-        .telemetry-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.85rem;
-        }
-        .telemetry-table th {
-            background: rgba(15, 15, 25, 0.8);
-            padding: 16px;
-            font-weight: 700;
-            color: var(--text-muted);
-            font-size: 0.68rem;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--fluent-border);
-        }
-        .telemetry-table td {
-            padding: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            color: var(--text-core);
-        }
-        .telemetry-table tr:hover td {
-            background: rgba(255, 255, 255, 0.01);
-        }
-        .badge-profile {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
-            background: rgba(124, 58, 237, 0.15);
-            color: #c084fc;
-            border: 1px solid rgba(124, 58, 237, 0.3);
-        }
-        .action-header-row {
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 16px;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 24px;
+            margin-bottom: 32px;
         }
-        .btn-dangerous-purge {
-            background: rgba(239, 68, 68, 0.1) !important;
-            border: 1px solid rgba(239, 68, 68, 0.3) !important;
-            color: #fca5a5 !important;
-            padding: 10px 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.78rem;
-            transition: var(--transition-fluent);
+        h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.02em; }
+        .refresh-btn {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: white; border: none; padding: 12px 24px;
+            border-radius: 12px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; transition: 0.2s;
         }
-        .btn-dangerous-purge:hover {
-            background: #ef4444 !important;
-            color: #fff !important;
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+        .refresh-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .table-container { overflow-x: auto; }
+        table {
+            width: 100%; border-collapse: collapse; text-align: left;
+            font-size: 0.9rem;
         }
+        th {
+            padding: 16px; border-bottom: 2px solid var(--border-glass);
+            color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;
+        }
+        td { padding: 16px; border-bottom: 1px solid var(--border-glass); }
+        tr:hover { background: rgba(255,255,255,0.02); }
+        .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+        .badge {
+            background: rgba(56, 189, 248, 0.15); color: var(--accent-blue);
+            padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;
+        }
+        .pdf-link {
+            color: #4ade80; text-decoration: none; display: inline-flex;
+            align-items: center; gap: 6px; font-weight: 600;
+        }
+        .pdf-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-<div class="fluent-ambient-canvas">
-    <div class="ambient-fluid-orb orb-alpha" style="width: 700px; height: 700px;"></div>
-    <div class="ambient-fluid-orb orb-beta" style="width: 800px; height: 800px;"></div>
-</div>
-
-<div class="soft-glass-container admin-wide-container">
-    <header class="app-header" style="text-align: left; align-items: flex-start;">
-        <div class="fluent-badge">E7 SECURE BACKEND LINK</div>
-        <h1>Assessment Operations Dashboard</h1>
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Real-time synchronized records for the ECLIPSE7 Evaluation Platform.</p>
+<div class="admin-wrapper">
+    <header>
+        <div>
+            <h1>Eclipse7 Intelligence Dashboard</h1>
+            <p style="color: #64748b; margin: 4px 0 0 0; font-size: 0.9rem;">Live System Metric Tracking Gateway</p>
+        </div>
+        <button class="refresh-btn" onclick="fetchEvaluationRecords()">
+            <i class="fa-solid fa-rotate"></i> Sync Live Matrix
+        </button>
     </header>
 
-    <div class="admin-stats-grid">
-        <div class="stat-card">
-            <div class="stat-label">Total Submissions Processed</div>
-            <div class="stat-value" id="statTotalLogs">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Unique Identity Profiles</div>
-            <div class="stat-value" id="statUniqueStudents">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Global Precision Average</div>
-            <div class="stat-value" id="statAvgAccuracy">0.0%</div>
-        </div>
-    </div>
-
-    <div class="action-header-row">
-        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700;">Telemetry Stream Database Records</h3>
-        <button type="button" class="btn-dangerous-purge" onclick="purgeServerLogs()">
-            <i class="fa-solid fa-trash-can" style="margin-right: 6px;"></i> Purge Telemetry Database
-        </button>
-    </div>
-
-    <div class="table-responsive-wrapper">
-        <table class="telemetry-table">
+    <div class="table-container">
+        <table>
             <thead>
                 <tr>
                     <th>Timestamp</th>
-                    <th>Student Name</th>
+                    <th>Student Identity</th>
                     <th>Assessment Token</th>
-                    <th>Curriculum Profile</th>
-                    <th>Attempts</th>
-                    <th>Incorrect</th>
-                    <th>Calculated Score</th>
+                    <th>Profile</th>
+                    <th>Score (Raw)</th>
+                    <th>Accuracy %</th>
+                    <th>Data Report</th>
                 </tr>
             </thead>
-            <tbody id="telemetryDataStreamRoot">
+            <tbody id="metricsTableBody">
                 <tr>
-                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">
-                        <i class="fa-solid fa-circle-notch fa-spin" style="margin-right: 8px;"></i> Awaiting synchronization lifecycle connection streaming...
-                    </td>
+                    <td colspan="7" style="text-align: center; color: #64748b; padding: 40px;">Initializing Core Sync Stream...</td>
                 </tr>
             </tbody>
         </table>
@@ -179,106 +108,52 @@
 </div>
 
 <script>
-    /**
-     * Fetch API Data stream from Server Core Pipeline
-     */
-    async function streamTelemetryDashboard() {
+    const SUPABASE_URL = "https://marhkwvkprvoshowqpgq.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hcmhrd3ZrcHJ2b3Nob3dxcGdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MTcwMTcsImV4cCI6MjA5ODk5MzAxN30.voml07f_WQTpEbu43EUhqeqgoAcBZJQ3mc3usbnwbzs";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function fetchEvaluationRecords() {
+        const tbody = document.getElementById('metricsTableBody');
         try {
-            const response = await fetch('/api/admin/telemetry-stream');
-            const resData = await response.json();
-            
-            if (!resData.success) return;
-            
-            renderTableRecords(resData.logs);
-        } catch (err) {
-            console.error("Failed to connect with telemetry backend streams:", err);
-        }
-    }
+            const { data, error } = await supabase
+                .from('evaluations')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-    /**
-     * Map Data Stream Arrays into Document Node Matrix Table Rows
-     */
-    function renderTableRecords(logs) {
-        const root = document.getElementById('telemetryDataStreamRoot');
-        if (!root) return;
+            if (error) throw error;
 
-        if (logs.length === 0) {
-            root.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">No assessment submissions found in system logs.</td></tr>`;
-            document.getElementById('statTotalLogs').textContent = "0";
-            document.getElementById('statUniqueStudents').textContent = "0";
-            document.getElementById('statAvgAccuracy').textContent = "0.0%";
-            return;
-        }
-
-        // Calculate System Stats Engine
-        const uniqueStudents = new Set(logs.map(l => l.studentName.toLowerCase())).size;
-        let totalAccuracySum = 0;
-        
-        let rowBufferHTML = "";
-        logs.forEach(log => {
-            const dateObj = new Date(log.timestamp);
-            const formattedTime = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
-            const attempts = Number(log.attempted) || 0;
-            const wrong = Number(log.wrong) || 0;
-            const correct = Math.max(0, attempts - wrong);
-            
-            const accuracy = attempts > 0 ? ((correct / attempts) * 100).toFixed(1) : "0.0";
-            totalAccuracySum += parseFloat(accuracy);
-
-            rowBufferHTML += `
-                <tr>
-                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted);">${formattedTime}</td>
-                    <td style="font-weight: 600;">${escapeHTML(log.studentName)}</td>
-                    <td>${escapeHTML(log.testName)}</td>
-                    <td><span class="badge-profile">${log.examProfile.toUpperCase()}</span></td>
-                    <td style="font-family: 'JetBrains Mono', monospace;">${attempts}</td>
-                    <td style="font-family: 'JetBrains Mono', monospace; color: #ef4444;">${wrong}</td>
-                    <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #34d399;">
-                        ${log.scoreMetrics.finalScore !== undefined ? log.scoreMetrics.finalScore : 'N/A'}
-                    </td>
-                </tr>
-            `;
-        });
-
-        root.innerHTML = rowBufferHTML;
-        
-        // Update Admin Analytics Counters
-        document.getElementById('statTotalLogs').textContent = logs.length;
-        document.getElementById('statUniqueStudents').textContent = uniqueStudents;
-        document.getElementById('statAvgAccuracy').textContent = (totalAccuracySum / logs.length).toFixed(1) + "%";
-    }
-
-    /**
-     * Purge Database Logs via System Command Post Configuration Hook
-     */
-    async function purgeServerLogs() {
-        if (!confirm("CRITICAL MANDATE CONTROL: Are you completely certain you want to purge all tracking log evaluations from the permanent system registry? This action cannot be reversed.")) {
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/admin/purge-logs', { method: 'POST' });
-            const result = await response.json();
-            if (result.success) {
-                streamTelemetryDashboard();
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 40px;">No operational records registered in local cluster database.</td></tr>`;
+                return;
             }
-        } catch (error) {
-            alert("Failed to communicate destructive operations payload configuration with server.");
+
+            tbody.innerHTML = data.map(record => {
+                const date = new Date(record.created_at).toLocaleString();
+                return `
+                    <tr>
+                        <td class="mono" style="color: #94a3b8;">${date}</td>
+                        <td><strong>${record.student_name}</strong></td>
+                        <td style="color: #cbd5e1;">${record.test_name}</td>
+                        <td><span class="badge">${record.exam_profile}</span></td>
+                        <td class="mono" style="font-weight:700; color:#38bdf8;">${Number(record.final_score).toFixed(2)}</td>
+                        <td class="mono" style="color:#e2e8f0;">${record.efficiency}%</td>
+                        <td>
+                            ${record.pdf_storage_url ? `
+                                <a href="${record.pdf_storage_url}" target="_blank" class="pdf-link">
+                                    <i class="fa-solid fa-file-pdf"></i> View Output
+                                </a>
+                            ` : `<span style="color:#64748b;">No PDF File Linked</span>`}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #f87171; padding: 40px;">Connection Interrupted: Fault loading data matrix.</td></tr>`;
         }
     }
 
-    function escapeHTML(str) {
-        return str.replace(/[&<>'"]/g, 
-            tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-        );
-    }
-
-    // Initialize Active Stream Loop
-    document.addEventListener('DOMContentLoaded', () => {
-        streamTelemetryDashboard();
-        setInterval(streamTelemetryDashboard, 10000); // Polling architecture interval tracking every 10 seconds
-    });
+    document.addEventListener('DOMContentLoaded', fetchEvaluationRecords);
 </script>
 </body>
 </html>
