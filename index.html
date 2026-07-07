@@ -181,6 +181,7 @@
         </form>
     </div>
 
+    <!-- Corrected Touch-Optimized Virtual Numpad Panel Overlay -->
     <div class="glassmorphic-keyboard-panel" id="glassmorphicKeyboardPanel">
         <div class="keyboard-panel-header">
             <div class="keyboard-panel-title">
@@ -190,23 +191,24 @@
                 <i class="fa-solid fa-delete-left"></i>
             </button>
         </div>
-    </div>
 
-    <div class="keyboard-matrix-grid" id="numpadMatrixRoot">
-        <button type="button" class="kb-matrix-key" data-key="1">1</button>
-        <button type="button" class="kb-matrix-key" data-key="2">2</button>
-        <button type="button" class="kb-matrix-key" data-key="3">3</button>
-        <button type="button" class="kb-matrix-key" data-key="4">4</button>
-        <button type="button" class="kb-matrix-key" data-key="5">5</button>
-        <button type="button" class="kb-matrix-key" data-key="6">6</button>
-        <button type="button" class="kb-matrix-key" data-key="7">7</button>
-        <button type="button" class="kb-matrix-key" data-key="8">8</button>
-        <button type="button" class="kb-matrix-key" data-key="9">9</button>
-        <button type="button" class="kb-matrix-key kb-functional-accent-key" data-key="clear">CLR</button>
-        <button type="button" class="kb-matrix-key" data-key="0">0</button>
-        <button type="button" class="kb-matrix-key kb-functional-backspace-key" data-key="backspace">
-            <i class="fa-solid fa-arrow-left-long"></i>
-        </button>
+        <!-- The key matrix grid must reside INSIDE the panel container wrapper -->
+        <div class="keyboard-matrix-grid" id="numpadMatrixRoot">
+            <button type="button" class="kb-matrix-key" data-key="1">1</button>
+            <button type="button" class="kb-matrix-key" data-key="2">2</button>
+            <button type="button" class="kb-matrix-key" data-key="3">3</button>
+            <button type="button" class="kb-matrix-key" data-key="4">4</button>
+            <button type="button" class="kb-matrix-key" data-key="5">5</button>
+            <button type="button" class="kb-matrix-key" data-key="6">6</button>
+            <button type="button" class="kb-matrix-key" data-key="7">7</button>
+            <button type="button" class="kb-matrix-key" data-key="8">8</button>
+            <button type="button" class="kb-matrix-key" data-key="9">9</button>
+            <button type="button" class="kb-matrix-key kb-functional-accent-key" data-key="clear">CLR</button>
+            <button type="button" class="kb-matrix-key" data-key="0">0</button>
+            <button type="button" class="kb-matrix-key kb-functional-backspace-key" data-key="backspace">
+                <i class="fa-solid fa-arrow-left-long"></i>
+            </button>
+        </div>
     </div>
 </body>
 </html>
