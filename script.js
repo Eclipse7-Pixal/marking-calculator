@@ -42,6 +42,13 @@ let currentlyFocusedInputFieldNode = null;
 let isTouchFormFactorDevice = false;
 
 // ============================================================================
+// SUPABASE CLIENT DIRECT LINK CONFIGURATION (LIVE PRODUCTION)
+// ============================================================================
+const SUPABASE_URL = "https://marhkwvkprvoshowqpgq.supabase.co"; 
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hcmhrd3ZrcHJ2b3Nob3dxcGdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MTcwMTcsImV4cCI6MjA5ODk5MzAxN30.voml07f_WQTpEbu43EUhqeqgoAcBZJQ3mc3usbnwbzs";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ============================================================================
 // 2. MODERN RE-ENGINEERED FLUENT DROPDOWN CONTROLLER
 // ============================================================================
 function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, callback) {
@@ -140,7 +147,6 @@ function applySelectedExamProfile(profileKey) {
         return;
     }
 
-    // Apply UI lock pattern to Total Questions instead of standard HTML readonly attribute
     if (totalQsInput) {
         totalQsInput.classList.add('profile-locked-row');
     }
@@ -206,7 +212,6 @@ function setupReactiveSubjectSyncObservers() {
 }
 
 function processSubjectRowRecalculationSequence(targetNode) {
-    // If user edited an allowed input field, check if it should push to custom mode
     if (targetNode.id !== 'totalQs' && !targetNode.classList.contains('profile-locked-row')) {
         const selectedProfile = document.getElementById('examProfile').value;
         if (selectedProfile === 'custom' || targetNode.classList.contains('sub-input')) {
@@ -222,6 +227,7 @@ function processSubjectRowRecalculationSequence(targetNode) {
     syncSubjectBreakdownToMainInputs();
 }
 
+// Custom code block deployment structural rules follow below
 function executeRowAlgebraSolver(sub, activeElement = null) {
     const elTot = document.getElementById(`${sub}A`);
     const elCor = document.getElementById(`${sub}C`);
@@ -324,7 +330,6 @@ function setupPremiumVirtualKeyboardCoreEngine() {
         }
 
         input.addEventListener('click', (e) => {
-            // Guard against choosing elements locked by current preset profile selection state
             if (input.classList.contains('profile-locked-row')) {
                 e.preventDefault();
                 return;
@@ -425,6 +430,7 @@ function triggerSystemToastNotification(message, isError = true) {
     setTimeout(() => { toast.classList.remove('show'); }, 5000);
 }
 
+// Validation styles removal architecture logic stream setup
 function clearInputValidationStyles() {
     const inputs = document.querySelectorAll('input');
     inputs.forEach(input => input.classList.remove('validation-error'));
@@ -533,7 +539,7 @@ function executeCalculationSequence() {
 }
 
 // ============================================================================
-// 9. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT)
+// 9. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT + SUPABASE SYNC)
 // ============================================================================
 async function downloadPDFReportSequence() {
     const telemetryData = executeCalculationSequence();
@@ -735,22 +741,7 @@ async function downloadPDFReportSequence() {
     doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(5, 150, 105);
     doc.text("STATUS: INTEGRITY MATRIX APPROVED & DIGITAL RECORD VERIFIED VIA CORE STREAM", 14, finalFooterY + 14);
 
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = "stamp.jpg"; 
-    
-    img.onload = function() {
-        doc.addImage(img, 'JPEG', 158, 244, 34, 34);
-        doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
-    };
-    img.onerror = () => {
-        doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
-    };
-}
-
-    // ============================================================================
-    // PRODUCTION INTEGRATION MATRIX (STORAGE + LIVE TRACKING DATABASE INJECTION)
-    // ============================================================================
+    // INNER SCOPE: Asynchronously handle storage upload operations cleanly
     const runDocumentExportAndUpload = async () => {
         const finalFilename = `${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`;
         doc.save(finalFilename);
