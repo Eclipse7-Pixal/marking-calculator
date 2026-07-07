@@ -18,288 +18,180 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        .app-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .meta-branding-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            margin-top: 10px;
-        }
-
-        .platform-title-meta {
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: #93c5fd;
-            opacity: 0.95;
-            margin: 0;
-            line-height: 1.3;
-        }
-
-        .author-attribution-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.64rem;
-            font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #9ca3af;
-            opacity: 0.7;
-            margin: 0;
-        }
-
-        .author-attribution-meta::before,
-        .author-attribution-meta::after {
-            content: '';
-            display: inline-block;
-            width: 14px;
-            height: 1px;
-            background: currentColor;
-            opacity: 0.3;
-        }
-    </style>
+    <script defer src="script.js"></script>
 </head>
 <body>
+    <div class="glass-viewport-wrapper" id="mainAppContainer">
+        <header class="app-header">
+            <div class="brand-badge">ECLIPSE7 ENGINE v5.5</div>
+            <h1>Performance Matrix Laboratory</h1>
+            <p>Algorithmic calculation engine optimizing precision scores and evaluation metrics.</p>
+        </header>
 
-<div class="fluent-ambient-canvas">
-    <div class="ambient-fluid-orb orb-alpha"></div>
-    <div class="ambient-fluid-orb orb-beta"></div>
-    <div class="ambient-fluid-orb orb-gamma"></div>
-</div>
+        <div id="systemNotification" class="toast-notification-node">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span id="notificationMessage">Action Blocked: Validation Error Detected.</span>
+        </div>
 
-<div class="soft-glass-container" id="mainAppContainer">
-    <div id="systemNotification" class="fluent-toast">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span id="notificationMessage">Validation Token Uninitialized.</span>
+        <form id="matrixCalculationForm" onsubmit="return false;">
+            <div class="soft-glass-container card-margin-bottom">
+                <div class="card-section-header">
+                    <i class="fa-solid fa-id-card section-icon-accent"></i>
+                    <h2>Identity Registration</h2>
+                </div>
+                <div class="fluent-layout-row">
+                    <div class="form-input-wrapper">
+                        <label class="soft-field-label" for="studentName">STUDENT NAME / CANDIDATE IDENTITY</label>
+                        <input type="text" id="studentName" placeholder="ENTER FULL NAME" autocomplete="off" required class="v-keyboard-target-disabled">
+                    </div>
+                    <div class="form-input-wrapper">
+                        <label class="soft-field-label" for="testName">TEST NAME / TRACKING PROFILE</label>
+                        <input type="text" id="testName" placeholder="ENTER EXAM TITLE" autocomplete="off" required class="v-keyboard-target-disabled">
+                    </div>
+                </div>
+            </div>
+
+            <div class="soft-glass-container card-margin-bottom">
+                <div class="card-section-header">
+                    <i class="fa-solid fa-sliders section-icon-accent"></i>
+                    <h2>Curriculum Controls</h2>
+                </div>
+                
+                <div class="fluent-layout-row card-margin-bottom">
+                    <div class="form-input-wrapper">
+                        <label class="soft-field-label">REPORT MODE CONFIGURATION</label>
+                        <div class="custom-select-box" id="customSelect">
+                            <input type="hidden" id="reportType" value="grand">
+                            <div class="select-box-trigger" id="selectedLabel">GRAND TOTAL EVALUATION</div>
+                            <div class="select-box-dropdown" id="selectOptions">
+                                <div class="select-box-option" data-value="grand">GRAND TOTAL EVALUATION</div>
+                                <div class="select-box-option" data-value="subjectwise">CROSS-SUBJECT BREAKDOWN</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-input-wrapper">
+                        <label class="soft-field-label">EXAM TEMPLATE STREAM</label>
+                        <div class="custom-select-box" id="examProfileSelectContainer">
+                            <input type="hidden" id="examProfile" value="custom">
+                            <div class="select-box-trigger" id="examProfileLabel">CUSTOM MODE (MANUAL OVERRIDE)</div>
+                            <div class="select-box-dropdown" id="examProfileOptions">
+                                <div class="select-box-option" data-value="jeemain">JEE MAIN PROFILE</div>
+                                <div class="select-box-option" data-value="jeeadv">JEE ADVANCED PROFILE</div>
+                                <div class="select-box-option" data-value="neet">NEET UG PROFILE</div>
+                                <div class="select-box-option" data-value="custom">CUSTOM OVERRIDE MODE</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="intel-diagnostic-box card-margin-bottom">
+                    <div class="intel-pulse-indicator"></div>
+                    <span id="intelMessage">Manual Override operational. Custom constraints active across input modules.</span>
+                </div>
+
+                <div class="fluent-layout-row">
+                    <div class="form-input-wrapper">
+                        <label class="soft-field-label" for="totalQs">TOTAL QUESTIONS</label>
+                        <input type="text" id="totalQs" placeholder="0" class="v-keyboard-target">
+                    </div>
+                    <div class="form-input-wrapper">
+                        <label class="soft-field-label" for="maxMarks">MAX EVAL MARKS</label>
+                        <input type="text" id="maxMarks" placeholder="0" class="v-keyboard-target">
+                    </div>
+                    <div class="form-input-wrapper">
+                        <label class="soft-field-label" for="attempted">ATTEMPTED UNITS</label>
+                        <input type="text" id="attempted" placeholder="0" class="v-keyboard-target">
+                    </div>
+                    <div class="form-input-wrapper">
+                        <label class="soft-field-label" for="wrong">VERIFIED FAULTS</label>
+                        <input type="text" id="wrong" placeholder="0" class="v-keyboard-target">
+                    </div>
+                    <div class="form-input-wrapper">
+                        <label class="soft-field-label">PENALTY SCALE RATIO</label>
+                        <div class="custom-select-box" id="ratioSelectContainer">
+                            <input type="hidden" id="markingRatio" value="0.25">
+                            <div class="select-box-trigger" id="ratioLabel">Ratio: 1/4</div>
+                            <div class="select-box-dropdown" id="ratioOptions">
+                                <div class="select-box-option" data-value="0.25">1/4 Negative Marking</div>
+                                <div class="select-box-option" data-value="0.333">1/3 Negative Marking</div>
+                                <div class="select-box-option" data-value="0.5">1/2 Negative Marking</div>
+                                <div class="select-box-option" data-value="1.0">1/1 Penalty Scale</div>
+                                <div class="select-box-option" data-value="0">0.0 No Penalty Ratio</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="subjectSection" class="subject-breakdown-wrapper">
+                <div class="soft-glass-container card-margin-bottom">
+                    <div class="card-section-header">
+                        <i class="fa-solid fa-chart-simple section-icon-accent"></i>
+                        <h2>Cross-Subject Breakdown</h2>
+                    </div>
+
+                    <div class="subject-grid-layout-header">
+                        <div>SUBJECT CHANNELS</div>
+                        <div>TOTAL</div>
+                        <div>CORRECT</div>
+                        <div>WRONG</div>
+                        <div>UNATTEMPTED</div>
+                    </div>
+
+                    <div class="subject-grid-row" data-subject="phy">
+                        <div class="subject-identity-tag">PHYSICS SUBSYSTEM</div>
+                        <input type="text" id="phyA" placeholder="0" class="v-keyboard-target sub-input">
+                        <input type="text" id="phyC" placeholder="0" class="v-keyboard-target sub-input">
+                        <input type="text" id="phyW" placeholder="0" class="v-keyboard-target sub-input">
+                        <input type="text" id="phyN" placeholder="0" class="v-keyboard-target sub-input">
+                    </div>
+
+                    <div class="subject-grid-row" data-subject="chem">
+                        <div class="subject-identity-tag">CHEMISTRY SUBSYSTEM</div>
+                        <input type="text" id="chemA" placeholder="0" class="v-keyboard-target sub-input">
+                        <input type="text" id="chemC" placeholder="0" class="v-keyboard-target sub-input">
+                        <input type="text" id="chemW" placeholder="0" class="v-keyboard-target sub-input">
+                        <input type="text" id="chemN" placeholder="0" class="v-keyboard-target sub-input">
+                    </div>
+
+                    <div class="subject-grid-row" data-subject="mathBio">
+                        <div class="subject-identity-tag" id="mathBioLabel">MATHEMATICS / BIOLOGY</div>
+                        <input type="text" id="mathBioA" placeholder="0" class="v-keyboard-target sub-input">
+                        <input type="text" id="mathBioC" placeholder="0" class="v-keyboard-target sub-input">
+                        <input type="text" id="mathBioW" placeholder="0" class="v-keyboard-target sub-input">
+                        <input type="text" id="mathBioN" placeholder="0" class="v-keyboard-target sub-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="score-hero-display card-margin-bottom">
+                <div class="score-hero-sub">ALGORITHMIC INTELLIGENCE REALTIME SCORE</div>
+                <div class="score-hero-val" id="score">0.00</div>
+            </div>
+
+            <div class="control-actions-wrapper">
+                <button type="button" class="btn-core btn-secondary-glass" id="calculateButton">
+                    <i class="fa-solid fa-microchip"></i> EXECUTE CALCULATIONS
+                </button>
+                <button type="button" class="btn-core btn-primary-gradient" id="downloadPdfButton">
+                    <i class="fa-solid fa-file-pdf"></i> STREAM REPORT MATRIX
+                </button>
+            </div>
+        </form>
     </div>
 
-    <header class="app-header">
-        <div class="fluent-badge">E7 Core Premium v2.5</div>
-        <h1>Negative Marking Engine</h1>
-        
-        <div class="meta-branding-container">
-            <p class="platform-title-meta">ECLIPSE7 FLUID EVALUATION PLATFORM</p>
-            <p class="author-attribution-meta">By Saiprasad Barure</p>
-        </div>
-    </header>
-
-    <form id="evaluationForm" onsubmit="event.preventDefault();">
-        
-        <div class="input-field-group">
-            <label class="soft-field-label">Student Authentication <span class="req-star">*</span></label>
-            <div class="fluent-input-wrapper">
-                <i class="fa-solid fa-fingerprint input-field-icon"></i>
-                <input type="text" id="studentName" placeholder="Enter student identity" required autocomplete="off" class="v-keyboard-target" data-kb-type="qwerty">
+    <div class="glassmorphic-keyboard-panel" id="glassmorphicKeyboardPanel">
+        <div class="keyboard-panel-header">
+            <div class="keyboard-panel-title">
+                <i class="fa-solid fa-calculator"></i> INTEGRATED DATA BUS KEYPAD
             </div>
-        </div>
-
-        <div class="input-field-group">
-            <label class="soft-field-label">Assessment Token <span class="req-star">*</span></label>
-            <div class="fluent-input-wrapper">
-                <i class="fa-solid fa-hashtag input-field-icon"></i>
-                <input type="text" id="testName" placeholder="Assessment name (e.g., JEE Main Major)" required autocomplete="off" class="v-keyboard-target" data-kb-type="qwerty">
-            </div>
-        </div>
-
-        <div class="input-field-group">
-            <label class="soft-field-label">Smart Curriculum Profile <span class="req-star">*</span></label>
-            <div class="custom-select-box" id="examProfileSelectContainer">
-                <div class="select-box-trigger" id="examProfileLabel">SELECT EXAM PROFILE</div>
-                <div class="select-box-dropdown" id="examProfileOptions">
-                    <div class="select-box-option" data-value="custom">CUSTOM MODE (MANUAL OVERRIDE)</div>
-                    <div class="select-box-option" data-value="jeemain">JEE MAIN PROFILE</div>
-                    <div class="select-box-option" data-value="jeeadv">JEE ADVANCED PROFILE</div>
-                    <div class="select-box-option" data-value="neet">NEET UG PROFILE</div>
-                </div>
-                <input type="hidden" id="examProfile" value="custom" required>
-            </div>
-        </div>
-
-        <div class="fluent-layout-row">
-            <div class="input-field-group">
-                <label class="soft-field-label">Total Questions <span class="req-star">*</span></label>
-                <input type="number" id="totalQs" placeholder="0" min="1" required class="v-keyboard-target" data-kb-type="numpad">
-            </div>
-            <div class="input-field-group">
-                <label class="soft-field-label">Max Marks <span class="req-star">*</span></label>
-                <input type="number" id="maxMarks" placeholder="0" min="1" required class="v-keyboard-target" data-kb-type="numpad">
-            </div>
-        </div>
-
-        <div class="fluent-layout-row">
-            <div class="input-field-group">
-                <label class="soft-field-label">Total Attempts <span class="req-star">*</span></label>
-                <input type="number" id="attempted" placeholder="0" min="0" required class="v-keyboard-target" data-kb-type="numpad">
-            </div>
-            <div class="input-field-group">
-                <label class="soft-field-label">Incorrect <span class="req-star">*</span></label>
-                <input type="number" id="wrong" placeholder="0" min="0" required class="v-keyboard-target" data-kb-type="numpad">
-            </div>
-        </div>
-
-        <div class="fluent-layout-row dropdown-adjustment">
-            <div class="custom-select-box" id="ratioSelectContainer">
-                <label class="soft-field-label">Negative Ratio <span class="req-star">*</span></label>
-                <div class="select-box-trigger" id="ratioLabel">Ratio: 1/4</div>
-                <div class="select-box-dropdown" id="ratioOptions">
-                    <div class="select-box-option" data-value="0.25">1/4 Ratio</div>
-                    <div class="select-box-option" data-value="0.33">1/3 Ratio</div>
-                    <div class="select-box-option" data-value="0.5">1/2 Ratio</div>
-                    <div class="select-box-option" data-value="0">No Penalty</div>
-                </div>
-                <input type="hidden" id="markingRatio" value="0.25" required>
-            </div>
-
-            <div class="custom-select-box" id="customSelect">
-                <label class="soft-field-label">Analytics Mode <span class="req-star">*</span></label>
-                <div class="select-box-trigger" id="selectedLabel">OVERALL MODE</div>
-                <div class="select-box-dropdown" id="selectOptions">
-                    <div class="select-box-option" data-value="overall">OVERALL MODE</div>
-                    <div class="select-box-option" data-value="subjectwise">SUBJECT BREAKDOWN</div>
-                </div>
-                <input type="hidden" id="reportType" value="overall" required>
-            </div>
-        </div>
-
-        <div id="subjectSection" class="subject-breakdown-wrapper">
-            <!-- Dynamic Rule Mandate Notice Bar -->
-            <div class="mandatory-input-notice-bar">
-                <i class="fa-solid fa-circle-info"></i>
-                <span><strong>Mandatory Metrics Rule:</strong> Provide exactly 2 variables per row among (Correct, Wrong, Not Attempted). The residual data points evaluate instantly.</span>
-            </div>
-
-            <div class="subject-grid-layout-header">
-                <div></div> 
-                <span>TOTAL Q.</span>
-                <span>CORRECT</span>
-                <span>WRONG</span>
-                <span>NOT ATTM</span>
-            </div>
-             
-            <div class="subject-grid-row" data-subject="phy">
-                <label class="sub-identity-lbl">PHYSICS</label>
-                <input type="number" id="phyA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="phyC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="phyW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="phyN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0" data-kb-type="numpad">
-            </div>
-
-            <div class="subject-grid-row" data-subject="chem">
-                <label class="sub-identity-lbl">CHEMISTRY</label>
-                <input type="number" id="chemA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="chemC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="chemW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="chemN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0" data-kb-type="numpad">
-            </div>
-
-            <div class="subject-grid-row" data-subject="mathBio">
-                <label class="sub-identity-lbl" id="mathBioLabel">MATH/BIO</label>
-                <input type="number" id="mathBioA" placeholder="0" class="sub-input sub-tot v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="mathBioC" placeholder="0" class="sub-input sub-cor v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="mathBioW" placeholder="0" class="sub-input sub-wro v-keyboard-target" min="0" data-kb-type="numpad">
-                <input type="number" id="mathBioN" placeholder="0" class="sub-input sub-not v-keyboard-target" min="0" data-kb-type="numpad">
-            </div>
-            
-            <div class="quantum-intel-status">
-                <i class="fa-solid fa-microchip"></i> 
-                <span id="intelMessage">Quantum cross-input synchronization layer active.</span>
-            </div>
-        </div>
-
-        <button type="button" onclick="executeCalculationSequence()" class="fluent-btn btn-primary-gradient">
-            <span>Compute Assessment Metrics</span>
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </button>
-
-        <div class="fluent-score-hero-display">
-            <label class="score-hero-title">CALCULATED METRIC SCORE</label>
-            <div id="score" class="score-hero-val">0.00</div>
-            <div class="fluent-wave-shimmer"></div>
-        </div>
-
-        <button type="button" onclick="downloadPDFReportSequence()" class="fluent-btn btn-secondary-frosted">
-            <i class="fa-solid fa-file-pdf"></i>
-            <span>Export E7 Intelligence Document</span>
-        </button>
-    </form>
-
-    <footer class="fluent-footer">
-        <span class="secure-badge">
-            <i class="fa-solid fa-shield-halved"></i> YOUR DATA IS 100% PRIVATE:
-        </span> 
-        All marks are calculated instantly inside your device's browser. No data is saved or tracked. Built by <b>Saiprasad Barure / Prasad Reddy</b>.
-    </footer>
-</div>
-
-<!-- Re-Engineered Dual-Mode Adaptive Custom Virtual Keyboard View -->
-<div id="glassmorphicKeyboardPanel" class="glass-keyboard-container structural-mode-numpad">
-    <div class="keyboard-drag-notch-handle"></div>
-    
-    <!-- Dynamic Alphanumeric QWERTY Matrix View Structure -->
-    <div class="keyboard-matrix-qwerty-layout" id="qwertyMatrixRoot">
-        <div class="kb-compact-row row-numbers-strip">
-            <button type="button" class="kb-character-key" data-key="1">1</button>
-            <button type="button" class="kb-character-key" data-key="2">2</button>
-            <button type="button" class="kb-character-key" data-key="3">3</button>
-            <button type="button" class="kb-character-key" data-key="4">4</button>
-            <button type="button" class="kb-character-key" data-key="5">5</button>
-            <button type="button" class="kb-character-key" data-key="6">6</button>
-            <button type="button" class="kb-character-key" data-key="7">7</button>
-            <button type="button" class="kb-character-key" data-key="8">8</button>
-            <button type="button" class="kb-character-key" data-key="9">9</button>
-            <button type="button" class="kb-character-key" data-key="0">0</button>
-        </div>
-        <div class="kb-compact-row">
-            <button type="button" class="kb-character-key" data-key="Q">Q</button>
-            <button type="button" class="kb-character-key" data-key="W">W</button>
-            <button type="button" class="kb-character-key" data-key="E">E</button>
-            <button type="button" class="kb-character-key" data-key="R">R</button>
-            <button type="button" class="kb-character-key" data-key="T">T</button>
-            <button type="button" class="kb-character-key" data-key="Y">Y</button>
-            <button type="button" class="kb-character-key" data-key="U">U</button>
-            <button type="button" class="kb-character-key" data-key="I">I</button>
-            <button type="button" class="kb-character-key" data-key="O">O</button>
-            <button type="button" class="kb-character-key" data-key="P">P</button>
-        </div>
-        <div class="kb-compact-row">
-            <button type="button" class="kb-character-key" data-key="A">A</button>
-            <button type="button" class="kb-character-key" data-key="S">S</button>
-            <button type="button" class="kb-character-key" data-key="D">D</button>
-            <button type="button" class="kb-character-key" data-key="F">F</button>
-            <button type="button" class="kb-character-key" data-key="G">G</button>
-            <button type="button" class="kb-character-key" data-key="H">H</button>
-            <button type="button" class="kb-character-key" data-key="J">J</button>
-            <button type="button" class="kb-character-key" data-key="K">K</button>
-            <button type="button" class="kb-character-key" data-key="L">L</button>
-        </div>
-        <div class="kb-compact-row">
-            <button type="button" class="kb-character-key" data-key="Z">Z</button>
-            <button type="button" class="kb-character-key" data-key="X">X</button>
-            <button type="button" class="kb-character-key" data-key="C">C</button>
-            <button type="button" class="kb-character-key" data-key="V">V</button>
-            <button type="button" class="kb-character-key" data-key="B">B</button>
-            <button type="button" class="kb-character-key" data-key="N">N</button>
-            <button type="button" class="kb-character-key" data-key="M">M</button>
-        </div>
-        <div class="kb-compact-row functional-utility-row">
-            <button type="button" class="kb-character-key kb-functional-accent-key text-utility-ctrl" data-key="clear">CLR</button>
-            <button type="button" class="kb-character-key spacebar-layout-key" data-key=" ">SPACE</button>
-            <button type="button" class="kb-character-key kb-functional-backspace-key text-utility-ctrl" data-key="backspace">
+            <button type="button" class="keyboard-dismiss-control-node" onclick="dismissVirtualKeyboardPanel()">
                 <i class="fa-solid fa-delete-left"></i>
             </button>
         </div>
     </div>
 
-    <!-- Standard Numerical Input Layout Grid View -->
     <div class="keyboard-matrix-grid" id="numpadMatrixRoot">
         <button type="button" class="kb-matrix-key" data-key="1">1</button>
         <button type="button" class="kb-matrix-key" data-key="2">2</button>
@@ -313,14 +205,8 @@
         <button type="button" class="kb-matrix-key kb-functional-accent-key" data-key="clear">CLR</button>
         <button type="button" class="kb-matrix-key" data-key="0">0</button>
         <button type="button" class="kb-matrix-key kb-functional-backspace-key" data-key="backspace">
-            <i class="fa-solid fa-delete-left"></i>
+            <i class="fa-solid fa-arrow-left-long"></i>
         </button>
     </div>
-    <button type="button" class="keyboard-dismiss-control-btn" onclick="dismissVirtualKeyboardPanel()">
-        <span>Confirm Entry Matrix</span> <i class="fa-solid fa-circle-check"></i>
-    </button>
-</div>
-
-<script src="script.js"></script>
 </body>
 </html>
