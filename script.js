@@ -112,6 +112,16 @@ document.addEventListener('DOMContentLoaded', () => {
     setupPremiumVirtualKeyboardCoreEngine();
     
     toggleSubjectSectionDisplay();
+
+    // Link calculation routine directly to the global frame for UI controls
+    const actionButton = document.getElementById('calculateButton');
+    if (actionButton) {
+        actionButton.addEventListener('click', executeCalculationSequence);
+    }
+    const pdfButton = document.getElementById('downloadPdfButton');
+    if (pdfButton) {
+        pdfButton.addEventListener('click', downloadPDFReportSequence);
+    }
 });
 
 function toggleSubjectSectionDisplay() {
@@ -215,7 +225,7 @@ function processSubjectRowRecalculationSequence(targetNode) {
     if (targetNode.id !== 'totalQs' && !targetNode.classList.contains('profile-locked-row')) {
         const selectedProfile = document.getElementById('examProfile').value;
         if (selectedProfile === 'custom' || targetNode.classList.contains('sub-input')) {
-            // Let algebra continue smoothly
+            // Processing parameters dynamically
         }
     }
     
@@ -227,7 +237,6 @@ function processSubjectRowRecalculationSequence(targetNode) {
     syncSubjectBreakdownToMainInputs();
 }
 
-// Custom code block deployment structural rules follow below
 function executeRowAlgebraSolver(sub, activeElement = null) {
     const elTot = document.getElementById(`${sub}A`);
     const elCor = document.getElementById(`${sub}C`);
@@ -399,6 +408,7 @@ function dismissVirtualKeyboardPanel() {
     adjustViewportPaddingForVirtualKeyboardPanel(false);
 }
 
+// Avoid blocking visual controls during interface input cycles
 function adjustViewportPaddingForVirtualKeyboardPanel(isOpening) {
     if (isOpening) {
         document.body.style.paddingBottom = "360px";
@@ -430,7 +440,6 @@ function triggerSystemToastNotification(message, isError = true) {
     setTimeout(() => { toast.classList.remove('show'); }, 5000);
 }
 
-// Validation styles removal architecture logic stream setup
 function clearInputValidationStyles() {
     const inputs = document.querySelectorAll('input');
     inputs.forEach(input => input.classList.remove('validation-error'));
@@ -443,18 +452,18 @@ function scanAndValidateSystemInputs() {
     const studentName = document.getElementById('studentName');
     const testName = document.getElementById('testName');
     
-    if (!studentName.value.trim()) invalidNodes.push(studentName);
-    if (!testName.value.trim()) invalidNodes.push(testName);
+    if (!studentName || !studentName.value.trim()) invalidNodes.push(studentName);
+    if (!testName || !testName.value.trim()) invalidNodes.push(testName);
 
     const totalQs = document.getElementById('totalQs');
     const maxMarks = document.getElementById('maxMarks');
     const attempted = document.getElementById('attempted');
     const wrong = document.getElementById('wrong');
 
-    if (!totalQs.value || parseFloat(totalQs.value) <= 0) invalidNodes.push(totalQs);
-    if (!maxMarks.value || parseFloat(maxMarks.value) <= 0) invalidNodes.push(maxMarks);
-    if (attempted.value === "" || parseFloat(attempted.value) < 0) invalidNodes.push(attempted);
-    if (wrong.value === "" || parseFloat(wrong.value) < 0) invalidNodes.push(wrong);
+    if (!totalQs || !totalQs.value || parseFloat(totalQs.value) <= 0) invalidNodes.push(totalQs);
+    if (!maxMarks || !maxMarks.value || parseFloat(maxMarks.value) <= 0) invalidNodes.push(maxMarks);
+    if (!attempted || attempted.value === "" || parseFloat(attempted.value) < 0) invalidNodes.push(attempted);
+    if (!wrong || wrong.value === "" || parseFloat(wrong.value) < 0) invalidNodes.push(wrong);
 
     const reportType = document.getElementById('reportType').value;
     if (reportType === 'subjectwise') {
@@ -464,10 +473,10 @@ function scanAndValidateSystemInputs() {
             const tw = document.getElementById(`${sub}W`);
             const tn = document.getElementById(`${sub}N`);
             
-            if (!ta.value || parseFloat(ta.value) < 0) invalidNodes.push(ta);
-            if (tc.value === "" || parseFloat(tc.value) < 0) invalidNodes.push(tc);
-            if (tw.value === "" || parseFloat(tw.value) < 0) invalidNodes.push(tw);
-            if (tn.value === "" || parseFloat(tn.value) < 0) invalidNodes.push(tn);
+            if (!ta || !ta.value || parseFloat(ta.value) < 0) invalidNodes.push(ta);
+            if (!tc || tc.value === "" || parseFloat(tc.value) < 0) invalidNodes.push(tc);
+            if (!tw || tw.value === "" || parseFloat(tw.value) < 0) invalidNodes.push(tw);
+            if (!tn || tn.value === "" || parseFloat(tn.value) < 0) invalidNodes.push(tn);
         });
     }
 
@@ -489,7 +498,7 @@ function scanAndValidateSystemInputs() {
     }
 
     if (invalidNodes.length > 0) {
-        invalidNodes.forEach(node => node.classList.add('validation-error'));
+        invalidNodes.forEach(node => { if(node) node.classList.add('validation-error'); });
         triggerSystemToastNotification("Action Blocked: Please populate required fields with valid numerical data.");
         animateContainerShake();
         return false;
@@ -526,11 +535,12 @@ function executeCalculationSequence() {
     const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100).toFixed(2) : 0;
 
     const scoreDisplayNode = document.getElementById('score');
-    scoreDisplayNode.innerText = finalScore.toFixed(2);
-    
-    scoreDisplayNode.style.animation = 'none';
-    scoreDisplayNode.offsetHeight;
-    scoreDisplayNode.style.animation = 'fluentScalePulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    if (scoreDisplayNode) {
+        scoreDisplayNode.innerText = finalScore.toFixed(2);
+        scoreDisplayNode.style.animation = 'none';
+        scoreDisplayNode.offsetHeight;
+        scoreDisplayNode.style.animation = 'fluentScalePulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    }
 
     return { 
         totalQs, maxMarks, attempted, wrong, correct, 
@@ -741,7 +751,6 @@ async function downloadPDFReportSequence() {
     doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(5, 150, 105);
     doc.text("STATUS: INTEGRITY MATRIX APPROVED & DIGITAL RECORD VERIFIED VIA CORE STREAM", 14, finalFooterY + 14);
 
-    // INNER SCOPE: Asynchronously handle storage upload operations cleanly
     const runDocumentExportAndUpload = async () => {
         const finalFilename = `${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`;
         doc.save(finalFilename);
@@ -751,19 +760,16 @@ async function downloadPDFReportSequence() {
                 const pdfBlob = doc.output('blob');
                 const pathToken = `${Date.now()}_${finalFilename}`;
                 
-                // 1. Direct Transmission to Supabase Storage Bucket
                 const { data: uploadData, error: uploadError } = await supabase.storage
                     .from('e7-reports')
                     .upload(pathToken, pdfBlob, { contentType: 'application/pdf' });
 
                 if (uploadError) throw uploadError;
 
-                // 2. Fetch Signed/Public Remote URL Reference
                 const { data: publicUrlData } = supabase.storage
                     .from('e7-reports')
                     .getPublicUrl(pathToken);
 
-                // 3. Document Telemetry Logging to evaluations Database Table
                 const { error: dbError } = await supabase.from('evaluations').insert([{
                     student_name: student,
                     test_name: test,
