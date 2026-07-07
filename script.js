@@ -46,7 +46,7 @@ let isTouchFormFactorDevice = false;
 // ============================================================================
 const SUPABASE_URL = "https://marhkwvkprvoshowqpgq.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hcmhrd3ZrcHJ2b3Nob3dxcGdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MTcwMTcsImV4cCI6MjA5ODk5MzAxN30.voml07f_WQTpEbu43EUhqeqgoAcBZJQ3mc3usbnwbzs";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 // ============================================================================
 // 2. MODERN RE-ENGINEERED FLUENT DROPDOWN CONTROLLER
@@ -113,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     toggleSubjectSectionDisplay();
 
-    // Link calculation routine directly to the global frame for UI controls
     const actionButton = document.getElementById('calculateButton');
     if (actionButton) {
         actionButton.addEventListener('click', executeCalculationSequence);
@@ -222,13 +221,6 @@ function setupReactiveSubjectSyncObservers() {
 }
 
 function processSubjectRowRecalculationSequence(targetNode) {
-    if (targetNode.id !== 'totalQs' && !targetNode.classList.contains('profile-locked-row')) {
-        const selectedProfile = document.getElementById('examProfile').value;
-        if (selectedProfile === 'custom' || targetNode.classList.contains('sub-input')) {
-            // Processing parameters dynamically
-        }
-    }
-    
     const row = targetNode.closest('.subject-grid-row');
     if (row) {
         const subjectKey = row.getAttribute('data-subject');
@@ -359,7 +351,7 @@ function setupPremiumVirtualKeyboardCoreEngine() {
         });
     });
 
-    const matrixKeys = kbContainer.querySelectorAll('.kb-matrix-key');
+    const matrixKeys = document.querySelectorAll('.kb-matrix-key');
     matrixKeys.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -408,13 +400,8 @@ function dismissVirtualKeyboardPanel() {
     adjustViewportPaddingForVirtualKeyboardPanel(false);
 }
 
-// Avoid blocking visual controls during interface input cycles
 function adjustViewportPaddingForVirtualKeyboardPanel(isOpening) {
-    if (isOpening) {
-        document.body.style.paddingBottom = "360px";
-    } else {
-        document.body.style.paddingBottom = "24px";
-    }
+    document.body.style.paddingBottom = isOpening ? "360px" : "24px";
 }
 
 // ============================================================================
@@ -445,6 +432,9 @@ function clearInputValidationStyles() {
     inputs.forEach(input => input.classList.remove('validation-error'));
 }
 
+// ============================================================================
+// 8. CALCULATION ENGINE LOGIC UNIFICATION
+// ============================================================================
 function scanAndValidateSystemInputs() {
     clearInputValidationStyles();
     let invalidNodes = [];
@@ -465,59 +455,30 @@ function scanAndValidateSystemInputs() {
     if (!attempted || attempted.value === "" || parseFloat(attempted.value) < 0) invalidNodes.push(attempted);
     if (!wrong || wrong.value === "" || parseFloat(wrong.value) < 0) invalidNodes.push(wrong);
 
-    const reportType = document.getElementById('reportType').value;
-    if (reportType === 'subjectwise') {
-        ['phy', 'chem', 'mathBio'].forEach(sub => {
-            const ta = document.getElementById(`${sub}A`);
-            const tc = document.getElementById(`${sub}C`);
-            const tw = document.getElementById(`${sub}W`);
-            const tn = document.getElementById(`${sub}N`);
-            
-            if (!ta || !ta.value || parseFloat(ta.value) < 0) invalidNodes.push(ta);
-            if (!tc || tc.value === "" || parseFloat(tc.value) < 0) invalidNodes.push(tc);
-            if (!tw || tw.value === "" || parseFloat(tw.value) < 0) invalidNodes.push(tw);
-            if (!tn || tn.value === "" || parseFloat(tn.value) < 0) invalidNodes.push(tn);
-        });
-    }
-
     if (invalidNodes.length === 0) {
         if (parseFloat(wrong.value) > parseFloat(attempted.value)) {
             invalidNodes.push(wrong);
             invalidNodes.push(attempted);
-            triggerSystemToastNotification("Logic Error: Incorrect faults cannot exceed total attempts.");
-            animateContainerShake();
+            triggerSystemToastNotification("Logic Error: Faults cannot exceed attempts.");
             return false;
         }
         if (parseFloat(attempted.value) > parseFloat(totalQs.value)) {
             invalidNodes.push(attempted);
             invalidNodes.push(totalQs);
-            triggerSystemToastNotification("Logic Error: Total attempts cannot exceed total questions.");
-            animateContainerShake();
+            triggerSystemToastNotification("Logic Error: Attempts cannot exceed questions.");
             return false;
         }
     }
 
     if (invalidNodes.length > 0) {
         invalidNodes.forEach(node => { if(node) node.classList.add('validation-error'); });
-        triggerSystemToastNotification("Action Blocked: Please populate required fields with valid numerical data.");
-        animateContainerShake();
+        triggerSystemToastNotification("Action Blocked: Please populate fields accurately.");
         return false;
     }
 
     return true;
 }
 
-function animateContainerShake() {
-    const container = document.getElementById('mainAppContainer');
-    if (!container) return;
-    container.style.animation = 'none';
-    container.offsetHeight; 
-    container.style.animation = 'fluentContainerShake 0.45s cubic-bezier(.36,.07,.19,.97) both';
-}
-
-// ============================================================================
-// 8. CALCULATION ENGINE LOGIC UNIFICATION
-// ============================================================================
 function executeCalculationSequence() {
     if (!scanAndValidateSystemInputs()) return null;
 
@@ -537,9 +498,6 @@ function executeCalculationSequence() {
     const scoreDisplayNode = document.getElementById('score');
     if (scoreDisplayNode) {
         scoreDisplayNode.innerText = finalScore.toFixed(2);
-        scoreDisplayNode.style.animation = 'none';
-        scoreDisplayNode.offsetHeight;
-        scoreDisplayNode.style.animation = 'fluentScalePulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
     }
 
     return { 
@@ -564,31 +522,23 @@ async function downloadPDFReportSequence() {
     const test = document.getElementById('testName').value.toUpperCase();
     const timestamp = new Date().toLocaleString().toUpperCase();
 
-    doc.setFillColor(255, 255, 255);
-    doc.rect(0, 0, 210, 297, 'F');
-    
-    doc.setDrawColor(240, 244, 248);
-    doc.setLineWidth(0.25);
+    // PDF structural design layers
+    doc.setFillColor(255, 255, 255); doc.rect(0, 0, 210, 297, 'F');
+    doc.setDrawColor(240, 244, 248); doc.setLineWidth(0.25);
     for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
     for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j);
+    doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3); doc.rect(8, 8, 194, 281);
 
-    doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3);
-    doc.rect(8, 8, 194, 281);
-
-    doc.setFillColor(248, 250, 252);
-    doc.rect(10, 10, 190, 32, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5);
-    doc.rect(10, 10, 190, 32, 'D');
-    
+    // Banner Layout
+    doc.setFillColor(248, 250, 252); doc.rect(10, 10, 190, 32, 'F');
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5); doc.rect(10, 10, 190, 32, 'D');
     doc.setFillColor(14, 165, 233); doc.rect(10, 41, 130, 1, 'F');
     doc.setFillColor(168, 85, 247); doc.rect(140, 41, 60, 1, 'F');
 
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
     doc.text("NEGATIVE MARKING PERFORMANCE REPORT", 16, 21);
-    
     doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
     doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v5.5`, 16, 27);
-    
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
     doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
 
@@ -598,8 +548,7 @@ async function downloadPDFReportSequence() {
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
     doc.text(" SECURE INITIAL IDENTITY MATRIX", 12, cardY + 4.2);
     
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
-    doc.rect(10, cardY + 6, 92, 26, 'DF');
+    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225); doc.rect(10, cardY + 6, 92, 26, 'DF');
     doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
     doc.text("CANDIDATE INITIALS :", 14, cardY + 14);
     doc.text("TARGET MATRIX APP  :", 14, cardY + 22);
@@ -615,8 +564,7 @@ async function downloadPDFReportSequence() {
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
     doc.text(" LOAD DATA STRUCTURAL CONSTANTS", 110, cardY + 4.2);
     
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
-    doc.rect(108, cardY + 6, 92, 26, 'DF');
+    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225); doc.rect(108, cardY + 6, 92, 26, 'DF');
     doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
     doc.text("TOTAL QUESTIONS    :", 112, cardY + 13);
     doc.text("MAX EVAL MARKS      :", 112, cardY + 19);
@@ -630,10 +578,8 @@ async function downloadPDFReportSequence() {
     doc.setTextColor(225, 29, 72); doc.text(`${telemetryData.wrong} FAULTS`, 148, cardY + 31);
 
     let scoreY = 86;
-    doc.setFillColor(250, 251, 253); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
-    doc.rect(10, scoreY, 190, 24, 'DF');
-    doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.3);
-    doc.line(68, scoreY, 68, scoreY + 24); doc.line(142, scoreY, 142, scoreY + 24);
+    doc.setFillColor(250, 251, 253); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4); doc.rect(10, scoreY, 190, 24, 'DF');
+    doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.3); doc.line(68, scoreY, 68, scoreY + 24); doc.line(142, scoreY, 142, scoreY + 24);
     
     doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
     doc.text("COMPUTED GROSS MARKS", 15, scoreY + 6);
@@ -664,18 +610,15 @@ async function downloadPDFReportSequence() {
     analyticalGauges.forEach(gauge => {
         doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139);
         doc.text(gauge.title, 11, meterY + 3.5);
-
         let segments = 24;
         let activeBlocks = Math.round((gauge.value / gauge.max) * segments);
         let startX = 74;
-        
         for(let s = 0; s < segments; s++) {
             if(s < activeBlocks) {
                 doc.setFillColor(gauge.color[0], gauge.color[1], gauge.color[2]);
                 doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'F');
             } else {
-                doc.setDrawColor(226, 232, 240);
-                doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'D');
+                doc.setDrawColor(226, 232, 240); doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'D');
             }
         }
         meterY += 7;
@@ -711,21 +654,20 @@ async function downloadPDFReportSequence() {
                 doc.setFillColor(16, 185, 129); if(cW > 0) doc.rect(74, meterY, cW, 4.0, 'F');
                 doc.setFillColor(244, 63, 94); if(wW > 0) doc.rect(74 + cW, meterY, wW, 4.0, 'F');
                 doc.setFillColor(241, 245, 249); if(iW > 0) doc.rect(74 + cW + wW, meterY, iW, 4.0, 'F');
-                
                 doc.setDrawColor(203, 213, 225); doc.rect(74, meterY, maxWidth, 4.0, 'D');
+                
                 doc.setFontSize(5.5); doc.setTextColor(15, 23, 42); doc.setFont("courier", "bold");
                 doc.text(`[ OK: ${corr} | WRG: ${wrng} | IDLE: ${Math.max(0, total-(corr+wrng))} ]`, 158, meterY - 1.2);
             } else {
                 doc.setFont("helvetica", "oblique"); doc.setFontSize(6); doc.setTextColor(148, 163, 184);
-                doc.text("CHANNEL OFFLINE // NO CURRICULUM STREAM LOADED IN DATA MODEM", 74, meterY + 3);
+                doc.text("CHANNEL OFFLINE // NO DATA STREAM", 74, meterY + 3);
             }
             meterY += 7;
         });
     }
 
     let tBoxY = Math.max(meterY + 4, 148);
-    doc.setFillColor(252, 253, 255); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
-    doc.rect(10, tBoxY, 190, 36, 'DF');
+    doc.setFillColor(252, 253, 255); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4); doc.rect(10, tBoxY, 190, 36, 'DF');
     doc.setFillColor(168, 85, 247); doc.rect(10, tBoxY, 2.5, 36, 'F');
 
     doc.setTextColor(15, 23, 42); doc.setFontSize(8.5); doc.setFont("helvetica", "bold");
@@ -733,17 +675,16 @@ async function downloadPDFReportSequence() {
     doc.setFont("courier", "bold"); doc.setFontSize(7.5); doc.setTextColor(51, 65, 85);
 
     let systemRecommendationText = "";
-    if (telemetryData.efficiency > 80) systemRecommendationText = "EXCELLENT CONTEXT ACUITY. MAINTAIN CONSTANT VELOCITY PATTERNS TO PRESERVE CAP LIMIT.";
-    else if (telemetryData.efficiency > 50) systemRecommendationText = "STABLE EQUILIBRIUM. ELIMINATE TRIVIAL FAULT TRIGGERS TO BRIDGE THE SUB-80% ACCURACY DECAY.";
-    else systemRecommendationText = "CRITICAL SYSTEM FAULT DENSITY. ELIMINATE GUESSWORK PATTERNS IMMEDIATELY TO REMOVE PENALTY DRAINS.";
+    if (telemetryData.efficiency > 80) systemRecommendationText = "EXCELLENT CONTEXT ACUITY. MAINTAIN CONSTANT VELOCITY PATTERNS.";
+    else if (telemetryData.efficiency > 50) systemRecommendationText = "STABLE EQUILIBRIUM. ELIMINATE TRIVIAL FAULT TRIGGERS.";
+    else systemRecommendationText = "CRITICAL SYSTEM FAULT DENSITY. ELIMINATE GUESSWORK PATTERNS IMMEDIATELY.";
 
     doc.text(`>> RECOM_STRATEGY : ${systemRecommendationText}`, 15, tBoxY + 14);
-    doc.text(`>> PENALTY_DECAY  : THE REGISTERED PENALTY INFLICTED SUBTRACTS ${telemetryData.totalPenalty.toFixed(2)} POINTS FROM ABSOLUTE CAPACITY.`, 15, tBoxY + 21);
-    doc.text(`>> EFFICIENCY_GAP : ${telemetryData.unattempted} UNATTEMPTED SEGMENTS IDENTIFIED FOR LOW-COST SCORE OPTIMIZATION.`, 15, tBoxY + 28);
+    doc.text(`>> PENALTY_DECAY  : PENALTY SUBTRACTS ${telemetryData.totalPenalty.toFixed(2)} POINTS FROM ABSOLUTE CAPACITY.`, 15, tBoxY + 21);
+    doc.text(`>> EFFICIENCY_GAP : ${telemetryData.unattempted} UNATTEMPTED SEGMENTS IDENTIFIED.`, 15, tBoxY + 28);
 
     const finalFooterY = 254;
     doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, finalFooterY - 4, 200, finalFooterY - 4);
-
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
     doc.text("MR. PRASAD REDDY", 14, finalFooterY + 4);
     doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
@@ -770,7 +711,7 @@ async function downloadPDFReportSequence() {
                     .from('e7-reports')
                     .getPublicUrl(pathToken);
 
-                const { error: dbError } = await supabase.from('evaluations').insert([{
+                await supabase.from('evaluations').insert([{
                     student_name: student,
                     test_name: test,
                     exam_profile: currentProfile,
@@ -784,7 +725,6 @@ async function downloadPDFReportSequence() {
                     pdf_storage_url: publicUrlData?.publicUrl || null
                 }]);
 
-                if (dbError) throw dbError;
                 triggerSystemToastNotification("Cloud Sync Successful: Metric Record Saved.", false);
             } catch (err) {
                 console.error("Cloud tracking intercept dropped:", err);
@@ -795,12 +735,6 @@ async function downloadPDFReportSequence() {
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.src = "stamp.jpg"; 
-    
-    img.onload = function() {
-        doc.addImage(img, 'JPEG', 158, 244, 34, 34);
-        runDocumentExportAndUpload();
-    };
-    img.onerror = () => {
-        runDocumentExportAndUpload();
-    };
+    img.onload = () => { doc.addImage(img, 'JPEG', 158, 244, 34, 34); runDocumentExportAndUpload(); };
+    img.onerror = () => { runDocumentExportAndUpload(); };
 }
