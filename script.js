@@ -747,3 +747,63 @@ async function downloadPDFReportSequence() {
         doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
     };
 }
+
+    // ============================================================================
+    // PRODUCTION INTEGRATION MATRIX (STORAGE + LIVE TRACKING DATABASE INJECTION)
+    // ============================================================================
+    const runDocumentExportAndUpload = async () => {
+        const finalFilename = `${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`;
+        doc.save(finalFilename);
+
+        if (supabase) {
+            try {
+                const pdfBlob = doc.output('blob');
+                const pathToken = `${Date.now()}_${finalFilename}`;
+                
+                // 1. Direct Transmission to Supabase Storage Bucket
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('e7-reports')
+                    .upload(pathToken, pdfBlob, { contentType: 'application/pdf' });
+
+                if (uploadError) throw uploadError;
+
+                // 2. Fetch Signed/Public Remote URL Reference
+                const { data: publicUrlData } = supabase.storage
+                    .from('e7-reports')
+                    .getPublicUrl(pathToken);
+
+                // 3. Document Telemetry Logging to evaluations Database Table
+                const { error: dbError } = await supabase.from('evaluations').insert([{
+                    student_name: student,
+                    test_name: test,
+                    exam_profile: currentProfile,
+                    total_qs: telemetryData.totalQs,
+                    max_marks: telemetryData.maxMarks,
+                    attempted: telemetryData.attempted,
+                    wrong: telemetryData.wrong,
+                    correct: telemetryData.correct,
+                    final_score: telemetryData.finalScore,
+                    efficiency: parseFloat(telemetryData.efficiency),
+                    pdf_storage_url: publicUrlData?.publicUrl || null
+                }]);
+
+                if (dbError) throw dbError;
+                triggerSystemToastNotification("Cloud Sync Successful: Metric Record Saved.", false);
+            } catch (err) {
+                console.error("Cloud tracking intercept dropped:", err);
+            }
+        }
+    };
+
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.src = "stamp.jpg"; 
+    
+    img.onload = function() {
+        doc.addImage(img, 'JPEG', 158, 244, 34, 34);
+        runDocumentExportAndUpload();
+    };
+    img.onerror = () => {
+        runDocumentExportAndUpload();
+    };
+}
