@@ -1,32 +1,3 @@
-        window.onload = () => {
-            // Setup intro video termination triggers
-            const introLoader = document.getElementById('intro-loader');
-            const introVideo = document.getElementById('intro-video');
-            
-            function handleIntroEnd() {
-                introLoader.classList.add('exit-animate');
-                // Clean up elements from DOM post-animation to preserve resources
-                setTimeout(() => {
-                    introLoader.remove();
-                }, 1100);
-            }
-
-            if (introVideo) {
-                introVideo.addEventListener('ended', handleIntroEnd);
-                // Fallback catch if browser policies block autoloading configurations entirely
-                introVideo.addEventListener('error', handleIntroEnd);
-                // Secondary safety timeout: bypass interface if asset fails to resolve within 6 seconds
-                setTimeout(() => {
-                    if (document.getElementById('intro-loader')) handleIntroEnd();
-                }, 6000);
-            }
-
-            checkViewportSize();
-            init3D();
-            document.getElementById('formulaInput').value = 'H2O';
-            visualizeInput();
-        };
-
 // ============================================================================
 // 1. CURRICULUM PERFORMANCE PROFILE MATRIX CONFIGURATION
 // ============================================================================
