@@ -8,9 +8,13 @@ const EXAM_PROFILES = {
         maxMarks: 300,
         ratio: "0.25",
         labelRatio: "Ratio: 1/4",
-        subjects: { phy: 25, chem: 25, mathBio: 25 },
+        subjects: {
+            phy: { qs: 25, maxMarks: 100 },
+            chem: { qs: 25, maxMarks: 100 },
+            mathBio: { qs: 25, maxMarks: 100 }
+        },
         labelMathBio: "MATHEMATICS",
-        intel: "Curriculum: JEE Main successfully mapped. [25 Q per Subject Base]. Matrix +4 / -1."
+        intel: "Curriculum: JEE Main mapped. [25 Q / 100 Marks per Subject]. Matrix +4 / -1."
     },
     jeeadv: {
         label: "JEE ADVANCED PROFILE",
@@ -18,9 +22,13 @@ const EXAM_PROFILES = {
         maxMarks: 180,
         ratio: "0.25",
         labelRatio: "Ratio: 1/4",
-        subjects: { phy: 18, chem: 18, mathBio: 18 },
+        subjects: {
+            phy: { qs: 18, maxMarks: 60 },
+            chem: { qs: 18, maxMarks: 60 },
+            mathBio: { qs: 18, maxMarks: 60 }
+        },
         labelMathBio: "MATHEMATICS",
-        intel: "Curriculum: JEE Advanced layout generated. Standardized at 18 Questions per section."
+        intel: "Curriculum: JEE Advanced layout generated. Standardized 18 Q / 60 Marks per subject."
     },
     neet: {
         label: "NEET UG PROFILE",
@@ -28,9 +36,13 @@ const EXAM_PROFILES = {
         maxMarks: 720,
         ratio: "0.25",
         labelRatio: "Ratio: 1/4",
-        subjects: { phy: 45, chem: 45, mathBio: 90 },
+        subjects: {
+            phy: { qs: 45, maxMarks: 180 },
+            chem: { qs: 45, maxMarks: 180 },
+            mathBio: { qs: 90, maxMarks: 360 }
+        },
         labelMathBio: "BIOLOGY",
-        intel: "Curriculum: NEET UG mapped. [Phy: 45, Chem: 45, Bio: 90]. Matrix +4 / -1."
+        intel: "Curriculum: NEET UG mapped. [Phy: 180, Chem: 180, Bio: 360]. Matrix +4 / -1."
     },
     custom: {
         label: "CUSTOM MODE (MANUAL OVERRIDE)",
@@ -38,11 +50,15 @@ const EXAM_PROFILES = {
     }
 };
 
-let currentlyFocusedInputFieldNode = null;
-let isTouchFormFactorDevice = false;
+// Subject calculations state
+let subjectScores = {
+    phy: { correct: 0, wrong: 0, total: 0, score: 0, maxMarks: 100 },
+    chem: { correct: 0, wrong: 0, total: 0, score: 0, maxMarks: 100 },
+    mathBio: { correct: 0, wrong: 0, total: 0, score: 0, maxMarks: 100 }
+};
 
 // ============================================================================
-// 2. MODERN RE-ENGINEERED FLUENT DROPDOWN CONTROLLER
+// 2. DROPDOWN CONTROLLER
 // ============================================================================
 function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, callback) {
     const container = document.getElementById(containerId);
@@ -91,18 +107,18 @@ function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, call
 }
 
 // ============================================================================
-// 3. CENTRALIZED LIFE-CYCLE INITIALIZATION
+// 3. INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    isTouchFormFactorDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 1024);
-
     initDropdownSystem('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectSectionDisplay);
-    initDropdownSystem('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', () => { setProfileToCustomOverride(); });
+    initDropdownSystem('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', () => { 
+        setProfileToCustomOverride(); 
+        recalculateSubjectScores();
+    });
     initDropdownSystem('examProfileSelectContainer', 'examProfileLabel', 'examProfileOptions', 'examProfile', applySelectedExamProfile);
     
     setupReactiveSubjectSyncObservers();
     setupMainFallbackInputObservers();
-    setupPremiumVirtualKeyboardCoreEngine();
     
     toggleSubjectSectionDisplay();
 });
@@ -117,7 +133,6 @@ function toggleSubjectSectionDisplay() {
         syncSubjectBreakdownToMainInputs();
     } else {
         section.classList.remove('visible');
-        dismissVirtualKeyboardPanel();
     }
 }
 
@@ -134,16 +149,11 @@ function applySelectedExamProfile(profileKey) {
     const totalQsInput = document.getElementById('totalQs');
 
     if (profileKey === 'custom') {
-        if (totalQsInput) {
-            totalQsInput.classList.remove('profile-locked-row');
-        }
+        if (totalQsInput) totalQsInput.classList.remove('profile-locked-row');
         return;
     }
 
-    // Apply UI lock pattern to Total Questions instead of standard HTML readonly attribute
-    if (totalQsInput) {
-        totalQsInput.classList.add('profile-locked-row');
-    }
+    if (totalQsInput) totalQsInput.classList.add('profile-locked-row');
 
     document.getElementById('totalQs').value = profile.totalQs;
     document.getElementById('maxMarks').value = profile.maxMarks;
@@ -153,14 +163,19 @@ function applySelectedExamProfile(profileKey) {
     const mbLabel = document.getElementById('mathBioLabel');
     if (mbLabel && profile.labelMathBio) mbLabel.textContent = profile.labelMathBio;
 
-    document.getElementById('phyA').value = profile.subjects.phy;
-    document.getElementById('chemA').value = profile.subjects.chem;
-    document.getElementById('mathBioA').value = profile.subjects.mathBio;
+    document.getElementById('phyA').value = profile.subjects.phy.qs;
+    document.getElementById('chemA').value = profile.subjects.chem.qs;
+    document.getElementById('mathBioA').value = profile.subjects.mathBio.qs;
+
+    subjectScores.phy.maxMarks = profile.subjects.phy.maxMarks;
+    subjectScores.chem.maxMarks = profile.subjects.chem.maxMarks;
+    subjectScores.mathBio.maxMarks = profile.subjects.mathBio.maxMarks;
 
     clearImplicitTransientResiduals();
     clearInputValidationStyles();
     
     ['phy', 'chem', 'mathBio'].forEach(sub => executeRowAlgebraSolver(sub));
+    recalculateSubjectScores();
     syncSubjectBreakdownToMainInputs();
 }
 
@@ -169,9 +184,7 @@ function setProfileToCustomOverride() {
     const triggerProf = document.getElementById('examProfileLabel');
     
     const totalQsInput = document.getElementById('totalQs');
-    if (totalQsInput) {
-        totalQsInput.classList.remove('profile-locked-row');
-    }
+    if (totalQsInput) totalQsInput.classList.remove('profile-locked-row');
 
     if(hiddenProf && hiddenProf.value !== 'custom') {
         hiddenProf.value = 'custom';
@@ -192,7 +205,7 @@ function clearImplicitTransientResiduals() {
 }
 
 // ============================================================================
-// 5. BIDIRECTIONAL DYNAMIC CROSS-INPUT LINKER & ALGEBRA MATRIX SOLVER
+// 5. SUBJECT ALGEBRA & NTA SCORE CALCULATOR
 // ============================================================================
 function setupReactiveSubjectSyncObservers() {
     const subPanel = document.getElementById('subjectSection');
@@ -206,19 +219,12 @@ function setupReactiveSubjectSyncObservers() {
 }
 
 function processSubjectRowRecalculationSequence(targetNode) {
-    // If user edited an allowed input field, check if it should push to custom mode
-    if (targetNode.id !== 'totalQs' && !targetNode.classList.contains('profile-locked-row')) {
-        const selectedProfile = document.getElementById('examProfile').value;
-        if (selectedProfile === 'custom' || targetNode.classList.contains('sub-input')) {
-            // Let algebra continue smoothly
-        }
-    }
-    
     const row = targetNode.closest('.subject-grid-row');
     if (row) {
         const subjectKey = row.getAttribute('data-subject');
         executeRowAlgebraSolver(subjectKey, targetNode);
     }
+    recalculateSubjectScores();
     syncSubjectBreakdownToMainInputs();
 }
 
@@ -256,15 +262,39 @@ function executeRowAlgebraSolver(sub, activeElement = null) {
 
     if (filledFields.length === 2) {
         const structuralMask = filledFields.map(f => f.id).join('');
-        
-        if (structuralMask === 'CW') {
-            elNot.value = Math.max(0, tot - cor - wro);
-        } else if (structuralMask === 'WN') {
-            elCor.value = Math.max(0, tot - wro - not);
-        } else if (structuralMask === 'CN') {
-            elWro.value = Math.max(0, tot - cor - not);
-        }
+        if (structuralMask === 'CW') elNot.value = Math.max(0, tot - cor - wro);
+        else if (structuralMask === 'WN') elCor.value = Math.max(0, tot - wro - not);
+        else if (structuralMask === 'CN') elWro.value = Math.max(0, tot - cor - not);
     }
+}
+
+function recalculateSubjectScores() {
+    const ratio = parseFloat(document.getElementById('markingRatio').value) || 0.25;
+    const subjects = ['phy', 'chem', 'mathBio'];
+
+    subjects.forEach(sub => {
+        const total = parseFloat(document.getElementById(`${sub}A`).value) || 0;
+        const correct = parseFloat(document.getElementById(`${sub}C`).value) || 0;
+        const wrong = parseFloat(document.getElementById(`${sub}W`).value) || 0;
+
+        let maxMarks = subjectScores[sub].maxMarks;
+        if (document.getElementById('examProfile').value === 'custom') {
+            // Auto calculate max marks proportionally if total questions exist
+            const globalTotalQs = parseFloat(document.getElementById('totalQs').value) || 1;
+            const globalMaxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
+            maxMarks = total > 0 ? (total / globalTotalQs) * globalMaxMarks : 100;
+        }
+
+        const marksPerQ = total > 0 ? maxMarks / total : 4; 
+        const score = (correct * marksPerQ) - (wrong * marksPerQ * ratio);
+
+        subjectScores[sub] = { correct, wrong, total, score, maxMarks };
+
+        const chip = document.getElementById(`${sub}ScoreChip`);
+        if (chip) {
+            chip.textContent = `Score: ${score.toFixed(2)} / ${maxMarks}`;
+        }
+    });
 }
 
 function setupMainFallbackInputObservers() {
@@ -301,9 +331,7 @@ function syncSubjectBreakdownToMainInputs() {
     });
 
     const totalQsInput = document.getElementById('totalQs');
-    if(aggregateTotal > 0 && totalQsInput) {
-        totalQsInput.value = aggregateTotal;
-    }
+    if(aggregateTotal > 0 && totalQsInput) totalQsInput.value = aggregateTotal;
     
     let computedAttempts = aggregateCorrect + aggregateWrong;
     document.getElementById('attempted').value = computedAttempts > 0 || aggregateWrong > 0 ? computedAttempts : '';
@@ -311,99 +339,7 @@ function syncSubjectBreakdownToMainInputs() {
 }
 
 // ============================================================================
-// 6. GLOSSY TOUCH-OPTIMIZED VIRTUAL KEYPAD CORE SUBSYSTEM
-// ============================================================================
-function setupPremiumVirtualKeyboardCoreEngine() {
-    const targets = document.querySelectorAll('.v-keyboard-target');
-    const kbContainer = document.getElementById('glassmorphicKeyboardPanel');
-    if (!kbContainer) return;
-
-    targets.forEach(input => {
-        if (isTouchFormFactorDevice) {
-            input.setAttribute('inputmode', 'none');
-        }
-
-        input.addEventListener('click', (e) => {
-            // Guard against choosing elements locked by current preset profile selection state
-            if (input.classList.contains('profile-locked-row')) {
-                e.preventDefault();
-                return;
-            }
-            
-            if (!isTouchFormFactorDevice) return; 
-            e.stopPropagation();
-
-            if (currentlyFocusedInputFieldNode) {
-                currentlyFocusedInputFieldNode.classList.remove('v-keyboard-focused-node');
-            }
-
-            currentlyFocusedInputFieldNode = input;
-            input.classList.add('v-keyboard-focused-node');
-            
-            kbContainer.classList.add('panel-active');
-            adjustViewportPaddingForVirtualKeyboardPanel(true);
-        });
-    });
-
-    const matrixKeys = kbContainer.querySelectorAll('.kb-matrix-key');
-    matrixKeys.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (!currentlyFocusedInputFieldNode) return;
-
-            const commandKeyValue = btn.getAttribute('data-key');
-            let baseStringValue = currentlyFocusedInputFieldNode.value;
-
-            btn.style.transform = 'scale(0.92)';
-            setTimeout(() => { btn.style.transform = 'none'; }, 80);
-
-            if (commandKeyValue === 'clear') {
-                currentlyFocusedInputFieldNode.value = '';
-            } else if (commandKeyValue === 'backspace') {
-                currentlyFocusedInputFieldNode.value = baseStringValue.slice(0, -1);
-            } else {
-                if (baseStringValue.length < 4) {
-                    currentlyFocusedInputFieldNode.value = baseStringValue + commandKeyValue;
-                }
-            }
-
-            currentlyFocusedInputFieldNode.dispatchEvent(new Event('input', { bubbles: true }));
-            processSubjectRowRecalculationSequence(currentlyFocusedInputFieldNode);
-        });
-    });
-
-    window.addEventListener('click', (e) => {
-        if (kbContainer.classList.contains('panel-active') && 
-            !kbContainer.contains(e.target) && 
-            !e.target.classList.contains('v-keyboard-target')) {
-            dismissVirtualKeyboardPanel();
-        }
-    });
-}
-
-function dismissVirtualKeyboardPanel() {
-    const kbContainer = document.getElementById('glassmorphicKeyboardPanel');
-    if (kbContainer) {
-        kbContainer.classList.remove('panel-active');
-    }
-    if (currentlyFocusedInputFieldNode) {
-        currentlyFocusedInputFieldNode.classList.remove('v-keyboard-focused-node');
-        currentlyFocusedInputFieldNode = null;
-    }
-    adjustViewportPaddingForVirtualKeyboardPanel(false);
-}
-
-function adjustViewportPaddingForVirtualKeyboardPanel(isOpening) {
-    if (isOpening) {
-        document.body.style.paddingBottom = "360px";
-    } else {
-        document.body.style.paddingBottom = "24px";
-    }
-}
-
-// ============================================================================
-// 7. FLUENT NOTIFICATION SYSTEM & UI CRITICAL VALIDATION ENGINE
+// 6. VALIDATION & TOAST SYSTEM
 // ============================================================================
 function triggerSystemToastNotification(message, isError = true) {
     const toast = document.getElementById('systemNotification');
@@ -412,9 +348,9 @@ function triggerSystemToastNotification(message, isError = true) {
 
     msgSpan.textContent = message;
     if (isError) {
-        toast.style.background = "rgba(239, 68, 68, 0.15)";
-        toast.style.borderColor = "rgba(239, 68, 68, 0.3)";
-        toast.style.color = "#fca5a5";
+        toast.style.background = "rgba(244, 63, 94, 0.15)";
+        toast.style.borderColor = "rgba(244, 63, 94, 0.3)";
+        toast.style.color = "#fecdd3";
     } else {
         toast.style.background = "rgba(16, 185, 129, 0.15)";
         toast.style.borderColor = "rgba(16, 185, 129, 0.3)";
@@ -422,12 +358,11 @@ function triggerSystemToastNotification(message, isError = true) {
     }
 
     toast.classList.add('show');
-    setTimeout(() => { toast.classList.remove('show'); }, 5000);
+    setTimeout(() => { toast.classList.remove('show'); }, 4000);
 }
 
 function clearInputValidationStyles() {
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach(input => input.classList.remove('validation-error'));
+    document.querySelectorAll('input').forEach(input => input.classList.remove('validation-error'));
 }
 
 function scanAndValidateSystemInputs() {
@@ -450,58 +385,30 @@ function scanAndValidateSystemInputs() {
     if (attempted.value === "" || parseFloat(attempted.value) < 0) invalidNodes.push(attempted);
     if (wrong.value === "" || parseFloat(wrong.value) < 0) invalidNodes.push(wrong);
 
-    const reportType = document.getElementById('reportType').value;
-    if (reportType === 'subjectwise') {
-        ['phy', 'chem', 'mathBio'].forEach(sub => {
-            const ta = document.getElementById(`${sub}A`);
-            const tc = document.getElementById(`${sub}C`);
-            const tw = document.getElementById(`${sub}W`);
-            const tn = document.getElementById(`${sub}N`);
-            
-            if (!ta.value || parseFloat(ta.value) < 0) invalidNodes.push(ta);
-            if (tc.value === "" || parseFloat(tc.value) < 0) invalidNodes.push(tc);
-            if (tw.value === "" || parseFloat(tw.value) < 0) invalidNodes.push(tw);
-            if (tn.value === "" || parseFloat(tn.value) < 0) invalidNodes.push(tn);
-        });
-    }
-
     if (invalidNodes.length === 0) {
         if (parseFloat(wrong.value) > parseFloat(attempted.value)) {
-            invalidNodes.push(wrong);
-            invalidNodes.push(attempted);
-            triggerSystemToastNotification("Logic Error: Incorrect faults cannot exceed total attempts.");
-            animateContainerShake();
+            invalidNodes.push(wrong, attempted);
+            triggerSystemToastNotification("Logic Error: Incorrect answers cannot exceed total attempts.");
             return false;
         }
         if (parseFloat(attempted.value) > parseFloat(totalQs.value)) {
-            invalidNodes.push(attempted);
-            invalidNodes.push(totalQs);
+            invalidNodes.push(attempted, totalQs);
             triggerSystemToastNotification("Logic Error: Total attempts cannot exceed total questions.");
-            animateContainerShake();
             return false;
         }
     }
 
     if (invalidNodes.length > 0) {
         invalidNodes.forEach(node => node.classList.add('validation-error'));
-        triggerSystemToastNotification("Action Blocked: Please populate required fields with valid numerical data.");
-        animateContainerShake();
+        triggerSystemToastNotification("Action Blocked: Please populate required fields correctly.");
         return false;
     }
 
     return true;
 }
 
-function animateContainerShake() {
-    const container = document.getElementById('mainAppContainer');
-    if (!container) return;
-    container.style.animation = 'none';
-    container.offsetHeight; 
-    container.style.animation = 'fluentContainerShake 0.45s cubic-bezier(.36,.07,.19,.97) both';
-}
-
 // ============================================================================
-// 8. CALCULATION ENGINE LOGIC UNIFICATION
+// 7. CALCULATION ENGINE LOGIC UNIFICATION (STANDARD NTA SCHEME)
 // ============================================================================
 function executeCalculationSequence() {
     if (!scanAndValidateSystemInputs()) return null;
@@ -510,21 +417,19 @@ function executeCalculationSequence() {
     const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
     const attempted = parseFloat(document.getElementById('attempted').value) || 0;
     const wrong = parseFloat(document.getElementById('wrong').value) || 0;
-    const ratio = parseFloat(document.getElementById('markingRatio').value) || 0;
+    const ratio = parseFloat(document.getElementById('markingRatio').value) || 0.25;
     
     const correct = attempted - wrong;
     const unattempted = Math.max(0, totalQs - attempted);
     const marksPerCorrect = totalQs > 0 ? (maxMarks / totalQs) : 0;
+    
+    // NTA Scheme Calculation: (Correct * Marks per Q) - (Wrong * Marks per Q * Penalty Ratio)
     const totalPenalty = wrong * (marksPerCorrect * ratio); 
     const finalScore = (correct * marksPerCorrect) - totalPenalty;
     const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100).toFixed(2) : 0;
 
     const scoreDisplayNode = document.getElementById('score');
     scoreDisplayNode.innerText = finalScore.toFixed(2);
-    
-    scoreDisplayNode.style.animation = 'none';
-    scoreDisplayNode.offsetHeight;
-    scoreDisplayNode.style.animation = 'fluentScalePulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
 
     return { 
         totalQs, maxMarks, attempted, wrong, correct, 
@@ -533,7 +438,7 @@ function executeCalculationSequence() {
 }
 
 // ============================================================================
-// 9. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT)
+// 8. PDF REPORT GENERATOR
 // ============================================================================
 async function downloadPDFReportSequence() {
     const telemetryData = executeCalculationSequence();
@@ -551,27 +456,24 @@ async function downloadPDFReportSequence() {
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, 'F');
     
-    doc.setDrawColor(240, 244, 248);
-    doc.setLineWidth(0.25);
+    doc.setDrawColor(240, 244, 248); doc.setLineWidth(0.25);
     for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
     for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j);
 
     doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3);
     doc.rect(8, 8, 194, 281);
 
-    doc.setFillColor(248, 250, 252);
-    doc.rect(10, 10, 190, 32, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5);
-    doc.rect(10, 10, 190, 32, 'D');
+    doc.setFillColor(248, 250, 252); doc.rect(10, 10, 190, 32, 'F');
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5); doc.rect(10, 10, 190, 32, 'D');
     
-    doc.setFillColor(14, 165, 233); doc.rect(10, 41, 130, 1, 'F');
-    doc.setFillColor(168, 85, 247); doc.rect(140, 41, 60, 1, 'F');
+    doc.setFillColor(124, 58, 237); doc.rect(10, 41, 130, 1, 'F');
+    doc.setFillColor(14, 165, 233); doc.rect(140, 41, 60, 1, 'F');
 
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
     doc.text("NEGATIVE MARKING PERFORMANCE REPORT", 16, 21);
     
-    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
-    doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v5.5`, 16, 27);
+    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(124, 58, 237);
+    doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v6.0`, 16, 27);
     
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
     doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
@@ -624,7 +526,7 @@ async function downloadPDFReportSequence() {
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
     doc.text(`${(telemetryData.correct * telemetryData.marksPerCorrect).toFixed(2)}`, 15, scoreY + 14);
 
-    doc.setTextColor(14, 165, 233); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.setTextColor(124, 58, 237); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
     doc.text("INTELLIGENCE ENGINE SCORE RUN", 73, scoreY + 6);
     doc.setFont("courier", "bold"); doc.setFontSize(20); doc.setTextColor(15, 23, 42);
     doc.text(`${telemetryData.finalScore.toFixed(2)}`, 73, scoreY + 15);
@@ -634,116 +536,29 @@ async function downloadPDFReportSequence() {
     doc.setFont("helvetica", "bold"); doc.setFontSize(12);
     doc.text(`${telemetryData.efficiency}%`, 147, scoreY + 14);
 
-    let meterY = 118;
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY - 4, 200, meterY - 4);
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-    doc.text("VISUAL TELEMETRY EVALUATION GRAPH", 11, meterY);
-    meterY += 5;
-
-    const analyticalGauges = [
-        { title: "ACCURACY DENSITY", value: telemetryData.correct, max: telemetryData.totalQs || 1, color: [14, 165, 233] },
-        { title: "PENALTY COEFFICIENT", value: telemetryData.wrong, max: telemetryData.totalQs || 1, color: [168, 85, 247] }
-    ];
-
-    analyticalGauges.forEach(gauge => {
-        doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139);
-        doc.text(gauge.title, 11, meterY + 3.5);
-
-        let segments = 24;
-        let activeBlocks = Math.round((gauge.value / gauge.max) * segments);
-        let startX = 74;
-        
-        for(let s = 0; s < segments; s++) {
-            if(s < activeBlocks) {
-                doc.setFillColor(gauge.color[0], gauge.color[1], gauge.color[2]);
-                doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'F');
-            } else {
-                doc.setDrawColor(226, 232, 240);
-                doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'D');
-            }
-        }
-        meterY += 7;
-    });
-
     if (reportType === 'subjectwise') {
+        let meterY = 118;
         doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY - 1, 200, meterY - 1);
         doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-        doc.text("CROSS-SUBJECT ANALYTICS MATRIX", 11, meterY + 4);
-        meterY += 9;
+        doc.text("SUBJECTWise EVALUATION BREAKDOWN", 11, meterY + 4);
+        meterY += 12;
 
-        const dynLabel = document.getElementById('mathBioLabel')?.textContent || 'MATH / BIO';
+        const dynLabel = document.getElementById('mathBioLabel')?.textContent || 'MATHEMATICS';
         const rows = [
-            { name: 'PHYSICS SUBSYSTEM', kA: 'phyA', kC: 'phyC', kW: 'phyW' },
-            { name: 'CHEMISTRY SUBSYSTEM', kA: 'chemA', kC: 'chemC', kW: 'chemW' },
-            { name: `${dynLabel} SUBSYSTEM`, kA: 'mathBioA', kC: 'mathBioC', kW: 'mathBioW' }
+            { name: 'PHYSICS', key: 'phy' },
+            { name: 'CHEMISTRY', key: 'chem' },
+            { name: dynLabel, key: 'mathBio' }
         ];
 
         rows.forEach(r => {
-            const total = parseInt(document.getElementById(r.kA).value) || 0;
-            const corr = parseInt(document.getElementById(r.kC).value) || 0;
-            const wrng = parseInt(document.getElementById(r.kW).value) || 0;
-
-            doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(71, 85, 105);
-            doc.text(r.name, 11, meterY + 3);
-
-            if (total > 0) {
-                let maxWidth = 122;
-                let cW = (corr / total) * maxWidth;
-                let wW = (wrng / total) * maxWidth;
-                let iW = Math.max(0, maxWidth - (cW + wW));
-
-                doc.setFillColor(16, 185, 129); if(cW > 0) doc.rect(74, meterY, cW, 4.0, 'F');
-                doc.setFillColor(244, 63, 94); if(wW > 0) doc.rect(74 + cW, meterY, wW, 4.0, 'F');
-                doc.setFillColor(241, 245, 249); if(iW > 0) doc.rect(74 + cW + wW, meterY, iW, 4.0, 'F');
-                
-                doc.setDrawColor(203, 213, 225); doc.rect(74, meterY, maxWidth, 4.0, 'D');
-                doc.setFontSize(5.5); doc.setTextColor(15, 23, 42); doc.setFont("courier", "bold");
-                doc.text(`[ OK: ${corr} | WRG: ${wrng} | IDLE: ${Math.max(0, total-(corr+wrng))} ]`, 158, meterY - 1.2);
-            } else {
-                doc.setFont("helvetica", "oblique"); doc.setFontSize(6); doc.setTextColor(148, 163, 184);
-                doc.text("CHANNEL OFFLINE // NO CURRICULUM STREAM LOADED IN DATA MODEM", 74, meterY + 3);
-            }
-            meterY += 7;
+            const data = subjectScores[r.key];
+            doc.setFontSize(7); doc.setFont("helvetica", "bold"); doc.setTextColor(15, 23, 42);
+            doc.text(`${r.name}: ${data.score.toFixed(2)} / ${data.maxMarks}`, 11, meterY);
+            doc.setFont("courier", "normal"); doc.setTextColor(100, 116, 139);
+            doc.text(`[ Correct: ${data.correct} | Wrong: ${data.wrong} | Total Qs: ${data.total} ]`, 95, meterY);
+            meterY += 8;
         });
     }
 
-    let tBoxY = Math.max(meterY + 4, 148);
-    doc.setFillColor(252, 253, 255); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
-    doc.rect(10, tBoxY, 190, 36, 'DF');
-    doc.setFillColor(168, 85, 247); doc.rect(10, tBoxY, 2.5, 36, 'F');
-
-    doc.setTextColor(15, 23, 42); doc.setFontSize(8.5); doc.setFont("helvetica", "bold");
-    doc.text("AUTOMATED ALGORITHMIC INTELLIGENCE RECOMMENDATIONS MATRIX", 16, tBoxY + 6);
-    doc.setFont("courier", "bold"); doc.setFontSize(7.5); doc.setTextColor(51, 65, 85);
-
-    let systemRecommendationText = "";
-    if (telemetryData.efficiency > 80) systemRecommendationText = "EXCELLENT CONTEXT ACUITY. MAINTAIN CONSTANT VELOCITY PATTERNS TO PRESERVE CAP LIMIT.";
-    else if (telemetryData.efficiency > 50) systemRecommendationText = "STABLE EQUILIBRIUM. ELIMINATE TRIVIAL FAULT TRIGGERS TO BRIDGE THE SUB-80% ACCURACY DECAY.";
-    else systemRecommendationText = "CRITICAL SYSTEM FAULT DENSITY. ELIMINATE GUESSWORK PATTERNS IMMEDIATELY TO REMOVE PENALTY DRAINS.";
-
-    doc.text(`>> RECOM_STRATEGY : ${systemRecommendationText}`, 15, tBoxY + 14);
-    doc.text(`>> PENALTY_DECAY  : THE REGISTERED PENALTY INFLICTED SUBTRACTS ${telemetryData.totalPenalty.toFixed(2)} POINTS FROM ABSOLUTE CAPACITY.`, 15, tBoxY + 21);
-    doc.text(`>> EFFICIENCY_GAP : ${telemetryData.unattempted} UNATTEMPTED SEGMENTS IDENTIFIED FOR LOW-COST SCORE OPTIMIZATION.`, 15, tBoxY + 28);
-
-    const finalFooterY = 254;
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, finalFooterY - 4, 200, finalFooterY - 4);
-
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-    doc.text("MR. PRASAD REDDY", 14, finalFooterY + 4);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
-    doc.text("Chief Executive Officer & Founder of ECLIPSE7", 14, finalFooterY + 9);
-    doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(5, 150, 105);
-    doc.text("STATUS: INTEGRITY MATRIX APPROVED & DIGITAL RECORD VERIFIED VIA CORE STREAM", 14, finalFooterY + 14);
-
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = "stamp.jpg"; 
-    
-    img.onload = function() {
-        doc.addImage(img, 'JPEG', 158, 244, 34, 34);
-        doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
-    };
-    img.onerror = () => {
-        doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
-    };
+    doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
 }
