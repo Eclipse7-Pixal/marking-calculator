@@ -33,7 +33,7 @@
     </div>
 
     <header class="app-header">
-        <div class="fluent-badge">E7 CORE ULTRA v6.5</div>
+        <div class="fluent-badge">Eclipse7 v6.5</div>
         <h1>Negative Marking Engine</h1>
         
         <div class="meta-branding-container">
@@ -45,7 +45,7 @@
     <form id="evaluationForm" onsubmit="event.preventDefault();">
         
         <div class="input-field-group">
-            <label class="soft-field-label">Student Authentication <span class="req-star">*</span></label>
+            <label class="soft-field-label">Student Name <span class="req-star">*</span></label>
             <div class="fluent-input-wrapper">
                 <i class="fa-solid fa-fingerprint input-field-icon"></i>
                 <input type="text" id="studentName" placeholder="Enter student identity" required autocomplete="off">
@@ -53,10 +53,10 @@
         </div>
 
         <div class="input-field-group">
-            <label class="soft-field-label">Assessment Token <span class="req-star">*</span></label>
+            <label class="soft-field-label">Assessment Name <span class="req-star">*</span></label>
             <div class="fluent-input-wrapper">
                 <i class="fa-solid fa-hashtag input-field-icon"></i>
-                <input type="text" id="testName" placeholder="Assessment name (e.g., JEE Main Major)" required autocomplete="off">
+                <input type="text" id="testName" placeholder="(e.g., JEE Main Major, NEET Jumbo)" required autocomplete="off">
             </div>
         </div>
 
@@ -123,7 +123,7 @@
         <div id="subjectSection" class="subject-breakdown-wrapper">
             <div class="mandatory-input-notice-bar">
                 <i class="fa-solid fa-circle-info"></i>
-                <span><strong>Subject Matrix Mode:</strong> Provide values per subject section. Scores calculated automatically according to NTA evaluation rules.</span>
+                <span><strong>Subject Matrix Mode:</strong> Provide values per subject section. Scores calculated automatically according to Standard evaluation rules.</span>
             </div>
 
             <!-- Fixed Header Layout Order to align exactly with input columns below -->
@@ -182,7 +182,7 @@
         </button>
 
         <div class="fluent-score-hero-display">
-            <label class="score-hero-title">CALCULATED METRIC SCORE</label>
+            <label class="score-hero-title">CALCULATED SCORE</label>
             <div id="score" class="score-hero-val">0.00</div>
             <div class="fluent-wave-shimmer"></div>
         </div>
