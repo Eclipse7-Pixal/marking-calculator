@@ -99,12 +99,6 @@ body {
     box-sizing: border-box;
 }
 
-.soft-glass-container:hover {
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.95), 
-                0 0 40px rgba(139, 92, 246, 0.08);
-}
-
 .app-header {
     display: flex;
     flex-direction: column;
@@ -386,16 +380,17 @@ input.validation-error {
     line-height: 1.35;
 }
 
+/* Grid layout matching 4 input columns below */
 .subject-grid-layout-header {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 6px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     text-align: center;
 }
 
 .subject-grid-layout-header span {
-    font-size: 0.6rem;
+    font-size: 0.62rem;
     font-weight: 700;
     letter-spacing: 0.5px;
 }
