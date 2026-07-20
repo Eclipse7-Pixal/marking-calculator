@@ -279,7 +279,6 @@ function recalculateSubjectScores() {
 
         let maxMarks = subjectScores[sub].maxMarks;
         if (document.getElementById('examProfile').value === 'custom') {
-            // Auto calculate max marks proportionally if total questions exist
             const globalTotalQs = parseFloat(document.getElementById('totalQs').value) || 1;
             const globalMaxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
             maxMarks = total > 0 ? (total / globalTotalQs) * globalMaxMarks : 100;
@@ -423,7 +422,6 @@ function executeCalculationSequence() {
     const unattempted = Math.max(0, totalQs - attempted);
     const marksPerCorrect = totalQs > 0 ? (maxMarks / totalQs) : 0;
     
-    // NTA Scheme Calculation: (Correct * Marks per Q) - (Wrong * Marks per Q * Penalty Ratio)
     const totalPenalty = wrong * (marksPerCorrect * ratio); 
     const finalScore = (correct * marksPerCorrect) - totalPenalty;
     const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100).toFixed(2) : 0;
@@ -438,7 +436,7 @@ function executeCalculationSequence() {
 }
 
 // ============================================================================
-// 8. PDF REPORT GENERATOR
+// 8. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT)
 // ============================================================================
 async function downloadPDFReportSequence() {
     const telemetryData = executeCalculationSequence();
@@ -466,14 +464,14 @@ async function downloadPDFReportSequence() {
     doc.setFillColor(248, 250, 252); doc.rect(10, 10, 190, 32, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5); doc.rect(10, 10, 190, 32, 'D');
     
-    doc.setFillColor(124, 58, 237); doc.rect(10, 41, 130, 1, 'F');
-    doc.setFillColor(14, 165, 233); doc.rect(140, 41, 60, 1, 'F');
+    doc.setFillColor(14, 165, 233); doc.rect(10, 41, 130, 1, 'F');
+    doc.setFillColor(168, 85, 247); doc.rect(140, 41, 60, 1, 'F');
 
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
     doc.text("NEGATIVE MARKING PERFORMANCE REPORT", 16, 21);
     
-    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(124, 58, 237);
-    doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v6.0`, 16, 27);
+    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
+    doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v6.5`, 16, 27);
     
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
     doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
@@ -526,7 +524,7 @@ async function downloadPDFReportSequence() {
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
     doc.text(`${(telemetryData.correct * telemetryData.marksPerCorrect).toFixed(2)}`, 15, scoreY + 14);
 
-    doc.setTextColor(124, 58, 237); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.setTextColor(14, 165, 233); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
     doc.text("INTELLIGENCE ENGINE SCORE RUN", 73, scoreY + 6);
     doc.setFont("courier", "bold"); doc.setFontSize(20); doc.setTextColor(15, 23, 42);
     doc.text(`${telemetryData.finalScore.toFixed(2)}`, 73, scoreY + 15);
@@ -536,29 +534,119 @@ async function downloadPDFReportSequence() {
     doc.setFont("helvetica", "bold"); doc.setFontSize(12);
     doc.text(`${telemetryData.efficiency}%`, 147, scoreY + 14);
 
+    let meterY = 118;
+    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY - 4, 200, meterY - 4);
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
+    doc.text("VISUAL TELEMETRY EVALUATION GRAPH", 11, meterY);
+    meterY += 5;
+
+    const analyticalGauges = [
+        { title: "ACCURACY DENSITY", value: telemetryData.correct, max: telemetryData.totalQs || 1, color: [14, 165, 233] },
+        { title: "PENALTY COEFFICIENT", value: telemetryData.wrong, max: telemetryData.totalQs || 1, color: [168, 85, 247] }
+    ];
+
+    analyticalGauges.forEach(gauge => {
+        doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139);
+        doc.text(gauge.title, 11, meterY + 3.5);
+
+        let segments = 24;
+        let activeBlocks = Math.round((gauge.value / gauge.max) * segments);
+        let startX = 74;
+        
+        for(let s = 0; s < segments; s++) {
+            if(s < activeBlocks) {
+                doc.setFillColor(gauge.color[0], gauge.color[1], gauge.color[2]);
+                doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'F');
+            } else {
+                doc.setDrawColor(226, 232, 240);
+                doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'D');
+            }
+        }
+        meterY += 7;
+    });
+
     if (reportType === 'subjectwise') {
-        let meterY = 118;
         doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY - 1, 200, meterY - 1);
         doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-        doc.text("SUBJECTWise EVALUATION BREAKDOWN", 11, meterY + 4);
-        meterY += 12;
+        doc.text("CROSS-SUBJECT ANALYTICS MATRIX", 11, meterY + 4);
+        meterY += 9;
 
         const dynLabel = document.getElementById('mathBioLabel')?.textContent || 'MATHEMATICS';
         const rows = [
-            { name: 'PHYSICS', key: 'phy' },
-            { name: 'CHEMISTRY', key: 'chem' },
-            { name: dynLabel, key: 'mathBio' }
+            { name: 'PHYSICS SUBSYSTEM', key: 'phy', kA: 'phyA', kC: 'phyC', kW: 'phyW' },
+            { name: 'CHEMISTRY SUBSYSTEM', key: 'chem', kA: 'chemA', kC: 'chemC', kW: 'chemW' },
+            { name: `${dynLabel} SUBSYSTEM`, key: 'mathBio', kA: 'mathBioA', kC: 'mathBioC', kW: 'mathBioW' }
         ];
 
         rows.forEach(r => {
-            const data = subjectScores[r.key];
-            doc.setFontSize(7); doc.setFont("helvetica", "bold"); doc.setTextColor(15, 23, 42);
-            doc.text(`${r.name}: ${data.score.toFixed(2)} / ${data.maxMarks}`, 11, meterY);
-            doc.setFont("courier", "normal"); doc.setTextColor(100, 116, 139);
-            doc.text(`[ Correct: ${data.correct} | Wrong: ${data.wrong} | Total Qs: ${data.total} ]`, 95, meterY);
-            meterY += 8;
+            const total = parseInt(document.getElementById(r.kA).value) || 0;
+            const corr = parseInt(document.getElementById(r.kC).value) || 0;
+            const wrng = parseInt(document.getElementById(r.kW).value) || 0;
+            const sData = subjectScores[r.key];
+
+            doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(71, 85, 105);
+            doc.text(r.name, 11, meterY + 3);
+
+            if (total > 0) {
+                let maxWidth = 80;
+                let cW = (corr / total) * maxWidth;
+                let wW = (wrng / total) * maxWidth;
+                let iW = Math.max(0, maxWidth - (cW + wW));
+
+                doc.setFillColor(16, 185, 129); if(cW > 0) doc.rect(74, meterY, cW, 4.0, 'F');
+                doc.setFillColor(244, 63, 94); if(wW > 0) doc.rect(74 + cW, meterY, wW, 4.0, 'F');
+                doc.setFillColor(241, 245, 249); if(iW > 0) doc.rect(74 + cW + wW, meterY, iW, 4.0, 'F');
+                
+                doc.setDrawColor(203, 213, 225); doc.rect(74, meterY, maxWidth, 4.0, 'D');
+                
+                // Displays Subject Marks along with Correct/Wrong Stats without modifying PDF pattern
+                doc.setFontSize(5.5); doc.setTextColor(15, 23, 42); doc.setFont("courier", "bold");
+                doc.text(`[ MARKS: ${sData.score.toFixed(2)}/${sData.maxMarks} | OK: ${corr} | WRG: ${wrng} ]`, 156, meterY + 2.8);
+            } else {
+                doc.setFont("helvetica", "oblique"); doc.setFontSize(6); doc.setTextColor(148, 163, 184);
+                doc.text("CHANNEL OFFLINE // NO CURRICULUM STREAM LOADED IN DATA MODEM", 74, meterY + 3);
+            }
+            meterY += 7;
         });
     }
 
-    doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
+    let tBoxY = Math.max(meterY + 4, 148);
+    doc.setFillColor(252, 253, 255); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
+    doc.rect(10, tBoxY, 190, 36, 'DF');
+    doc.setFillColor(168, 85, 247); doc.rect(10, tBoxY, 2.5, 36, 'F');
+
+    doc.setTextColor(15, 23, 42); doc.setFontSize(8.5); doc.setFont("helvetica", "bold");
+    doc.text("AUTOMATED ALGORITHMIC INTELLIGENCE RECOMMENDATIONS MATRIX", 16, tBoxY + 6);
+    doc.setFont("courier", "bold"); doc.setFontSize(7.5); doc.setTextColor(51, 65, 85);
+
+    let systemRecommendationText = "";
+    if (telemetryData.efficiency > 80) systemRecommendationText = "EXCELLENT CONTEXT ACUITY. MAINTAIN CONSTANT VELOCITY PATTERNS TO PRESERVE CAP LIMIT.";
+    else if (telemetryData.efficiency > 50) systemRecommendationText = "STABLE EQUILIBRIUM. ELIMINATE TRIVIAL FAULT TRIGGERS TO BRIDGE THE SUB-80% ACCURACY DECAY.";
+    else systemRecommendationText = "CRITICAL SYSTEM FAULT DENSITY. ELIMINATE GUESSWORK PATTERNS IMMEDIATELY TO REMOVE PENALTY DRAINS.";
+
+    doc.text(`>> RECOM_STRATEGY : ${systemRecommendationText}`, 15, tBoxY + 14);
+    doc.text(`>> PENALTY_DECAY  : THE REGISTERED PENALTY INFLICTED SUBTRACTS ${telemetryData.totalPenalty.toFixed(2)} POINTS FROM ABSOLUTE CAPACITY.`, 15, tBoxY + 21);
+    doc.text(`>> EFFICIENCY_GAP : ${telemetryData.unattempted} UNATTEMPTED SEGMENTS IDENTIFIED FOR LOW-COST SCORE OPTIMIZATION.`, 15, tBoxY + 28);
+
+    const finalFooterY = 254;
+    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, finalFooterY - 4, 200, finalFooterY - 4);
+
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+    doc.text("MR. PRASAD REDDY", 14, finalFooterY + 4);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
+    doc.text("Chief Executive Officer & Founder of ECLIPSE7", 14, finalFooterY + 9);
+    doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(5, 150, 105);
+    doc.text("STATUS: INTEGRITY MATRIX APPROVED & DIGITAL RECORD VERIFIED VIA CORE STREAM", 14, finalFooterY + 14);
+
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.src = "stamp.jpg"; 
+    
+    img.onload = function() {
+        doc.addImage(img, 'JPEG', 158, 244, 34, 34);
+        doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
+    };
+    img.onerror = () => {
+        doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
+    };
 }
