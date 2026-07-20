@@ -471,7 +471,7 @@ async function downloadPDFReportSequence() {
     doc.text("NEGATIVE MARKING PERFORMANCE REPORT", 16, 21);
     
     doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
-    doc.text(`SYSTEM CORE: METRIC_PROFILE_${currentProfile} // CODE v6.5`, 16, 27);
+    doc.text(`SYSTEM CORE: SCORE_PROFILE_${currentProfile} // CORE v6.5`, 16, 27);
     
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
     doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
@@ -480,14 +480,14 @@ async function downloadPDFReportSequence() {
     doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" SECURE INITIAL IDENTITY MATRIX", 12, cardY + 4.2);
+    doc.text(" STUDENT IDENTITY MATRIX", 12, cardY + 4.2);
     
     doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
     doc.rect(10, cardY + 6, 92, 26, 'DF');
     doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
-    doc.text("CANDIDATE INITIALS :", 14, cardY + 14);
-    doc.text("TARGET MATRIX APP  :", 14, cardY + 22);
-    doc.text("SYSTEM TIME STAMP  :", 14, cardY + 30);
+    doc.text("CANDIDATE NAME    :", 14, cardY + 14);
+    doc.text("TARGET EXAM       :", 14, cardY + 22);
+    doc.text("SYSTEM TIME STAMP :", 14, cardY + 30);
     
     doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
     doc.text(student.length > 20 ? student.substring(0, 20) + "..." : student, 44, cardY + 14);
@@ -644,9 +644,9 @@ async function downloadPDFReportSequence() {
     
     img.onload = function() {
         doc.addImage(img, 'JPEG', 158, 244, 34, 34);
-        doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
+        doc.save(`${student.replace(/ /g, "_")}_ECLIPSE7_METRIC_REPORT.pdf`);
     };
     img.onerror = () => {
-        doc.save(`${student.replace(/ /g, "_")}_E7_METRIC_REPORT.pdf`);
+        doc.save(`${student.replace(/ /g, "_")}_ECLIPSE7_METRIC_REPORT.pdf`);
     };
 }
