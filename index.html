@@ -200,6 +200,7 @@
     </footer>
 </div>
 
+</header>
 <!-- Sliding History Drawer Overlay -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="toggleHistoryDrawer(false)"></div>
 <aside class="history-drawer" id="historyDrawer">
@@ -229,7 +230,12 @@
         <!-- Rendered dynamically by script.js -->
     </div>
 </aside>
-
+<!-- Place this Floating Action Button just before </body> -->
+<button type="button" class="floating-history-fab" id="openHistoryBtn" onclick="toggleHistoryDrawer(true)" title="Open Assessment Vault">
+    <i class="fa-solid fa-clock-rotate-left"></i>
+    <span class="fab-counter-badge" id="historyCounter">0</span>
+</button> 
+    
 <script src="script.js"></script>
 </body>
 </html>
