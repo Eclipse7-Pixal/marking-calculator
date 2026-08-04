@@ -434,7 +434,16 @@ function executeCalculationSequence() {
         unattempted, finalScore, efficiency, totalPenalty, marksPerCorrect 
     };
 }
-
+// Hook into history storage module
+    if (typeof saveAssessmentToHistory === 'function') {
+        saveAssessmentToHistory({
+            studentName: document.getElementById('studentName').value,
+            testName: document.getElementById('testName').value,
+            examProfile: document.getElementById('examProfile').value,
+            totalQs, maxMarks, attempted, wrong, correct,
+            finalScore, efficiency
+        });
+    }
 // ============================================================================
 // 8. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT)
 // ============================================================================
