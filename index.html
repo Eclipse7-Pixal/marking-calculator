@@ -33,7 +33,15 @@
     </div>
 
     <header class="app-header">
-        <div class="fluent-badge">Eclipse7 v6.5</div>
+        <div class="header-top-bar">
+            <div class="fluent-badge">Eclipse7 v6.5</div>
+            <button type="button" class="history-toggle-btn" id="openHistoryBtn" onclick="toggleHistoryDrawer(true)">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>History</span>
+                <span class="history-count-badge" id="historyCounter">0</span>
+            </button>
+        </div>
+        
         <h1>Negative Marking Engine</h1>
         
         <div class="meta-branding-container">
@@ -126,7 +134,6 @@
                 <span><strong>Subject Matrix Mode:</strong> Provide values per subject section. Scores calculated automatically according to Standard evaluation rules.</span>
             </div>
 
-            <!-- Fixed Header Layout Order to align exactly with input columns below -->
             <div class="subject-grid-layout-header">
                 <span>TOTAL Q.</span>
                 <span>CORRECT</span>
@@ -201,7 +208,36 @@
     </footer>
 </div>
 
-<script src="history.js"></script>    
+<!-- Sliding History Drawer Overlay -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="toggleHistoryDrawer(false)"></div>
+<aside class="history-drawer" id="historyDrawer">
+    <div class="drawer-header">
+        <div class="drawer-title">
+            <i class="fa-solid fa-box-archive text-cyan"></i>
+            <h3>Assessment Vault</h3>
+        </div>
+        <button class="drawer-close-btn" onclick="toggleHistoryDrawer(false)">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <div class="drawer-search-bar">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="historySearchInput" placeholder="Filter candidate or test name..." oninput="filterHistoryList()">
+    </div>
+
+    <div class="drawer-actions">
+        <span class="history-total-lbl" id="historyTotalText">0 Records Stored</span>
+        <button type="button" class="clear-all-btn" onclick="clearAssessmentHistory()">
+            <i class="fa-solid fa-trash-can"></i> Purge Vault
+        </button>
+    </div>
+
+    <div class="history-list-scroll" id="historyListContainer">
+        <!-- Rendered dynamically by script.js -->
+    </div>
+</aside>
+
 <script src="script.js"></script>
 </body>
 </html>
