@@ -50,6 +50,8 @@ const EXAM_PROFILES = {
     }
 };
 
+const E7_HISTORY_KEY = 'e7_assessment_history_v2';
+
 // Subject calculations state
 let subjectScores = {
     phy: { correct: 0, wrong: 0, total: 0, score: 0, maxMarks: 100 },
@@ -121,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupMainFallbackInputObservers();
     
     toggleSubjectSectionDisplay();
+    renderHistoryVault();
 });
 
 function toggleSubjectSectionDisplay() {
@@ -429,21 +432,17 @@ function executeCalculationSequence() {
     const scoreDisplayNode = document.getElementById('score');
     scoreDisplayNode.innerText = finalScore.toFixed(2);
 
-    return { 
+    const resultData = { 
         totalQs, maxMarks, attempted, wrong, correct, 
         unattempted, finalScore, efficiency, totalPenalty, marksPerCorrect 
     };
+
+    // Auto-save calculated metrics to persistent storage vault
+    saveRecordToVault(resultData);
+
+    return resultData;
 }
-// Hook into history storage module
-    if (typeof saveAssessmentToHistory === 'function') {
-        saveAssessmentToHistory({
-            studentName: document.getElementById('studentName').value,
-            testName: document.getElementById('testName').value,
-            examProfile: document.getElementById('examProfile').value,
-            totalQs, maxMarks, attempted, wrong, correct,
-            finalScore, efficiency
-        });
-    }
+
 // ============================================================================
 // 8. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT)
 // ============================================================================
@@ -608,7 +607,6 @@ async function downloadPDFReportSequence() {
                 
                 doc.setDrawColor(203, 213, 225); doc.rect(74, meterY, maxWidth, 4.0, 'D');
                 
-                // Displays Subject Marks along with Correct/Wrong Stats without modifying PDF pattern
                 doc.setFontSize(5.5); doc.setTextColor(15, 23, 42); doc.setFont("courier", "bold");
                 doc.text(`[ MARKS: ${sData.score.toFixed(2)}/${sData.maxMarks} | OK: ${corr} | WRG: ${wrng} ]`, 156, meterY + 2.8);
             } else {
@@ -658,4 +656,169 @@ async function downloadPDFReportSequence() {
     img.onerror = () => {
         doc.save(`${student.replace(/ /g, "_")}_ECLIPSE7_METRIC_REPORT.pdf`);
     };
+}
+
+// ============================================================================
+// 9. HISTORY VAULT STORAGE & SLIDING DRAWER SYSTEM
+// ============================================================================
+function toggleHistoryDrawer(show) {
+    const drawer = document.getElementById('historyDrawer');
+    const overlay = document.getElementById('drawerOverlay');
+    if (!drawer || !overlay) return;
+
+    if (show) {
+        drawer.classList.add('active');
+        overlay.classList.add('active');
+        renderHistoryVault();
+    } else {
+        drawer.classList.remove('active');
+        overlay.classList.remove('active');
+    }
+}
+
+function getStoredHistory() {
+    try {
+        const raw = localStorage.getItem(E7_HISTORY_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        console.error("Storage Access Fault", e);
+        return [];
+    }
+}
+
+function saveRecordToVault(computed) {
+    const studentName = document.getElementById('studentName').value.trim();
+    const testName = document.getElementById('testName').value.trim();
+    const profile = document.getElementById('examProfile').value;
+
+    if (!studentName || !testName) return;
+
+    const record = {
+        id: 'E7-REC-' + Date.now(),
+        timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        studentName,
+        testName,
+        profile,
+        finalScore: computed.finalScore.toFixed(2),
+        maxMarks: computed.maxMarks,
+        totalQs: computed.totalQs,
+        attempted: computed.attempted,
+        wrong: computed.wrong,
+        correct: computed.correct,
+        efficiency: computed.efficiency
+    };
+
+    let history = getStoredHistory();
+    // Prevent duplicated items calculated in short sequence
+    if (history.length > 0 && history[0].studentName === studentName && history[0].testName === testName && history[0].finalScore === record.finalScore) {
+        return;
+    }
+
+    history.unshift(record);
+    if (history.length > 50) history = history.slice(0, 50);
+
+    localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
+    updateHistoryCounterBadge(history.length);
+}
+
+function updateHistoryCounterBadge(count) {
+    const counterNode = document.getElementById('historyCounter');
+    if (counterNode) counterNode.textContent = count;
+}
+
+function renderHistoryVault(filterQuery = "") {
+    const container = document.getElementById('historyListContainer');
+    const totalLabel = document.getElementById('historyTotalText');
+    if (!container) return;
+
+    const history = getStoredHistory();
+    updateHistoryCounterBadge(history.length);
+
+    const filtered = filterQuery.trim() === "" ? history : history.filter(item => 
+        item.studentName.toLowerCase().includes(filterQuery.toLowerCase()) || 
+        item.testName.toLowerCase().includes(filterQuery.toLowerCase())
+    );
+
+    if (totalLabel) totalLabel.textContent = `${filtered.length} Records Shown`;
+
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div class="empty-history-state">
+                <i class="fa-solid fa-folder-open"></i>
+                <p>${filterQuery ? "No matching records found." : "Vault empty. Compute a test score to log history."}</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = filtered.map(item => `
+        <div class="history-item-card" id="card-${item.id}">
+            <div class="history-card-top">
+                <h4 class="history-cand-name">${escapeHtml(item.studentName)}</h4>
+                <span class="history-badge-profile">${item.profile}</span>
+            </div>
+            <div class="history-card-mid">
+                <span class="history-test-name">${escapeHtml(item.testName)}</span>
+                <span class="history-card-score">${item.finalScore} / ${item.maxMarks}</span>
+            </div>
+            <div class="history-card-bottom">
+                <span>${item.timestamp} | Acc: ${item.efficiency}%</span>
+                <div class="history-card-controls">
+                    <button class="history-ctrl-btn" onclick="restoreHistoryItem('${item.id}')" title="Load into Calculator">
+                        <i class="fa-solid fa-rotate-left"></i> Load
+                    </button>
+                    <button class="history-ctrl-btn del" onclick="deleteHistoryItem('${item.id}')" title="Delete Entry">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterHistoryList() {
+    const query = document.getElementById('historySearchInput').value;
+    renderHistoryVault(query);
+}
+
+function restoreHistoryItem(id) {
+    const history = getStoredHistory();
+    const item = history.find(x => x.id === id);
+    if (!item) return;
+
+    document.getElementById('studentName').value = item.studentName;
+    document.getElementById('testName').value = item.testName;
+    document.getElementById('totalQs').value = item.totalQs;
+    document.getElementById('maxMarks').value = item.maxMarks;
+    document.getElementById('attempted').value = item.attempted;
+    document.getElementById('wrong').value = item.wrong;
+
+    document.getElementById('score').innerText = item.finalScore;
+
+    toggleHistoryDrawer(false);
+    triggerSystemToastNotification(`Loaded assessment record for ${item.studentName}`, false);
+}
+
+function deleteHistoryItem(id) {
+    let history = getStoredHistory();
+    history = history.filter(x => x.id !== id);
+    localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
+    renderHistoryVault(document.getElementById('historySearchInput').value);
+    triggerSystemToastNotification("Record removed from Vault.", false);
+}
+
+function clearAssessmentHistory() {
+    if (confirm("Purge all recorded assessment history from browser vault?")) {
+        localStorage.removeItem(E7_HISTORY_KEY);
+        renderHistoryVault();
+        triggerSystemToastNotification("Vault completely purged.", false);
+    }
+}
+
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
 }
