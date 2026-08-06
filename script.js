@@ -52,7 +52,10 @@ const EXAM_PROFILES = {
 
 const E7_HISTORY_KEY = 'e7_assessment_history_v2';
 
-// Subject calculations state
+// Global Instances & States
+let breakdownChartInstance = null;
+let subjectChartInstance = null;
+
 let subjectScores = {
     phy: { correct: 0, wrong: 0, total: 0, score: 0, maxMarks: 100 },
     chem: { correct: 0, wrong: 0, total: 0, score: 0, maxMarks: 100 },
@@ -129,13 +132,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleSubjectSectionDisplay() {
     const type = document.getElementById('reportType').value;
     const section = document.getElementById('subjectSection');
+    const subjCard = document.getElementById('subjectChartCard');
     if (!section) return;
 
     if (type === 'subjectwise') {
         section.classList.add('visible');
+        if(subjCard) subjCard.classList.remove('hidden');
         syncSubjectBreakdownToMainInputs();
     } else {
         section.classList.remove('visible');
+        if(subjCard) subjCard.classList.add('hidden');
     }
 }
 
@@ -410,7 +416,7 @@ function scanAndValidateSystemInputs() {
 }
 
 // ============================================================================
-// 7. CALCULATION ENGINE LOGIC UNIFICATION (STANDARD NTA SCHEME)
+// 7. MAIN CALCULATION ENGINE + FEATURE 1, 2, 4, 7, 8, 9 INTEGRATION
 // ============================================================================
 function executeCalculationSequence() {
     if (!scanAndValidateSystemInputs()) return null;
@@ -427,24 +433,234 @@ function executeCalculationSequence() {
     
     const totalPenalty = wrong * (marksPerCorrect * ratio); 
     const finalScore = (correct * marksPerCorrect) - totalPenalty;
-    const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100).toFixed(2) : 0;
+    const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100) : 0;
+    const accuracy = attempted > 0 ? ((correct / attempted) * 100) : 0;
 
-    const scoreDisplayNode = document.getElementById('score');
-    scoreDisplayNode.innerText = finalScore.toFixed(2);
+    // Smooth counter animation for score hero
+    animateNumberCounter('score', finalScore, 2);
+
+    const profileKey = document.getElementById('examProfile').value;
 
     const resultData = { 
         totalQs, maxMarks, attempted, wrong, correct, 
-        unattempted, finalScore, efficiency, totalPenalty, marksPerCorrect 
+        unattempted, finalScore, efficiency: efficiency.toFixed(2), 
+        accuracy: accuracy.toFixed(2), totalPenalty, marksPerCorrect, profileKey,
+        subjectScores: JSON.parse(JSON.stringify(subjectScores))
     };
 
     // Auto-save calculated metrics to persistent storage vault
     saveRecordToVault(resultData);
 
+    // Update Dashboard & Sub-modules
+    updateDashboardUI(resultData);
+    computeRankAndPercentile(resultData);
+    generateAIReport(resultData);
+    generateInsightEngineList(resultData);
+    renderCurrentDashboardCharts(resultData);
+
+    document.getElementById('analyticsDashboardContainer').classList.remove('hidden');
+
     return resultData;
 }
 
+function animateNumberCounter(elementId, targetValue, decimals = 0, prefix = '', suffix = '') {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    let start = 0;
+    let duration = 800;
+    let startTime = null;
+
+    function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        let progress = Math.min((timestamp - startTime) / duration, 1);
+        let curr = start + progress * (targetValue - start);
+        el.innerText = `${prefix}${curr.toFixed(decimals)}${suffix}`;
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    }
+    window.requestAnimationFrame(step);
+}
+
+// FEATURE 8: PERFORMANCE GRADE ASSIGNMENT
+function calculateGrade(pct) {
+    if (pct >= 95) return { grade: "S+", color: "#10b981" };
+    if (pct >= 90) return { grade: "S", color: "#34d399" };
+    if (pct >= 80) return { grade: "A+", color: "#38bdf8" };
+    if (pct >= 70) return { grade: "A", color: "#60a5fa" };
+    if (pct >= 60) return { grade: "B+", color: "#a78bfa" };
+    if (pct >= 50) return { grade: "B", color: "#c084fc" };
+    if (pct >= 40) return { grade: "C", color: "#facc15" };
+    if (pct >= 30) return { grade: "D", color: "#fb923c" };
+    return { grade: "Needs Improvement", color: "#f43f5e" };
+}
+
+// FEATURE 7: DASHBOARD UI UPDATE
+function updateDashboardUI(data) {
+    const gradeObj = calculateGrade(parseFloat(data.efficiency));
+    const gradeEl = document.getElementById('dashGrade');
+    gradeEl.innerText = gradeObj.grade;
+    gradeEl.style.backgroundColor = gradeObj.color + "22";
+    gradeEl.style.color = gradeObj.color;
+    gradeEl.style.border = `1px solid ${gradeObj.color}55`;
+
+    animateNumberCounter('dashAccuracy', parseFloat(data.accuracy), 1, '', '%');
+    animateNumberCounter('dashEfficiency', parseFloat(data.efficiency), 1, '', '%');
+    animateNumberCounter('dashPenalty', data.totalPenalty, 2);
+    document.getElementById('dashCorrect').innerText = data.correct;
+    document.getElementById('dashWrong').innerText = data.wrong;
+    document.getElementById('dashSkipped').innerText = data.unattempted;
+
+    let risk = "Low";
+    let wrongRatio = data.attempted > 0 ? (data.wrong / data.attempted) : 0;
+    if (wrongRatio > 0.4) risk = "High Risk";
+    else if (wrongRatio > 0.2) risk = "Moderate";
+    document.getElementById('dashRiskIndex').innerText = risk;
+}
+
+// FEATURE 1: SMART RANK & PERCENTILE PREDICTOR
+function computeRankAndPercentile(data) {
+    let scorePct = Math.max(0, Math.min(100, (data.finalScore / data.maxMarks) * 100));
+    let percentile = 0;
+    let rank = 0;
+    let band = "Good";
+    let competition = "Top 10%";
+
+    if (data.profileKey === 'jeemain') {
+        percentile = Math.max(0, 100 - Math.pow((100 - scorePct) / 100, 2) * 100);
+        rank = Math.round((100 - percentile) * 12000);
+    } else if (data.profileKey === 'jeeadv') {
+        percentile = Math.max(0, 100 - Math.pow((100 - scorePct) / 100, 1.8) * 100);
+        rank = Math.round((100 - percentile) * 2500);
+    } else if (data.profileKey === 'neet') {
+        percentile = Math.max(0, 100 - Math.pow((100 - scorePct) / 100, 2.2) * 100);
+        rank = Math.round((100 - percentile) * 20000);
+    } else {
+        percentile = scorePct;
+        rank = Math.round((100 - scorePct) * 1000);
+    }
+
+    if (percentile >= 99) { band = "Outstanding"; competition = "Top 1%"; }
+    else if (percentile >= 95) { band = "Excellent"; competition = "Top 5%"; }
+    else if (percentile >= 85) { band = "Very Good"; competition = "Top 15%"; }
+    else if (percentile >= 70) { band = "Above Average"; competition = "Top 30%"; }
+    else { band = "Developing"; competition = "Top 50%+"; }
+
+    animateNumberCounter('predPercentile', percentile, 2, '', '%');
+    animateNumberCounter('predRank', Math.max(1, rank), 0);
+    document.getElementById('predBand').innerText = band;
+    document.getElementById('predCompetition').innerText = competition;
+}
+
+// FEATURE 2: AI PERFORMANCE ANALYSIS
+function generateAIReport(data) {
+    let report = [];
+    let eff = parseFloat(data.efficiency);
+    let acc = parseFloat(data.accuracy);
+
+    if (eff >= 80) report.push("★ Excellent Overall Work. Your performance efficiency is in the top bracket.");
+    else if (eff >= 50) report.push("★ Solid Foundation. Performance is steady but requires accuracy refinement.");
+    else report.push("★ Caution Required. High score volatility detected.");
+
+    report.push(`• Accuracy Analysis: You maintained an accuracy of ${acc}%.`);
+    report.push(`• Negative Mark Analysis: You lost approximately ${data.totalPenalty.toFixed(2)} marks because of risky attempts.`);
+
+    if (data.wrong > 5) {
+        report.push(`• Risk Level: High negative drag. ${data.wrong} questions answered incorrectly.`);
+    } else {
+        report.push(`• Risk Level: Controlled precision. Minimal incorrect responses detected.`);
+    }
+
+    report.push("\nRecommendations:");
+    if (acc < 75) report.push("1. Attempt fewer uncertain questions to safeguard your positive scores.");
+    if (data.unattempted > data.totalQs * 0.3) report.push("2. Work on time management to reduce skipped questions.");
+    report.push("3. Focus on subject consistency to maintain continuous score improvement.");
+
+    document.getElementById('aiReportContent').innerText = report.join("\n");
+}
+
+// FEATURE 9: INSIGHT ENGINE
+function generateInsightEngineList(currentData) {
+    const listEl = document.getElementById('insightList');
+    listEl.innerHTML = '';
+    const history = getStoredHistory();
+
+    let insights = [];
+    
+    if (currentData.wrong > currentData.correct * 0.35) {
+        insights.push("You attempted too many risky questions in this session.");
+    }
+    
+    if (history.length > 1) {
+        let prev = history[1];
+        let scoreDiff = parseFloat(currentData.finalScore) - parseFloat(prev.finalScore);
+        if (scoreDiff > 0) {
+            insights.push(`Score improved by +${scoreDiff.toFixed(2)} marks compared to previous test.`);
+        } else if (scoreDiff < 0) {
+            insights.push(`Score dropped by ${scoreDiff.toFixed(2)} marks compared to previous test.`);
+        }
+    }
+
+    if (insights.length === 0) {
+        insights.push("Performance metrics logged. Continue testing to track growth trends.");
+    }
+
+    insights.forEach(txt => {
+        let li = document.createElement('li');
+        li.innerText = txt;
+        listEl.appendChild(li);
+    });
+}
+
+// FEATURE 4: PERFORMANCE GRAPHS
+function renderCurrentDashboardCharts(data) {
+    if (breakdownChartInstance) breakdownChartInstance.destroy();
+    if (subjectChartInstance) subjectChartInstance.destroy();
+
+    const ctxPie = document.getElementById('currentBreakdownChart').getContext('2d');
+    breakdownChartInstance = new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+            labels: ['Correct', 'Wrong', 'Skipped'],
+            datasets: [{
+                data: [data.correct, data.wrong, data.unattempted],
+                backgroundColor: ['#10b981', '#f43f5e', '#64748b']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#f8fafc', font: { size: 10 } } } }
+        }
+    });
+
+    const ctxBar = document.getElementById('currentSubjectChart').getContext('2d');
+    const dynLabel = document.getElementById('mathBioLabel')?.textContent || 'MATHEMATICS';
+    
+    subjectChartInstance = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: ['Physics', 'Chemistry', dynLabel],
+            datasets: [{
+                label: 'Subject Score',
+                data: [subjectScores.phy.score, subjectScores.chem.score, subjectScores.mathBio.score],
+                backgroundColor: ['#8b5cf6', '#0284c7', '#10b981']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: '#94a3b8' } },
+                y: { ticks: { color: '#94a3b8' } }
+            }
+        }
+    });
+}
+
 // ============================================================================
-// 8. DATA INTELLIGENCE REPORT COMPILATION GATEWAY (PDF EXPORT)
+// 8. DATA EXPORT & FEATURE 6 SHARE SYSTEM
 // ============================================================================
 async function downloadPDFReportSequence() {
     const telemetryData = executeCalculationSequence();
@@ -479,7 +695,7 @@ async function downloadPDFReportSequence() {
     doc.text("NEGATIVE MARKING PERFORMANCE REPORT", 16, 21);
     
     doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
-    doc.text(`SYSTEM CORE: SCORE_PROFILE_${currentProfile} // CORE v6.5`, 16, 27);
+    doc.text(`SYSTEM CORE: SCORE_PROFILE_${currentProfile} // CORE v7.0`, 16, 27);
     
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
     doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
@@ -658,8 +874,104 @@ async function downloadPDFReportSequence() {
     };
 }
 
+function exportCurrentPNG() {
+    const el = document.getElementById('mainAppContainer');
+    html2canvas(el).then(canvas => {
+        let link = document.createElement('a');
+        link.download = 'ECLIPSE7_Assessment_Result.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+
+function exportCurrentJSON() {
+    const data = executeCalculationSequence();
+    if (!data) return;
+    let blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    let link = document.createElement('a');
+    link.download = 'ECLIPSE7_Result.json';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+}
+
+function triggerShareMenu() {
+    const data = executeCalculationSequence();
+    if (!data) return;
+    const shareText = `ECLIPSE7 Exam Result\nStudent: ${document.getElementById('studentName').value}\nScore: ${data.finalScore.toFixed(2)} / ${data.maxMarks}\nAccuracy: ${data.accuracy}%\nEfficiency: ${data.efficiency}%`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'ECLIPSE7 Assessment Result',
+            text: shareText,
+            url: window.location.href
+        }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(shareText);
+        triggerSystemToastNotification("Result Summary copied to clipboard!", false);
+    }
+}
+
+// FEATURE 5: DOWNLOAD COMPLETE HISTORY PDF
+function downloadCompleteHistoryPDF() {
+    const history = getStoredHistory();
+    if (history.length === 0) {
+        triggerSystemToastNotification("No history records available to export PDF.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+
+    doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+    doc.text("ECLIPSE7 - Complete History Performance Analytics", 14, 20);
+    doc.setFontSize(9); doc.setTextColor(100);
+    doc.text(`Generated: ${new Date().toLocaleString()} | Total Tests: ${history.length}`, 14, 26);
+
+    const tableRows = history.map(h => [
+        h.timestamp,
+        h.studentName,
+        h.testName,
+        h.profile.toUpperCase(),
+        `${h.finalScore} / ${h.maxMarks}`,
+        `${h.efficiency}%`
+    ]);
+
+    doc.autoTable({
+        startY: 32,
+        head: [['Timestamp', 'Student', 'Test', 'Profile', 'Score', 'Efficiency']],
+        body: tableRows,
+        theme: 'striped',
+        headStyles: { fillColor: [139, 92, 246] }
+    });
+
+    doc.save("ECLIPSE7_Complete_History_Report.pdf");
+}
+
+function exportHistoryJSON() {
+    const history = getStoredHistory();
+    let blob = new Blob([JSON.stringify(history, null, 2)], { type: 'application/json' });
+    let link = document.createElement('a');
+    link.download = 'ECLIPSE7_History_Vault.json';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+}
+
+function exportHistoryCSV() {
+    const history = getStoredHistory();
+    if (history.length === 0) return;
+    let csv = "ID,Timestamp,Student,Test,Profile,Score,MaxMarks,Efficiency\n";
+    history.forEach(h => {
+        csv += `"${h.id}","${h.timestamp}","${h.studentName}","${h.testName}","${h.profile}","${h.finalScore}","${h.maxMarks}","${h.efficiency}"\n`;
+    });
+    let blob = new Blob([csv], { type: 'text/csv' });
+    let link = document.createElement('a');
+    link.download = 'ECLIPSE7_History_Vault.csv';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+}
+
 // ============================================================================
-// 9. HISTORY VAULT STORAGE & SLIDING DRAWER SYSTEM
+// 9. HISTORY VAULT STORAGE, COMPARISON & FULL AI REPORT
 // ============================================================================
 function toggleHistoryDrawer(show) {
     const drawer = document.getElementById('historyDrawer');
@@ -705,11 +1017,11 @@ function saveRecordToVault(computed) {
         attempted: computed.attempted,
         wrong: computed.wrong,
         correct: computed.correct,
-        efficiency: computed.efficiency
+        efficiency: computed.efficiency,
+        accuracy: computed.accuracy
     };
 
     let history = getStoredHistory();
-    // Prevent duplicated items calculated in short sequence
     if (history.length > 0 && history[0].studentName === studentName && history[0].testName === testName && history[0].finalScore === record.finalScore) {
         return;
     }
@@ -722,8 +1034,8 @@ function saveRecordToVault(computed) {
 }
 
 function updateHistoryCounterBadge(count) {
-    const counterNode = document.getElementById('historyCounter');
-    if (counterNode) counterNode.textContent = count;
+    const counterNodes = [document.getElementById('historyCounter'), document.getElementById('headerHistoryCounter')];
+    counterNodes.forEach(node => { if(node) node.textContent = count; });
 }
 
 function renderHistoryVault(filterQuery = "") {
@@ -797,6 +1109,7 @@ function restoreHistoryItem(id) {
 
     toggleHistoryDrawer(false);
     triggerSystemToastNotification(`Loaded assessment record for ${item.studentName}`, false);
+    executeCalculationSequence();
 }
 
 function deleteHistoryItem(id) {
@@ -813,6 +1126,121 @@ function clearAssessmentHistory() {
         renderHistoryVault();
         triggerSystemToastNotification("Vault completely purged.", false);
     }
+}
+
+// FEATURE 3: FULL HISTORY ANALYTICS AI REPORT
+function toggleFullReportModal(show) {
+    const modal = document.getElementById('fullReportModal');
+    const overlay = document.getElementById('fullReportOverlay');
+    if (show) { modal.classList.add('active'); overlay.classList.add('active'); }
+    else { modal.classList.remove('active'); overlay.classList.remove('active'); }
+}
+
+function generateAndShowFullHistoryReport() {
+    const history = getStoredHistory();
+    if (history.length === 0) {
+        triggerSystemToastNotification("Vault empty. Add tests to generate history analysis.");
+        return;
+    }
+
+    let totalTests = history.length;
+    let scores = history.map(h => parseFloat(h.finalScore));
+    let highest = Math.max(...scores);
+    let lowest = Math.min(...scores);
+    let avgScore = (scores.reduce((a, b) => a + b, 0) / totalTests).toFixed(2);
+    let avgAcc = (history.reduce((a, b) => a + parseFloat(h.accuracy || h.efficiency), 0) / totalTests).toFixed(2);
+
+    let content = document.getElementById('fullReportContent');
+    content.innerHTML = `
+        <div class="full-report-section">
+            <h4><i class="fa-solid fa-chart-line"></i> Historical Executive Summary</h4>
+            <p>Over the past ${totalTests} recorded assessments, the student has maintained an average score of <strong>${avgScore}</strong> with an average efficiency/accuracy of <strong>${avgAcc}%</strong>.</p>
+            <p>The highest score achieved across all assessments is <strong>${highest}</strong>, with a lower baseline recorded at <strong>${lowest}</strong>.</p>
+        </div>
+        <div class="full-report-section">
+            <h4><i class="fa-solid fa-microchip"></i> Performance & Strategy Recommendations</h4>
+            <p>Assessment trends indicate periodic score fluctuations primarily influenced by incorrect attempts. To maximize total score consistency, it is recommended to restrict uncertain answers and adopt a selective attempt framework in high-penalty sections.</p>
+        </div>
+    `;
+
+    toggleFullReportModal(true);
+}
+
+// FEATURE 10: COMPARE TESTS
+function toggleCompareModal(show) {
+    const modal = document.getElementById('compareModal');
+    const overlay = document.getElementById('compareModalOverlay');
+    if (show) { modal.classList.add('active'); overlay.classList.add('active'); }
+    else { modal.classList.remove('active'); overlay.classList.remove('active'); }
+}
+
+function openCompareModalLauncher() {
+    const history = getStoredHistory();
+    if (history.length < 2) {
+        triggerSystemToastNotification("At least 2 test entries required for comparison.");
+        return;
+    }
+
+    const sel1 = document.getElementById('compareSelect1');
+    const sel2 = document.getElementById('compareSelect2');
+    sel1.innerHTML = ''; sel2.innerHTML = '';
+
+    history.forEach((h, i) => {
+        let opt1 = document.createElement('option');
+        opt1.value = h.id; opt1.text = `${h.testName} (${h.finalScore})`;
+        let opt2 = opt1.cloneNode(true);
+        
+        sel1.appendChild(opt1);
+        sel2.appendChild(opt2);
+    });
+
+    sel2.selectedIndex = Math.min(1, history.length - 1);
+    renderComparisonView();
+    toggleCompareModal(true);
+}
+
+function renderComparisonView() {
+    const history = getStoredHistory();
+    const id1 = document.getElementById('compareSelect1').value;
+    const id2 = document.getElementById('compareSelect2').value;
+
+    const t1 = history.find(x => x.id === id1);
+    const t2 = history.find(x => x.id === id2);
+
+    if (!t1 || !t2) return;
+
+    let s1 = parseFloat(t1.finalScore);
+    let s2 = parseFloat(t2.finalScore);
+
+    const grid = document.getElementById('comparisonGrid');
+    grid.innerHTML = `
+        <table class="comp-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>${t1.testName}</th>
+                    <th>${t2.testName}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Final Score</td>
+                    <td class="${s1 >= s2 ? 'comp-winner' : ''}">${t1.finalScore} / ${t1.maxMarks}</td>
+                    <td class="${s2 >= s1 ? 'comp-winner' : ''}">${t2.finalScore} / ${t2.maxMarks}</td>
+                </tr>
+                <tr>
+                    <td>Efficiency</td>
+                    <td>${t1.efficiency}%</td>
+                    <td>${t2.efficiency}%</td>
+                </tr>
+                <tr>
+                    <td>Attempts / Wrong</td>
+                    <td>${t1.attempted} / ${t1.wrong}</td>
+                    <td>${t2.attempted} / ${t2.wrong}</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
 }
 
 function escapeHtml(str) {
