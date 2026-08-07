@@ -416,7 +416,7 @@ function scanAndValidateSystemInputs() {
 }
 
 // ============================================================================
-// 7. MAIN CALCULATION ENGINE + FEATURE 1, 2, 4, 7, 8, 9 INTEGRATION
+// 7. MAIN CALCULATION ENGINE + FEATURE CALCULATORS
 // ============================================================================
 function executeCalculationSequence() {
     if (!scanAndValidateSystemInputs()) return null;
@@ -436,7 +436,6 @@ function executeCalculationSequence() {
     const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100) : 0;
     const accuracy = attempted > 0 ? ((correct / attempted) * 100) : 0;
 
-    // Smooth counter animation for score hero
     animateNumberCounter('score', finalScore, 2);
 
     const profileKey = document.getElementById('examProfile').value;
@@ -448,10 +447,8 @@ function executeCalculationSequence() {
         subjectScores: JSON.parse(JSON.stringify(subjectScores))
     };
 
-    // Auto-save calculated metrics to persistent storage vault
     saveRecordToVault(resultData);
 
-    // Update Dashboard & Sub-modules
     updateDashboardUI(resultData);
     computeRankAndPercentile(resultData);
     generateAIReport(resultData);
@@ -482,7 +479,6 @@ function animateNumberCounter(elementId, targetValue, decimals = 0, prefix = '',
     window.requestAnimationFrame(step);
 }
 
-// FEATURE 8: PERFORMANCE GRADE ASSIGNMENT
 function calculateGrade(pct) {
     if (pct >= 95) return { grade: "S+", color: "#10b981" };
     if (pct >= 90) return { grade: "S", color: "#34d399" };
@@ -495,7 +491,6 @@ function calculateGrade(pct) {
     return { grade: "Needs Improvement", color: "#f43f5e" };
 }
 
-// FEATURE 7: DASHBOARD UI UPDATE
 function updateDashboardUI(data) {
     const gradeObj = calculateGrade(parseFloat(data.efficiency));
     const gradeEl = document.getElementById('dashGrade');
@@ -518,7 +513,6 @@ function updateDashboardUI(data) {
     document.getElementById('dashRiskIndex').innerText = risk;
 }
 
-// FEATURE 1: SMART RANK & PERCENTILE PREDICTOR
 function computeRankAndPercentile(data) {
     let scorePct = Math.max(0, Math.min(100, (data.finalScore / data.maxMarks) * 100));
     let percentile = 0;
@@ -550,9 +544,10 @@ function computeRankAndPercentile(data) {
     animateNumberCounter('predRank', Math.max(1, rank), 0);
     document.getElementById('predBand').innerText = band;
     document.getElementById('predCompetition').innerText = competition;
+
+    return { percentile: percentile.toFixed(2), rank: Math.max(1, rank), band, competition };
 }
 
-// FEATURE 2: AI PERFORMANCE ANALYSIS
 function generateAIReport(data) {
     let report = [];
     let eff = parseFloat(data.efficiency);
@@ -577,9 +572,9 @@ function generateAIReport(data) {
     report.push("3. Focus on subject consistency to maintain continuous score improvement.");
 
     document.getElementById('aiReportContent').innerText = report.join("\n");
+    return report.join("\n");
 }
 
-// FEATURE 9: INSIGHT ENGINE
 function generateInsightEngineList(currentData) {
     const listEl = document.getElementById('insightList');
     listEl.innerHTML = '';
@@ -610,9 +605,10 @@ function generateInsightEngineList(currentData) {
         li.innerText = txt;
         listEl.appendChild(li);
     });
+
+    return insights;
 }
 
-// FEATURE 4: PERFORMANCE GRAPHS
 function renderCurrentDashboardCharts(data) {
     if (breakdownChartInstance) breakdownChartInstance.destroy();
     if (subjectChartInstance) subjectChartInstance.destroy();
@@ -660,12 +656,9 @@ function renderCurrentDashboardCharts(data) {
 }
 
 // ============================================================================
-// 8. DATA EXPORT & FEATURE 6 SHARE SYSTEM
+// 8. DATA EXPORT & PDF GENERATION (WITH AI DIAGNOSTICS & PREDICTIONS)
 // ============================================================================
-async function downloadPDFReportSequence() {
-    const telemetryData = executeCalculationSequence();
-    if (!telemetryData) return;
-
+function createPDFDocumentObject(telemetryData) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'mm', 'a4');
     
@@ -675,6 +668,12 @@ async function downloadPDFReportSequence() {
     const test = document.getElementById('testName').value.toUpperCase();
     const timestamp = new Date().toLocaleString().toUpperCase();
 
+    // Predictions & AI Data
+    const predData = computeRankAndPercentile(telemetryData);
+    const aiReportText = generateAIReport(telemetryData);
+    const insights = generateInsightEngineList(telemetryData);
+
+    // Page Background
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, 'F');
     
@@ -682,9 +681,11 @@ async function downloadPDFReportSequence() {
     for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
     for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j);
 
+    // Border
     doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3);
     doc.rect(8, 8, 194, 281);
 
+    // Header Box
     doc.setFillColor(248, 250, 252); doc.rect(10, 10, 190, 32, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5); doc.rect(10, 10, 190, 32, 'D');
     
@@ -700,7 +701,8 @@ async function downloadPDFReportSequence() {
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
     doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
 
-    let cardY = 48;
+    // Candidate Identity Block
+    let cardY = 46;
     doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
@@ -710,18 +712,19 @@ async function downloadPDFReportSequence() {
     doc.rect(10, cardY + 6, 92, 26, 'DF');
     doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
     doc.text("CANDIDATE NAME    :", 14, cardY + 14);
-    doc.text("TARGET EXAM       :", 14, cardY + 22);
-    doc.text("SYSTEM TIME STAMP :", 14, cardY + 30);
+    doc.text("TARGET EXAM       :", 14, cardY + 20);
+    doc.text("SYSTEM TIMESTAMP  :", 14, cardY + 26);
     
     doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
     doc.text(student.length > 20 ? student.substring(0, 20) + "..." : student, 44, cardY + 14);
-    doc.text(test.length > 20 ? test.substring(0, 20) + "..." : test, 44, cardY + 22);
-    doc.setFont("courier", "bold"); doc.setFontSize(6.5); doc.text(timestamp, 44, cardY + 30);
+    doc.text(test.length > 20 ? test.substring(0, 20) + "..." : test, 44, cardY + 20);
+    doc.setFont("courier", "bold"); doc.setFontSize(6.5); doc.text(timestamp, 44, cardY + 26);
 
+    // Raw Constants Block
     doc.setFillColor(241, 245, 249); doc.rect(108, cardY, 92, 6, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(108, cardY, 92, 6, 'D');
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" LOAD DATA STRUCTURAL CONSTANTS", 110, cardY + 4.2);
+    doc.text(" EVALUATION METRICS SUMMARY", 110, cardY + 4.2);
     
     doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
     doc.rect(108, cardY + 6, 92, 26, 'DF');
@@ -737,62 +740,87 @@ async function downloadPDFReportSequence() {
     doc.text(`${telemetryData.attempted} UNITS`, 148, cardY + 25);
     doc.setTextColor(225, 29, 72); doc.text(`${telemetryData.wrong} FAULTS`, 148, cardY + 31);
 
-    let scoreY = 86;
+    // Score Summary Hero Banner
+    let scoreY = 82;
     doc.setFillColor(250, 251, 253); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
-    doc.rect(10, scoreY, 190, 24, 'DF');
+    doc.rect(10, scoreY, 190, 22, 'DF');
     doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.3);
-    doc.line(68, scoreY, 68, scoreY + 24); doc.line(142, scoreY, 142, scoreY + 24);
+    doc.line(68, scoreY, 68, scoreY + 22); doc.line(142, scoreY, 142, scoreY + 22);
     
     doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("COMPUTED GROSS MARKS", 15, scoreY + 6);
+    doc.text("GROSS MARKS (PRE-PENALTY)", 15, scoreY + 6);
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
     doc.text(`${(telemetryData.correct * telemetryData.marksPerCorrect).toFixed(2)}`, 15, scoreY + 14);
 
     doc.setTextColor(14, 165, 233); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text("INTELLIGENCE ENGINE SCORE RUN", 73, scoreY + 6);
-    doc.setFont("courier", "bold"); doc.setFontSize(20); doc.setTextColor(15, 23, 42);
-    doc.text(`${telemetryData.finalScore.toFixed(2)}`, 73, scoreY + 15);
+    doc.text("FINAL CALCULATED SCORE", 73, scoreY + 6);
+    doc.setFont("courier", "bold"); doc.setFontSize(18); doc.setTextColor(15, 23, 42);
+    doc.text(`${telemetryData.finalScore.toFixed(2)} / ${telemetryData.maxMarks}`, 73, scoreY + 15);
 
     doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("ENGINE PERFORMANCE EFFICIENCY", 147, scoreY + 6);
+    doc.text("ENGINE EFFICIENCY RATIO", 147, scoreY + 6);
     doc.setFont("helvetica", "bold"); doc.setFontSize(12);
     doc.text(`${telemetryData.efficiency}%`, 147, scoreY + 14);
 
-    let meterY = 118;
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY - 4, 200, meterY - 4);
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-    doc.text("VISUAL TELEMETRY EVALUATION GRAPH", 11, meterY);
-    meterY += 5;
+    // AI RANK & PERCENTILE PREDICTION SECTION
+    let rankY = 108;
+    doc.setFillColor(243, 244, 246); doc.rect(10, rankY, 190, 5, 'F');
+    doc.setDrawColor(139, 92, 246); doc.setLineWidth(0.4); doc.rect(10, rankY, 190, 5, 'D');
+    doc.setTextColor(109, 40, 217); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text(" AI SMART RANK & PERCENTILE PREDICTION ENGINE", 12, rankY + 3.8);
 
-    const analyticalGauges = [
-        { title: "ACCURACY DENSITY", value: telemetryData.correct, max: telemetryData.totalQs || 1, color: [14, 165, 233] },
-        { title: "PENALTY COEFFICIENT", value: telemetryData.wrong, max: telemetryData.totalQs || 1, color: [168, 85, 247] }
-    ];
+    doc.setFillColor(255, 255, 255); doc.setDrawColor(229, 231, 235);
+    doc.rect(10, rankY + 5, 190, 16, 'DF');
+    
+    doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
+    doc.text("ESTIMATED PERCENTILE :", 14, rankY + 11);
+    doc.text("ESTIMATED AIR RANK  :", 14, rankY + 17);
+    doc.text("PERFORMANCE BAND    :", 110, rankY + 11);
+    doc.text("COMPETITION LEVEL   :", 110, rankY + 17);
 
-    analyticalGauges.forEach(gauge => {
-        doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139);
-        doc.text(gauge.title, 11, meterY + 3.5);
+    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(15, 23, 42);
+    doc.text(`${predData.percentile}%`, 52, rankY + 11);
+    doc.text(`AIR ${predData.rank}`, 52, rankY + 17);
+    doc.text(`${predData.band}`, 148, rankY + 11);
+    doc.text(`${predData.competition}`, 148, rankY + 17);
 
-        let segments = 24;
-        let activeBlocks = Math.round((gauge.value / gauge.max) * segments);
-        let startX = 74;
-        
-        for(let s = 0; s < segments; s++) {
-            if(s < activeBlocks) {
-                doc.setFillColor(gauge.color[0], gauge.color[1], gauge.color[2]);
-                doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'F');
-            } else {
-                doc.setDrawColor(226, 232, 240);
-                doc.rect(startX + (s * 5.1), meterY, 4.0, 4.0, 'D');
-            }
-        }
-        meterY += 7;
+    // AI PERFORMANCE DIAGNOSTIC REPORT SECTION
+    let diagY = 133;
+    doc.setFillColor(240, 249, 255); doc.rect(10, diagY, 190, 5, 'F');
+    doc.setDrawColor(2, 132, 199); doc.setLineWidth(0.4); doc.rect(10, diagY, 190, 5, 'D');
+    doc.setTextColor(3, 105, 161); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text(" AI PERFORMANCE DIAGNOSTIC REPORT", 12, diagY + 3.8);
+
+    doc.setFillColor(255, 255, 255); doc.setDrawColor(229, 231, 235);
+    doc.rect(10, diagY + 5, 190, 26, 'DF');
+
+    doc.setFont("helvetica", "normal"); doc.setFontSize(6.8); doc.setTextColor(51, 65, 85);
+    let splitReport = doc.splitTextToSize(aiReportText, 182);
+    doc.text(splitReport, 14, diagY + 10);
+
+    // HISTORICAL INSIGHT ENGINE SECTION
+    let insY = 168;
+    doc.setFillColor(236, 253, 245); doc.rect(10, insY, 190, 5, 'F');
+    doc.setDrawColor(16, 185, 129); doc.setLineWidth(0.4); doc.rect(10, insY, 190, 5, 'D');
+    doc.setTextColor(4, 120, 87); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text(" HISTORICAL INSIGHT ENGINE & TREND ANALYTICS", 12, insY + 3.8);
+
+    doc.setFillColor(255, 255, 255); doc.setDrawColor(229, 231, 235);
+    doc.rect(10, insY + 5, 190, 18, 'DF');
+
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(51, 65, 85);
+    let lineCursor = insY + 11;
+    insights.forEach((ins) => {
+        doc.text(`• ${ins}`, 14, lineCursor);
+        lineCursor += 5;
     });
 
+    // Subject Breakdown Matrix (if applicable)
+    let meterY = 195;
     if (reportType === 'subjectwise') {
-        doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY - 1, 200, meterY - 1);
-        doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-        doc.text("CROSS-SUBJECT ANALYTICS MATRIX", 11, meterY + 4);
+        doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY, 200, meterY);
+        doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(8.5);
+        doc.text("CROSS-SUBJECT ANALYTICS MATRIX", 11, meterY + 5);
         meterY += 9;
 
         const dynLabel = document.getElementById('mathBioLabel')?.textContent || 'MATHEMATICS';
@@ -827,30 +855,13 @@ async function downloadPDFReportSequence() {
                 doc.text(`[ MARKS: ${sData.score.toFixed(2)}/${sData.maxMarks} | OK: ${corr} | WRG: ${wrng} ]`, 156, meterY + 2.8);
             } else {
                 doc.setFont("helvetica", "oblique"); doc.setFontSize(6); doc.setTextColor(148, 163, 184);
-                doc.text("CHANNEL OFFLINE // NO CURRICULUM STREAM LOADED IN DATA MODEM", 74, meterY + 3);
+                doc.text("CHANNEL OFFLINE // NO DATA LOADED", 74, meterY + 3);
             }
-            meterY += 7;
+            meterY += 6;
         });
     }
 
-    let tBoxY = Math.max(meterY + 4, 148);
-    doc.setFillColor(252, 253, 255); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
-    doc.rect(10, tBoxY, 190, 36, 'DF');
-    doc.setFillColor(168, 85, 247); doc.rect(10, tBoxY, 2.5, 36, 'F');
-
-    doc.setTextColor(15, 23, 42); doc.setFontSize(8.5); doc.setFont("helvetica", "bold");
-    doc.text("AUTOMATED ALGORITHMIC INTELLIGENCE RECOMMENDATIONS MATRIX", 16, tBoxY + 6);
-    doc.setFont("courier", "bold"); doc.setFontSize(7.5); doc.setTextColor(51, 65, 85);
-
-    let systemRecommendationText = "";
-    if (telemetryData.efficiency > 80) systemRecommendationText = "EXCELLENT CONTEXT ACUITY. MAINTAIN CONSTANT VELOCITY PATTERNS TO PRESERVE CAP LIMIT.";
-    else if (telemetryData.efficiency > 50) systemRecommendationText = "STABLE EQUILIBRIUM. ELIMINATE TRIVIAL FAULT TRIGGERS TO BRIDGE THE SUB-80% ACCURACY DECAY.";
-    else systemRecommendationText = "CRITICAL SYSTEM FAULT DENSITY. ELIMINATE GUESSWORK PATTERNS IMMEDIATELY TO REMOVE PENALTY DRAINS.";
-
-    doc.text(`>> RECOM_STRATEGY : ${systemRecommendationText}`, 15, tBoxY + 14);
-    doc.text(`>> PENALTY_DECAY  : THE REGISTERED PENALTY INFLICTED SUBTRACTS ${telemetryData.totalPenalty.toFixed(2)} POINTS FROM ABSOLUTE CAPACITY.`, 15, tBoxY + 21);
-    doc.text(`>> EFFICIENCY_GAP : ${telemetryData.unattempted} UNATTEMPTED SEGMENTS IDENTIFIED FOR LOW-COST SCORE OPTIMIZATION.`, 15, tBoxY + 28);
-
+    // Footer Signature
     const finalFooterY = 254;
     doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, finalFooterY - 4, 200, finalFooterY - 4);
 
@@ -860,6 +871,16 @@ async function downloadPDFReportSequence() {
     doc.text("Chief Executive Officer & Founder of ECLIPSE7", 14, finalFooterY + 9);
     doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(5, 150, 105);
     doc.text("STATUS: INTEGRITY MATRIX APPROVED & DIGITAL RECORD VERIFIED VIA CORE STREAM", 14, finalFooterY + 14);
+
+    return doc;
+}
+
+function downloadPDFReportSequence() {
+    const telemetryData = executeCalculationSequence();
+    if (!telemetryData) return;
+
+    const student = document.getElementById('studentName').value.toUpperCase();
+    const doc = createPDFDocumentObject(telemetryData);
 
     const img = new Image();
     img.crossOrigin = "Anonymous";
@@ -894,16 +915,68 @@ function exportCurrentJSON() {
     link.click();
 }
 
-function triggerShareMenu() {
+// ============================================================================
+// 9. ADVANCED RESULT SHARING (DIRECT PDF / ENHANCED TEXT FALLBACK)
+// ============================================================================
+async function triggerShareMenu() {
     const data = executeCalculationSequence();
     if (!data) return;
-    const shareText = `ECLIPSE7 Exam Result\nStudent: ${document.getElementById('studentName').value}\nScore: ${data.finalScore.toFixed(2)} / ${data.maxMarks}\nAccuracy: ${data.accuracy}%\nEfficiency: ${data.efficiency}%`;
+
+    const student = document.getElementById('studentName').value;
+    const test = document.getElementById('testName').value;
+    const profile = document.getElementById('examProfile').value.toUpperCase();
+    const pred = computeRankAndPercentile(data);
+
+    // Attempt direct PDF attachment share if Web Share API Level 2 is supported
+    if (navigator.canShare && navigator.canShare({ files: [new File([], 'test.pdf', { type: 'application/pdf' })] })) {
+        try {
+            const doc = createPDFDocumentObject(data);
+            const pdfArrayBuffer = doc.output('arraybuffer');
+            const pdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+            const fileName = `${student.replace(/ /g, "_")}_ECLIPSE7_Report.pdf`;
+            const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+            await navigator.share({
+                title: `${student}'s Performance Report - ECLIPSE7`,
+                text: `Check out ${student}'s evaluation result for ${test}!`,
+                files: [pdfFile]
+            });
+            triggerSystemToastNotification("Result PDF shared successfully!", false);
+            return;
+        } catch (err) {
+            console.log("PDF file share aborted or unsupported, defaulting to formatted summary...");
+        }
+    }
+
+    // Fallback Method: Rich Formatted Text Message Summary
+    const shareText = 
+`🎓 *ECLIPSE7 EXAM EVALUATION REPORT*
+----------------------------------------
+👤 *Student Name:* ${student}
+📝 *Assessment:* ${test}
+🎯 *Profile:* ${profile}
+
+📊 *SCORE SUMMARY*
+• *Final Score:* ${data.finalScore.toFixed(2)} / ${data.maxMarks}
+• *Efficiency:* ${data.efficiency}%
+• *Accuracy:* ${data.accuracy}%
+• *Correct Answers:* ${data.correct}
+• *Wrong Answers:* ${data.wrong} (${data.totalPenalty.toFixed(2)} Penalty Marks)
+• *Skipped Questions:* ${data.unattempted}
+
+🚀 *AI PREDICTION METRICS*
+• *Estimated Percentile:* ${pred.percentile}%
+• *Estimated AIR Rank:* ${pred.rank}
+• *Performance Band:* ${pred.band}
+
+----------------------------------------
+⚡ *Calculated via ECLIPSE7 Negative Marking Engine*
+🔗 https://eclipse7.odoo.com/`;
 
     if (navigator.share) {
         navigator.share({
-            title: 'ECLIPSE7 Assessment Result',
-            text: shareText,
-            url: window.location.href
+            title: `ECLIPSE7 Assessment Result - ${student}`,
+            text: shareText
         }).catch(() => {});
     } else {
         navigator.clipboard.writeText(shareText);
@@ -911,7 +984,9 @@ function triggerShareMenu() {
     }
 }
 
-// FEATURE 5: DOWNLOAD COMPLETE HISTORY PDF
+// ============================================================================
+// 10. HISTORY VAULT & COMPARISON ENGINE
+// ============================================================================
 function downloadCompleteHistoryPDF() {
     const history = getStoredHistory();
     if (history.length === 0) {
@@ -970,9 +1045,6 @@ function exportHistoryCSV() {
     link.click();
 }
 
-// ============================================================================
-// 9. HISTORY VAULT STORAGE, COMPARISON & FULL AI REPORT
-// ============================================================================
 function toggleHistoryDrawer(show) {
     const drawer = document.getElementById('historyDrawer');
     const overlay = document.getElementById('drawerOverlay');
@@ -1034,8 +1106,8 @@ function saveRecordToVault(computed) {
 }
 
 function updateHistoryCounterBadge(count) {
-    const counterNodes = [document.getElementById('historyCounter'), document.getElementById('headerHistoryCounter')];
-    counterNodes.forEach(node => { if(node) node.textContent = count; });
+    const counterNode = document.getElementById('historyCounter');
+    if (counterNode) counterNode.textContent = count;
 }
 
 function renderHistoryVault(filterQuery = "") {
@@ -1055,8 +1127,8 @@ function renderHistoryVault(filterQuery = "") {
 
     if (filtered.length === 0) {
         container.innerHTML = `
-            <div class="empty-history-state">
-                <i class="fa-solid fa-folder-open"></i>
+            <div class="empty-history-state" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px;"></i>
                 <p>${filterQuery ? "No matching records found." : "Vault empty. Compute a test score to log history."}</p>
             </div>
         `;
@@ -1128,7 +1200,6 @@ function clearAssessmentHistory() {
     }
 }
 
-// FEATURE 3: FULL HISTORY ANALYTICS AI REPORT
 function toggleFullReportModal(show) {
     const modal = document.getElementById('fullReportModal');
     const overlay = document.getElementById('fullReportOverlay');
@@ -1166,7 +1237,6 @@ function generateAndShowFullHistoryReport() {
     toggleFullReportModal(true);
 }
 
-// FEATURE 10: COMPARE TESTS
 function toggleCompareModal(show) {
     const modal = document.getElementById('compareModal');
     const overlay = document.getElementById('compareModalOverlay');
@@ -1185,7 +1255,7 @@ function openCompareModalLauncher() {
     const sel2 = document.getElementById('compareSelect2');
     sel1.innerHTML = ''; sel2.innerHTML = '';
 
-    history.forEach((h, i) => {
+    history.forEach((h) => {
         let opt1 = document.createElement('option');
         opt1.value = h.id; opt1.text = `${h.testName} (${h.finalScore})`;
         let opt2 = opt1.cloneNode(true);
