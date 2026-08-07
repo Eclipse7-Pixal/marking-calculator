@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
-    <!-- Dependencies -->
+    <!-- External Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -36,12 +36,8 @@
     </div>
 
     <header class="app-header">
-        <div class="header-top-bar">
+        <div class="header-top-bar" style="justify-content: center;">
             <div class="fluent-badge">Eclipse7 AI v7.0</div>
-            <button type="button" class="history-toggle-btn" onclick="toggleHistoryDrawer(true)">
-                <i class="fa-solid fa-clock-rotate-left"></i> Vault
-                <span class="history-count-badge" id="headerHistoryCounter">0</span>
-            </button>
         </div>
         <h1>Negative Marking Engine</h1>
     
@@ -195,10 +191,9 @@
             <div class="fluent-wave-shimmer"></div>
         </div>
 
-        <!-- FEATURE 7: RESULT ANALYTICS DASHBOARD CONTAINER -->
+        <!-- RESULT ANALYTICS DASHBOARD CONTAINER -->
         <div id="analyticsDashboardContainer" class="analytics-dashboard-wrap hidden">
             
-            <!-- Dashboard Grid Stats -->
             <div class="dash-section-title"><i class="fa-solid fa-chart-pie"></i> Performance Analytics Matrix</div>
             <div class="dashboard-grid">
                 <div class="dash-card">
@@ -231,7 +226,7 @@
                 </div>
             </div>
 
-            <!-- FEATURE 1: SMART RANK PREDICTOR CARD -->
+            <!-- SMART RANK PREDICTOR CARD -->
             <div class="prediction-card">
                 <div class="prediction-header">
                     <i class="fa-solid fa-ranking-star"></i> AI Smart Rank & Percentile Predictor
@@ -256,7 +251,7 @@
                 </div>
             </div>
 
-            <!-- FEATURE 2: AI PERFORMANCE ANALYSIS REPORT -->
+            <!-- AI PERFORMANCE ANALYSIS REPORT -->
             <div class="ai-report-box">
                 <div class="ai-report-header">
                     <i class="fa-solid fa-brain"></i> AI Performance Diagnostic Report
@@ -266,7 +261,7 @@
                 </div>
             </div>
 
-            <!-- FEATURE 9: INSIGHT ENGINE -->
+            <!-- INSIGHT ENGINE -->
             <div class="insight-engine-box">
                 <div class="insight-header"><i class="fa-solid fa-lightbulb"></i> Historical Insight Engine</div>
                 <ul class="insight-list" id="insightList">
@@ -274,7 +269,7 @@
                 </ul>
             </div>
 
-            <!-- FEATURE 4: PERFORMANCE GRAPHS -->
+            <!-- PERFORMANCE GRAPHS -->
             <div class="charts-wrapper">
                 <div class="chart-card">
                     <canvas id="currentBreakdownChart"></canvas>
@@ -284,7 +279,7 @@
                 </div>
             </div>
 
-            <!-- FEATURE 6 & 11: EXPORT & SHARE BUTTON CONTROLS -->
+            <!-- EXPORT & SHARE CONTROLS -->
             <div class="export-actions-grid">
                 <button type="button" onclick="downloadPDFReportSequence()" class="fluent-btn btn-secondary-frosted">
                     <i class="fa-solid fa-file-pdf"></i> Current PDF
@@ -310,7 +305,7 @@
     </footer>
 </div>
 
-<!-- FEATURE 10: COMPARISON MODAL DIALOG -->
+<!-- COMPARISON MODAL DIALOG -->
 <div class="drawer-overlay" id="compareModalOverlay" onclick="toggleCompareModal(false)"></div>
 <div class="compare-modal" id="compareModal">
     <div class="drawer-header">
@@ -328,11 +323,11 @@
         <select id="compareSelect2" class="compare-dropdown" onchange="renderComparisonView()"></select>
     </div>
     <div id="comparisonGrid" class="comparison-grid-container">
-        <!-- Comparison output injected via script -->
+        <!-- Injected via JS -->
     </div>
 </div>
 
-<!-- FEATURE 3 & 5: FULL HISTORY REPORT & DRAWER -->
+<!-- FULL HISTORY REPORT & DRAWER -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="toggleHistoryDrawer(false)"></div>
 <aside class="history-drawer" id="historyDrawer">
     <div class="drawer-header">
@@ -378,7 +373,7 @@
     </div>
 
     <div class="history-list-scroll" id="historyListContainer">
-        <!-- Rendered dynamically by script.js -->
+        <!-- Rendered dynamically -->
     </div>
 </aside>
 
