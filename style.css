@@ -32,11 +32,37 @@ body {
     color: var(--text-core);
     font-family: 'Plus Jakarta Sans', sans-serif;
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* Stack auth bar and main container vertically */
     align-items: center;
+    justify-content: flex-start;
     min-height: 100vh;
     margin: 0;
-    padding: 24px 12px;
+    padding: 16px 12px;
+    box-sizing: border-box;
+}
+
+/* Ensure Auth Bar spans correctly above the main card */
+#auth-container {
+    width: 100%;
+    max-width: 640px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+.soft-glass-container {
+    background: var(--fluent-surface);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid var(--fluent-border);
+    padding: 36px 32px;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 640px;
+    box-shadow: var(--fluent-shadow);
+    transition: var(--transition-fluent);
+    position: relative;
+    box-sizing: border-box;
+    margin: 0 auto; /* Ensure center alignment */
 }
 
 .hidden { display: none !important; }
