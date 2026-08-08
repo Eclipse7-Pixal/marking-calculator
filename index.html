@@ -401,6 +401,82 @@
     <span class="fab-counter-badge" id="historyCounter">0</span>
 </button> 
     
-<script src="script.js"></script>
+<!-- Firebase SDKs & Auth Integration -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBO9gwXMF789rIhNUktZdmzFXzD-ZAlXLw",
+      authDomain: "eclipse7-calculator.firebaseapp.com",
+      databaseURL: "https://eclipse7-calculator-default-rtdb.firebaseio.com",
+      projectId: "eclipse7-calculator",
+      storageBucket: "eclipse7-calculator.firebasestorage.app",
+      messagingSenderId: "336437169450",
+      appId: "1:336437169450:web:0f136e5a7497d16e746253",
+      measurementId: "G-H5H3LPQBPC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      const loginBtn = document.getElementById("google-login-btn");
+      const userProfile = document.getElementById("user-profile");
+      
+      if (user) {
+        currentUser = user;
+        if (loginBtn) loginBtn.style.display = "none";
+        if (userProfile) {
+          userProfile.style.display = "flex";
+          document.getElementById("user-name").innerText = user.displayName;
+          document.getElementById("user-avatar").src = user.photoURL;
+        }
+      } else {
+        currentUser = null;
+        if (loginBtn) loginBtn.style.display = "block";
+        if (userProfile) userProfile.style.display = "none";
+      }
+    });
+
+    window.loginWithGoogle = async function() {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        console.error("Sign-in error:", error);
+      }
+    };
+
+    window.logout = async function() {
+      await signOut(auth);
+    };
+
+    window.saveScoreToDatabase = function(correctAnswers, wrongAnswers, finalScore) {
+      if (!currentUser) {
+        alert("Please sign in with Google to save your score history!");
+        return;
+      }
+
+      const userScoresRef = ref(database, 'users/' + currentUser.uid + '/scores');
+      const newScoreRef = push(userScoresRef);
+
+      set(newScoreRef, {
+        correct: correctAnswers,
+        wrong: wrongAnswers,
+        score: finalScore,
+        timestamp: Date.now()
+      }).then(() => {
+        alert("Score saved successfully to your profile!");
+      }).catch((error) => {
+        console.error("Error saving score:", error);
+      });
+    };
+  </script>
+    <script src="script.js"></script>
 </body>
 </html>
