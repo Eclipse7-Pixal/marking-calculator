@@ -22,8 +22,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- Google Login / Profile Display -->
+<div id="auth-container" style="display: flex; align-items: center; justify-content: flex-end; padding: 10px; gap: 10px;">
+  <button id="google-login-btn" onclick="loginWithGoogle()" style="padding: 8px 16px; cursor: pointer; border-radius: 6px; background: #4285F4; color: white; border: none; font-weight: bold;">
+    <i class="fa-brands fa-google"></i> Sign in with Google
+  </button>
 
-<div id="auth-container">
+  <div id="user-profile" style="display: none; align-items: center; gap: 10px;">
+    <img id="user-avatar" src="" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%;" />
+    <span id="user-name" style="font-weight: bold; color: white;"></span>
+    <button onclick="logout()" style="padding: 6px 12px; cursor: pointer; border-radius: 6px; border: 1px solid #555; background: #222; color: white;">Sign Out</button>
+  </div>
+</div>
     
 <div class="fluent-ambient-canvas">
     <div class="ambient-fluid-orb orb-alpha"></div>
