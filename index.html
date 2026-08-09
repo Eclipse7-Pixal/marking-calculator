@@ -25,31 +25,25 @@
 
 <!-- TOP NAVIGATION BAR -->
 <nav class="top-nav-bar">
-    <!-- Left: Hamburger Menu Button -->
     <button id="menu-toggle-btn" class="nav-icon-btn" onclick="toggleHistoryDrawer(true)" aria-label="Open History">
         <i class="fa-solid fa-bars"></i>
         <span class="nav-history-badge" id="navHistoryCounter">0</span>
     </button>
 
-    <!-- Center / Title -->
     <div class="nav-brand-title">ECLIPSE7</div>
 
-    <!-- Right: Profile Section & Tooltip -->
     <div class="profile-container-wrapper">
         <div id="auth-container" class="profile-pill" onclick="handleProfileTap()">
-            <!-- Default Avatar state when signed out -->
             <div id="default-profile" class="profile-state">
                 <i class="fa-solid fa-circle-user profile-icon"></i>
             </div>
 
-            <!-- Profile state when signed in -->
             <div id="user-profile" class="profile-state hidden">
                 <img id="user-avatar" class="avatar-img" src="" alt="Profile" />
                 <span id="user-name" class="user-display-name"></span>
             </div>
         </div>
 
-        <!-- Recommendation Tooltip -->
         <div id="signin-tooltip" class="signin-tooltip">
             <i class="fa-solid fa-sparkles text-purple"></i>
             <span>Sign in recommended for a better experience across all devices.</span>
@@ -226,7 +220,6 @@
             <div class="fluent-wave-shimmer"></div>
         </div>
 
-        <!-- RESULT ANALYTICS DASHBOARD CONTAINER -->
         <div id="analyticsDashboardContainer" class="analytics-dashboard-wrap hidden">
             
             <div class="dash-section-title"><i class="fa-solid fa-chart-pie"></i> Performance Analytics Matrix</div>
@@ -261,7 +254,6 @@
                 </div>
             </div>
 
-            <!-- SMART RANK PREDICTOR CARD -->
             <div class="prediction-card">
                 <div class="prediction-header">
                     <i class="fa-solid fa-ranking-star"></i> AI Smart Rank & Percentile Predictor
@@ -286,7 +278,6 @@
                 </div>
             </div>
 
-            <!-- AI PERFORMANCE ANALYSIS REPORT -->
             <div class="ai-report-box">
                 <div class="ai-report-header">
                     <i class="fa-solid fa-brain"></i> AI Performance Diagnostic Report
@@ -296,7 +287,6 @@
                 </div>
             </div>
 
-            <!-- INSIGHT ENGINE -->
             <div class="insight-engine-box">
                 <div class="insight-header"><i class="fa-solid fa-lightbulb"></i> Historical Insight Engine</div>
                 <ul class="insight-list" id="insightList">
@@ -304,7 +294,6 @@
                 </ul>
             </div>
 
-            <!-- PERFORMANCE GRAPHS -->
             <div class="charts-wrapper">
                 <div class="chart-card">
                     <canvas id="currentBreakdownChart"></canvas>
@@ -314,7 +303,6 @@
                 </div>
             </div>
 
-            <!-- EXPORT & SHARE CONTROLS -->
             <div class="export-actions-grid">
                 <button type="button" onclick="downloadPDFReportSequence()" class="fluent-btn btn-secondary-frosted">
                     <i class="fa-solid fa-file-pdf"></i> Current PDF
@@ -340,7 +328,6 @@
     </footer>
 </div>
 
-<!-- COMPARISON MODAL DIALOG -->
 <div class="drawer-overlay" id="compareModalOverlay" onclick="toggleCompareModal(false)"></div>
 <div class="compare-modal" id="compareModal">
     <div class="drawer-header">
@@ -358,11 +345,9 @@
         <select id="compareSelect2" class="compare-dropdown" onchange="renderComparisonView()"></select>
     </div>
     <div id="comparisonGrid" class="comparison-grid-container">
-        <!-- Injected via JS -->
     </div>
 </div>
 
-<!-- FULL HISTORY REPORT & DRAWER -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="toggleHistoryDrawer(false)"></div>
 <aside class="history-drawer" id="historyDrawer">
     <div class="drawer-header">
@@ -375,7 +360,6 @@
         </button>
     </div>
 
-    <!-- First-time Onboarding Banner for History -->
     <div id="history-onboarding-banner" class="history-onboarding-banner">
         <i class="fa-solid fa-lightbulb"></i>
         <span>This is your assessment history vault. Your test scores are saved directly in your browser's local cache.</span>
@@ -414,11 +398,9 @@
     </div>
 
     <div class="history-list-scroll" id="historyListContainer">
-        <!-- Rendered dynamically -->
     </div>
 </aside>
 
-<!-- FULL HISTORY AI ANALYTICS REPORT MODAL -->
 <div class="drawer-overlay" id="fullReportOverlay" onclick="toggleFullReportModal(false)"></div>
 <div class="full-report-modal" id="fullReportModal">
     <div class="drawer-header">
@@ -432,7 +414,6 @@
     </div>
     
     <div id="fullReportContent" class="full-report-scroll-body">
-        <!-- Injected dynamically -->
     </div>
 </div>
 
@@ -539,11 +520,20 @@
     const userScoresRef = ref(database, 'users/' + currentUser.uid + '/scores');
     const newScoreRef = push(userScoresRef);
 
+    const cleanPayload = JSON.parse(JSON.stringify(recordData));
+
     set(newScoreRef, {
-      ...recordData,
+      ...cleanPayload,
       createdAt: Date.now()
+    }).then(() => {
+      if (window.triggerSystemToastNotification) {
+        window.triggerSystemToastNotification("Score saved to Cloud Vault!", false);
+      }
     }).catch((error) => {
       console.error("Error saving score to Firebase:", error);
+      if (window.triggerSystemToastNotification) {
+        window.triggerSystemToastNotification("Cloud sync failed: Check Database Rules", true);
+      }
     });
   };
 
