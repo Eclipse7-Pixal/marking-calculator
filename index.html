@@ -439,131 +439,145 @@
 <!-- Firebase SDKs & Auth Integration -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { 
-  getDatabase, ref, push, set, onValue 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { The root cause of the broken Google Sign-In option in your code is located in **Source 2 (index.html)**:
 
-// ... [firebaseConfig initialization] ...
+There is a **duplicate Firebase import block and double declaration of `initializeApp` & `onAuthStateChanged`** inside your `<script type="module">` tag. 
 
-let dbScoresUnsubscribe = null;
+Because standard ES modules encounter a syntax error when re-declaring variables (or running broken top-level code), JavaScript execution halts entirely. As a result, `window.loginWithGoogle` fails to initialize, making the profile/sign-in button unresponsive.
 
-onAuthStateChanged(auth, (user) => {
-  const defaultProf = document.getElementById("default-profile");
-  const userProfile = document.getElementById("user-profile");
-  const tooltip = document.getElementById("signin-tooltip");
+---
 
-  if (user) {
-    currentUser = user;
-    if (defaultProf) defaultProf.classList.add("hidden");
-    if (userProfile) {
-      userProfile.classList.remove("hidden");
-      document.getElementById("user-name").innerText = user.displayName;
-      document.getElementById("user-avatar").src = user.photoURL || "https://lh3.googleusercontent.com/a/default-user";
-    }
-    if (tooltip) tooltip.classList.add("hidden");
+### Key Issues Fixed
 
-    // Listen to cloud assessment history for the authenticated user
-    const userScoresRef = ref(database, 'users/' + user.uid + '/scores');
-    dbScoresUnsubscribe = onValue(userScoresRef, (snapshot) => {
-      const data = snapshot.val();
-      const cloudHistory = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          cloudHistory.unshift({ id: key, ...data[key] });
-        });
+1. **Removed Duplicate Module Code:** Consolidated the repeated `initializeApp`, `auth`, `onAuthStateChanged`, and imports into a single, clean module scope.
+2. **Fixed Auth Flow & Realtime Sync:** Connected `onValue` so cloud history correctly streams down to `localStorage` and triggers `window.renderHistoryVault()` upon signing in.
+3. **Cross-Origin Popup Handling:** Retained `signInWithPopup(auth, provider)` and added fallback error handling in case third-party popups are blocked by browsers.
+
+---
+
+### Complete Corrected `<script type="module">` Block
+
+Replace the entire `<script type="module">...</script>` tag at the bottom of your **HTML file (`index.html`)** with the clean code below:
+
+```html
+<!-- Firebase SDKs & Auth Integration -->
+<script type="module">
+  import { initializeApp } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js)";
+  import { 
+    getAuth, 
+    GoogleAuthProvider, 
+    signInWithPopup, 
+    signOut, 
+    onAuthStateChanged 
+  } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js)";
+  import { 
+    getDatabase, 
+    ref, 
+    push, 
+    set, 
+    onValue 
+  } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js)";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBO9gwXMF789rIhNUktZdmzFXzD-ZAlXLw",
+    authDomain: "eclipse7-calculator.firebaseapp.com",
+    databaseURL: "[https://eclipse7-calculator-default-rtdb.firebaseio.com](https://eclipse7-calculator-default-rtdb.firebaseio.com)",
+    projectId: "eclipse7-calculator",
+    storageBucket: "eclipse7-calculator.firebasestorage.app",
+    messagingSenderId: "336437169450",
+    appId: "1:336437169450:web:0f136e5a7497d16e746253",
+    measurementId: "G-H5H3LPQBPC"
+  };
+
+  // Initialize Firebase Core
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const database = getDatabase(app);
+  const provider = new GoogleAuthProvider();
+
+  let currentUser = null;
+  let dbScoresUnsubscribe = null;
+
+  // Auth State Listener
+  onAuthStateChanged(auth, (user) => {
+    const defaultProf = document.getElementById("default-profile");
+    const userProfile = document.getElementById("user-profile");
+    const tooltip = document.getElementById("signin-tooltip");
+
+    if (user) {
+      currentUser = user;
+      if (defaultProf) defaultProf.classList.add("hidden");
+      if (userProfile) {
+        userProfile.classList.remove("hidden");
+        document.getElementById("user-name").innerText = user.displayName || "User";
+        document.getElementById("user-avatar").src = user.photoURL || "[https://lh3.googleusercontent.com/a/default-user](https://lh3.googleusercontent.com/a/default-user)";
       }
-      // Update local storage cache & re-render vault UI
-      localStorage.setItem('e7_assessment_history_v2', JSON.stringify(cloudHistory));
-      if (window.renderHistoryVault) {
-        window.renderHistoryVault();
-      }
-    });
+      if (tooltip) tooltip.classList.add("hidden");
 
-  } else {
-    currentUser = null;
-    if (dbScoresUnsubscribe) {
-      dbScoresUnsubscribe();
-      dbScoresUnsubscribe = null;
-    }
-    if (defaultProf) defaultProf.classList.remove("hidden");
-    if (userProfile) userProfile.classList.add("hidden");
-  }
-});
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBO9gwXMF789rIhNUktZdmzFXzD-ZAlXLw",
-      authDomain: "eclipse7-calculator.firebaseapp.com",
-      databaseURL: "https://eclipse7-calculator-default-rtdb.firebaseio.com",
-      projectId: "eclipse7-calculator",
-      storageBucket: "eclipse7-calculator.firebasestorage.app",
-      messagingSenderId: "336437169450",
-      appId: "1:336437169450:web:0f136e5a7497d16e746253",
-      measurementId: "G-H5H3LPQBPC"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const database = getDatabase(app);
-    const provider = new GoogleAuthProvider();
-
-    let currentUser = null;
-
-    onAuthStateChanged(auth, (user) => {
-      const defaultProf = document.getElementById("default-profile");
-      const userProfile = document.getElementById("user-profile");
-      const tooltip = document.getElementById("signin-tooltip");
-
-      if (user) {
-        currentUser = user;
-        if (defaultProf) defaultProf.classList.add("hidden");
-        if (userProfile) {
-          userProfile.classList.remove("hidden");
-          document.getElementById("user-name").innerText = user.displayName;
-          document.getElementById("user-avatar").src = user.photoURL || "https://lh3.googleusercontent.com/a/default-user";
+      // Realtime listener for User Assessment History
+      const userScoresRef = ref(database, 'users/' + user.uid + '/scores');
+      dbScoresUnsubscribe = onValue(userScoresRef, (snapshot) => {
+        const data = snapshot.val();
+        const cloudHistory = [];
+        if (data) {
+          Object.keys(data).forEach(key => {
+            cloudHistory.unshift({ id: key, ...data[key] });
+          });
         }
-        if (tooltip) tooltip.classList.add("hidden");
-      } else {
-        currentUser = null;
-        if (defaultProf) defaultProf.classList.remove("hidden");
-        if (userProfile) userProfile.classList.add("hidden");
+        localStorage.setItem('e7_assessment_history_v2', JSON.stringify(cloudHistory));
+        if (window.renderHistoryVault) {
+          window.renderHistoryVault();
+        }
+      });
+
+    } else {
+      currentUser = null;
+      if (dbScoresUnsubscribe) {
+        dbScoresUnsubscribe();
+        dbScoresUnsubscribe = null;
       }
-    });
-
-    window.loginWithGoogle = async function() {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (error) {
-        console.error("Sign-in error:", error);
-      }
-    };
-
-    window.logout = async function() {
-      await signOut(auth);
-    };
-
-window.saveScoreToDatabase = function(recordData) {
-  if (!currentUser) return;
-
-  const userScoresRef = ref(database, 'users/' + currentUser.uid + '/scores');
-  const newScoreRef = push(userScoresRef);
-
-  set(newScoreRef, {
-    ...recordData,
-    createdAt: Date.now()
-  }).catch((error) => {
-    console.error("Error saving score to Firebase:", error);
+      if (defaultProf) defaultProf.classList.remove("hidden");
+      if (userProfile) userProfile.classList.add("hidden");
+    }
   });
-};
 
-    window.getCurrentUser = function() {
-      return currentUser;
-    };
+  // Global Auth Trigger Methods
+  window.loginWithGoogle = async function() {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Sign-in error:", error);
+      if (window.triggerSystemToastNotification) {
+        window.triggerSystemToastNotification("Sign-In failed or popup was closed.", true);
+      }
+    }
+  };
+
+  window.logout = async function() {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Sign-out error:", error);
+    }
+  };
+
+  window.saveScoreToDatabase = function(recordData) {
+    if (!currentUser) return;
+
+    const userScoresRef = ref(database, 'users/' + currentUser.uid + '/scores');
+    const newScoreRef = push(userScoresRef);
+
+    set(newScoreRef, {
+      ...recordData,
+      createdAt: Date.now()
+    }).catch((error) => {
+      console.error("Error saving score to Firebase:", error);
+    });
+  };
+
+  window.getCurrentUser = function() {
+    return currentUser;
+  };
 </script>
 <script src="script.js"></script>
 </body>
