@@ -766,7 +766,7 @@ function createPDFDocumentObject(telemetryData) {
     doc.setTextColor(14, 165, 233); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
     doc.text("FINAL CALCULATED SCORE", 73, scoreY + 6);
     doc.setFont("courier", "bold"); doc.setFontSize(18); doc.setTextColor(15, 23, 42);
-    doc.text(`${telemetryData.finalScore.toFixed(2)} / ${telemetryData.maxMarks}`, 73, scoreY + 15);
+    doc.text(`${typeof telemetryData.finalScore === 'number' ? telemetryData.finalScore.toFixed(2) : telemetryData.finalScore} / ${telemetryData.maxMarks}`, 73, scoreY + 15);
 
     doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
     doc.text("ENGINE EFFICIENCY RATIO", 147, scoreY + 6);
@@ -958,7 +958,7 @@ async function triggerShareMenu() {
 🎯 *Profile:* ${profile}
 
 📊 *SCORE SUMMARY*
-• *Final Score:* ${data.finalScore.toFixed(2)} / ${data.maxMarks}
+• *Final Score:* ${typeof data.finalScore === 'number' ? data.finalScore.toFixed(2) : data.finalScore} / ${data.maxMarks}
 • *Efficiency:* ${data.efficiency}%
 • *Accuracy:* ${data.accuracy}%
 • *Correct Answers:* ${data.correct}
@@ -1078,12 +1078,14 @@ function saveRecordToVault(computed) {
 
     if (!studentName || !testName) return;
 
+    const numScore = typeof computed.finalScore === 'number' ? computed.finalScore.toFixed(2) : computed.finalScore;
+
     const record = {
         timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
         studentName,
         testName,
         profile,
-        finalScore: computed.finalScore.toFixed(2),
+        finalScore: numScore,
         maxMarks: computed.maxMarks,
         totalQs: computed.totalQs,
         attempted: computed.attempted,
@@ -1224,7 +1226,7 @@ function generateAndShowFullHistoryReport() {
     let highest = Math.max(...scores);
     let lowest = Math.min(...scores);
     let avgScore = (scores.reduce((a, b) => a + b, 0) / totalTests).toFixed(2);
-    let avgAcc = (history.reduce((a, b) => a + parseFloat(h.accuracy || h.efficiency), 0) / totalTests).toFixed(2);
+    let avgAcc = (history.reduce((a, item) => a + parseFloat(item.accuracy || item.efficiency || 0), 0) / totalTests).toFixed(2);
 
     let content = document.getElementById('fullReportContent');
     content.innerHTML = `
