@@ -466,9 +466,6 @@ function executeCalculationSequence() {
     };
 
     saveRecordToVault(resultData);
-    if (window.saveScoreToDatabase) {
-        window.saveScoreToDatabase(correct, wrong, finalScore.toFixed(2));
-    }
 
     updateDashboardUI(resultData);
     computeRankAndPercentile(resultData);
@@ -1082,7 +1079,6 @@ function saveRecordToVault(computed) {
     if (!studentName || !testName) return;
 
     const record = {
-        id: 'E7-REC-' + Date.now(),
         timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
         studentName,
         testName,
@@ -1097,16 +1093,23 @@ function saveRecordToVault(computed) {
         accuracy: computed.accuracy
     };
 
-    let history = getStoredHistory();
-    if (history.length > 0 && history[0].studentName === studentName && history[0].testName === testName && history[0].finalScore === record.finalScore) {
-        return;
+    // Save to Firebase Realtime DB if signed in with Google
+    if (window.getCurrentUser && window.getCurrentUser() && window.saveScoreToDatabase) {
+        window.saveScoreToDatabase(record);
+    } else {
+        // Fallback for guest mode in LocalStorage
+        record.id = 'E7-REC-' + Date.now();
+        let history = getStoredHistory();
+        if (history.length > 0 && history[0].studentName === studentName && history[0].testName === testName && history[0].finalScore === record.finalScore) {
+            return;
+        }
+
+        history.unshift(record);
+        if (history.length > 50) history = history.slice(0, 50);
+
+        localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
+        updateHistoryCounterBadge(history.length);
     }
-
-    history.unshift(record);
-    if (history.length > 50) history = history.slice(0, 50);
-
-    localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
-    updateHistoryCounterBadge(history.length);
 }
 
 function updateHistoryCounterBadge(count) {
