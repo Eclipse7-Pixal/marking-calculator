@@ -547,21 +547,19 @@ onAuthStateChanged(auth, (user) => {
       await signOut(auth);
     };
 
-    window.saveScoreToDatabase = function(correctAnswers, wrongAnswers, finalScore) {
-      if (!currentUser) return;
+window.saveScoreToDatabase = function(recordData) {
+  if (!currentUser) return;
 
-      const userScoresRef = ref(database, 'users/' + currentUser.uid + '/scores');
-      const newScoreRef = push(userScoresRef);
+  const userScoresRef = ref(database, 'users/' + currentUser.uid + '/scores');
+  const newScoreRef = push(userScoresRef);
 
-      set(newScoreRef, {
-        correct: correctAnswers,
-        wrong: wrongAnswers,
-        score: finalScore,
-        timestamp: Date.now()
-      }).catch((error) => {
-        console.error("Error saving score:", error);
-      });
-    };
+  set(newScoreRef, {
+    ...recordData,
+    createdAt: Date.now()
+  }).catch((error) => {
+    console.error("Error saving score to Firebase:", error);
+  });
+};
 
     window.getCurrentUser = function() {
       return currentUser;
