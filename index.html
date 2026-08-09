@@ -438,50 +438,26 @@
 
 <!-- Firebase SDKs & Auth Integration -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { The root cause of the broken Google Sign-In option in your code is located in **Source 2 (index.html)**:
-
-There is a **duplicate Firebase import block and double declaration of `initializeApp` & `onAuthStateChanged`** inside your `<script type="module">` tag. 
-
-Because standard ES modules encounter a syntax error when re-declaring variables (or running broken top-level code), JavaScript execution halts entirely. As a result, `window.loginWithGoogle` fails to initialize, making the profile/sign-in button unresponsive.
-
----
-
-### Key Issues Fixed
-
-1. **Removed Duplicate Module Code:** Consolidated the repeated `initializeApp`, `auth`, `onAuthStateChanged`, and imports into a single, clean module scope.
-2. **Fixed Auth Flow & Realtime Sync:** Connected `onValue` so cloud history correctly streams down to `localStorage` and triggers `window.renderHistoryVault()` upon signing in.
-3. **Cross-Origin Popup Handling:** Retained `signInWithPopup(auth, provider)` and added fallback error handling in case third-party popups are blocked by browsers.
-
----
-
-### Complete Corrected `<script type="module">` Block
-
-Replace the entire `<script type="module">...</script>` tag at the bottom of your **HTML file (`index.html`)** with the clean code below:
-
-```html
-<!-- Firebase SDKs & Auth Integration -->
-<script type="module">
-  import { initializeApp } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js)";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { 
     getAuth, 
     GoogleAuthProvider, 
     signInWithPopup, 
     signOut, 
     onAuthStateChanged 
-  } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js)";
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import { 
     getDatabase, 
     ref, 
     push, 
     set, 
     onValue 
-  } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js)";
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBO9gwXMF789rIhNUktZdmzFXzD-ZAlXLw",
     authDomain: "eclipse7-calculator.firebaseapp.com",
-    databaseURL: "[https://eclipse7-calculator-default-rtdb.firebaseio.com](https://eclipse7-calculator-default-rtdb.firebaseio.com)",
+    databaseURL: "https://eclipse7-calculator-default-rtdb.firebaseio.com",
     projectId: "eclipse7-calculator",
     storageBucket: "eclipse7-calculator.firebasestorage.app",
     messagingSenderId: "336437169450",
@@ -489,7 +465,6 @@ Replace the entire `<script type="module">...</script>` tag at the bottom of you
     measurementId: "G-H5H3LPQBPC"
   };
 
-  // Initialize Firebase Core
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const database = getDatabase(app);
@@ -498,7 +473,6 @@ Replace the entire `<script type="module">...</script>` tag at the bottom of you
   let currentUser = null;
   let dbScoresUnsubscribe = null;
 
-  // Auth State Listener
   onAuthStateChanged(auth, (user) => {
     const defaultProf = document.getElementById("default-profile");
     const userProfile = document.getElementById("user-profile");
@@ -510,11 +484,10 @@ Replace the entire `<script type="module">...</script>` tag at the bottom of you
       if (userProfile) {
         userProfile.classList.remove("hidden");
         document.getElementById("user-name").innerText = user.displayName || "User";
-        document.getElementById("user-avatar").src = user.photoURL || "[https://lh3.googleusercontent.com/a/default-user](https://lh3.googleusercontent.com/a/default-user)";
+        document.getElementById("user-avatar").src = user.photoURL || "https://lh3.googleusercontent.com/a/default-user";
       }
       if (tooltip) tooltip.classList.add("hidden");
 
-      // Realtime listener for User Assessment History
       const userScoresRef = ref(database, 'users/' + user.uid + '/scores');
       dbScoresUnsubscribe = onValue(userScoresRef, (snapshot) => {
         const data = snapshot.val();
@@ -541,7 +514,6 @@ Replace the entire `<script type="module">...</script>` tag at the bottom of you
     }
   });
 
-  // Global Auth Trigger Methods
   window.loginWithGoogle = async function() {
     try {
       await signInWithPopup(auth, provider);
