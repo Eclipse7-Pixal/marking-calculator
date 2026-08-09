@@ -439,6 +439,60 @@
 <!-- Firebase SDKs & Auth Integration -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+  getDatabase, ref, push, set, onValue 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// ... [firebaseConfig initialization] ...
+
+let dbScoresUnsubscribe = null;
+
+onAuthStateChanged(auth, (user) => {
+  const defaultProf = document.getElementById("default-profile");
+  const userProfile = document.getElementById("user-profile");
+  const tooltip = document.getElementById("signin-tooltip");
+
+  if (user) {
+    currentUser = user;
+    if (defaultProf) defaultProf.classList.add("hidden");
+    if (userProfile) {
+      userProfile.classList.remove("hidden");
+      document.getElementById("user-name").innerText = user.displayName;
+      document.getElementById("user-avatar").src = user.photoURL || "https://lh3.googleusercontent.com/a/default-user";
+    }
+    if (tooltip) tooltip.classList.add("hidden");
+
+    // Listen to cloud assessment history for the authenticated user
+    const userScoresRef = ref(database, 'users/' + user.uid + '/scores');
+    dbScoresUnsubscribe = onValue(userScoresRef, (snapshot) => {
+      const data = snapshot.val();
+      const cloudHistory = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          cloudHistory.unshift({ id: key, ...data[key] });
+        });
+      }
+      // Update local storage cache & re-render vault UI
+      localStorage.setItem('e7_assessment_history_v2', JSON.stringify(cloudHistory));
+      if (window.renderHistoryVault) {
+        window.renderHistoryVault();
+      }
+    });
+
+  } else {
+    currentUser = null;
+    if (dbScoresUnsubscribe) {
+      dbScoresUnsubscribe();
+      dbScoresUnsubscribe = null;
+    }
+    if (defaultProf) defaultProf.classList.remove("hidden");
+    if (userProfile) userProfile.classList.add("hidden");
+  }
+});
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
