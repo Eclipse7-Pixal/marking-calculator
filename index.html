@@ -22,19 +22,42 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- Google Login / Profile Display -->
-<div id="auth-container" style="display: flex; align-items: center; justify-content: flex-end; padding: 10px; gap: 10px;">
-  <button id="google-login-btn" onclick="loginWithGoogle()" style="padding: 8px 16px; cursor: pointer; border-radius: 6px; background: #4285F4; color: white; border: none; font-weight: bold;">
-    <i class="fa-brands fa-google"></i> Sign in with Google
-  </button>
 
-  <div id="user-profile" style="display: none; align-items: center; gap: 10px;">
-    <img id="user-avatar" src="" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%;" />
-    <span id="user-name" style="font-weight: bold; color: white;"></span>
-    <button onclick="logout()" style="padding: 6px 12px; cursor: pointer; border-radius: 6px; border: 1px solid #555; background: #222; color: white;">Sign Out</button>
-  </div>
-</div>
-    
+<!-- TOP NAVIGATION BAR -->
+<nav class="top-nav-bar">
+    <!-- Left: Hamburger Menu Button -->
+    <button id="menu-toggle-btn" class="nav-icon-btn" onclick="toggleHistoryDrawer(true)" aria-label="Open History">
+        <i class="fa-solid fa-bars"></i>
+        <span class="nav-history-badge" id="navHistoryCounter">0</span>
+    </button>
+
+    <!-- Center / Title -->
+    <div class="nav-brand-title">ECLIPSE7</div>
+
+    <!-- Right: Profile Section & Tooltip -->
+    <div class="profile-container-wrapper">
+        <div id="auth-container" class="profile-pill" onclick="handleProfileTap()">
+            <!-- Default Avatar state when signed out -->
+            <div id="default-profile" class="profile-state">
+                <i class="fa-solid fa-circle-user profile-icon"></i>
+            </div>
+
+            <!-- Profile state when signed in -->
+            <div id="user-profile" class="profile-state hidden">
+                <img id="user-avatar" class="avatar-img" src="" alt="Profile" />
+                <span id="user-name" class="user-display-name"></span>
+            </div>
+        </div>
+
+        <!-- Recommendation Tooltip -->
+        <div id="signin-tooltip" class="signin-tooltip">
+            <i class="fa-solid fa-sparkles text-purple"></i>
+            <span>Sign in recommended for a better experience across all devices.</span>
+            <button class="tooltip-close" onclick="closeTooltip(event)"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+</nav>
+
 <div class="fluent-ambient-canvas">
     <div class="ambient-fluid-orb orb-alpha"></div>
     <div class="ambient-fluid-orb orb-beta"></div>
@@ -352,6 +375,12 @@
         </button>
     </div>
 
+    <!-- First-time Onboarding Banner for History -->
+    <div id="history-onboarding-banner" class="history-onboarding-banner">
+        <i class="fa-solid fa-lightbulb"></i>
+        <span>This is your assessment history vault. Your test scores are saved directly in your browser's local cache.</span>
+    </div>
+
     <div class="drawer-search-bar">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
         <input type="text" id="historySearchInput" placeholder="Filter candidate or test name..." oninput="filterHistoryList()">
@@ -407,14 +436,8 @@
     </div>
 </div>
 
-<!-- Floating Action Button -->
-<button type="button" class="floating-history-fab" id="openHistoryBtn" onclick="toggleHistoryDrawer(true)" title="Open Assessment Vault">
-    <i class="fa-solid fa-clock-rotate-left"></i>
-    <span class="fab-counter-badge" id="historyCounter">0</span>
-</button> 
-    
 <!-- Firebase SDKs & Auth Integration -->
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -438,21 +461,23 @@
     let currentUser = null;
 
     onAuthStateChanged(auth, (user) => {
-      const loginBtn = document.getElementById("google-login-btn");
+      const defaultProf = document.getElementById("default-profile");
       const userProfile = document.getElementById("user-profile");
-      
+      const tooltip = document.getElementById("signin-tooltip");
+
       if (user) {
         currentUser = user;
-        if (loginBtn) loginBtn.style.display = "none";
+        if (defaultProf) defaultProf.classList.add("hidden");
         if (userProfile) {
-          userProfile.style.display = "flex";
+          userProfile.classList.remove("hidden");
           document.getElementById("user-name").innerText = user.displayName;
-          document.getElementById("user-avatar").src = user.photoURL;
+          document.getElementById("user-avatar").src = user.photoURL || "https://lh3.googleusercontent.com/a/default-user";
         }
+        if (tooltip) tooltip.classList.add("hidden");
       } else {
         currentUser = null;
-        if (loginBtn) loginBtn.style.display = "block";
-        if (userProfile) userProfile.style.display = "none";
+        if (defaultProf) defaultProf.classList.remove("hidden");
+        if (userProfile) userProfile.classList.add("hidden");
       }
     });
 
@@ -469,10 +494,7 @@
     };
 
     window.saveScoreToDatabase = function(correctAnswers, wrongAnswers, finalScore) {
-      if (!currentUser) {
-        alert("Please sign in with Google to save your score history!");
-        return;
-      }
+      if (!currentUser) return;
 
       const userScoresRef = ref(database, 'users/' + currentUser.uid + '/scores');
       const newScoreRef = push(userScoresRef);
@@ -482,13 +504,15 @@
         wrong: wrongAnswers,
         score: finalScore,
         timestamp: Date.now()
-      }).then(() => {
-        alert("Score saved successfully to your profile!");
       }).catch((error) => {
         console.error("Error saving score:", error);
       });
     };
-  </script>
-    <script src="script.js"></script>
+
+    window.getCurrentUser = function() {
+      return currentUser;
+    };
+</script>
+<script src="script.js"></script>
 </body>
 </html>
