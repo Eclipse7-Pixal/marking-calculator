@@ -63,8 +63,26 @@ let subjectScores = {
 };
 
 // ============================================================================
-// 2. DROPDOWN CONTROLLER
+// 2. DROPDOWN & PROFILE SYSTEM
 // ============================================================================
+function handleProfileTap() {
+    if (window.getCurrentUser && window.getCurrentUser()) {
+        if (confirm("Do you want to sign out?")) {
+            window.logout();
+        }
+    } else {
+        if (window.loginWithGoogle) {
+            window.loginWithGoogle();
+        }
+    }
+}
+
+function closeTooltip(e) {
+    if (e) e.stopPropagation();
+    const tooltip = document.getElementById('signin-tooltip');
+    if (tooltip) tooltip.classList.add('hidden');
+}
+
 function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, callback) {
     const container = document.getElementById(containerId);
     const trigger = document.getElementById(triggerId);
@@ -356,12 +374,12 @@ function triggerSystemToastNotification(message, isError = true) {
 
     msgSpan.textContent = message;
     if (isError) {
-        toast.style.background = "rgba(244, 63, 94, 0.15)";
-        toast.style.borderColor = "rgba(244, 63, 94, 0.3)";
+        toast.style.background = "rgba(244, 63, 94, 0.25)";
+        toast.style.borderColor = "rgba(244, 63, 94, 0.4)";
         toast.style.color = "#fecdd3";
     } else {
-        toast.style.background = "rgba(16, 185, 129, 0.15)";
-        toast.style.borderColor = "rgba(16, 185, 129, 0.3)";
+        toast.style.background = "rgba(16, 185, 129, 0.25)";
+        toast.style.borderColor = "rgba(16, 185, 129, 0.4)";
         toast.style.color = "#a7f3d0";
     }
 
@@ -416,7 +434,7 @@ function scanAndValidateSystemInputs() {
 }
 
 // ============================================================================
-// 7. MAIN CALCULATION ENGINE + FEATURE CALCULATORS
+// 7. MAIN CALCULATION ENGINE
 // ============================================================================
 function executeCalculationSequence() {
     if (!scanAndValidateSystemInputs()) return null;
@@ -448,6 +466,9 @@ function executeCalculationSequence() {
     };
 
     saveRecordToVault(resultData);
+    if (window.saveScoreToDatabase) {
+        window.saveScoreToDatabase(correct, wrong, finalScore.toFixed(2));
+    }
 
     updateDashboardUI(resultData);
     computeRankAndPercentile(resultData);
@@ -656,7 +677,7 @@ function renderCurrentDashboardCharts(data) {
 }
 
 // ============================================================================
-// 8. DATA EXPORT & PDF GENERATION (WITH AI DIAGNOSTICS & PREDICTIONS)
+// 8. DATA EXPORT & PDF GENERATION
 // ============================================================================
 function createPDFDocumentObject(telemetryData) {
     const { jsPDF } = window.jspdf;
@@ -668,12 +689,10 @@ function createPDFDocumentObject(telemetryData) {
     const test = document.getElementById('testName').value.toUpperCase();
     const timestamp = new Date().toLocaleString().toUpperCase();
 
-    // Predictions & AI Data
     const predData = computeRankAndPercentile(telemetryData);
     const aiReportText = generateAIReport(telemetryData);
     const insights = generateInsightEngineList(telemetryData);
 
-    // Page Background
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, 'F');
     
@@ -681,11 +700,9 @@ function createPDFDocumentObject(telemetryData) {
     for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
     for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j);
 
-    // Border
     doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3);
     doc.rect(8, 8, 194, 281);
 
-    // Header Box
     doc.setFillColor(248, 250, 252); doc.rect(10, 10, 190, 32, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5); doc.rect(10, 10, 190, 32, 'D');
     
@@ -701,7 +718,6 @@ function createPDFDocumentObject(telemetryData) {
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
     doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
 
-    // Candidate Identity Block
     let cardY = 46;
     doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
@@ -720,7 +736,6 @@ function createPDFDocumentObject(telemetryData) {
     doc.text(test.length > 20 ? test.substring(0, 20) + "..." : test, 44, cardY + 20);
     doc.setFont("courier", "bold"); doc.setFontSize(6.5); doc.text(timestamp, 44, cardY + 26);
 
-    // Raw Constants Block
     doc.setFillColor(241, 245, 249); doc.rect(108, cardY, 92, 6, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(108, cardY, 92, 6, 'D');
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
@@ -740,7 +755,6 @@ function createPDFDocumentObject(telemetryData) {
     doc.text(`${telemetryData.attempted} UNITS`, 148, cardY + 25);
     doc.setTextColor(225, 29, 72); doc.text(`${telemetryData.wrong} FAULTS`, 148, cardY + 31);
 
-    // Score Summary Hero Banner
     let scoreY = 82;
     doc.setFillColor(250, 251, 253); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
     doc.rect(10, scoreY, 190, 22, 'DF');
@@ -762,7 +776,6 @@ function createPDFDocumentObject(telemetryData) {
     doc.setFont("helvetica", "bold"); doc.setFontSize(12);
     doc.text(`${telemetryData.efficiency}%`, 147, scoreY + 14);
 
-    // AI RANK & PERCENTILE PREDICTION SECTION
     let rankY = 108;
     doc.setFillColor(243, 244, 246); doc.rect(10, rankY, 190, 5, 'F');
     doc.setDrawColor(139, 92, 246); doc.setLineWidth(0.4); doc.rect(10, rankY, 190, 5, 'D');
@@ -784,7 +797,6 @@ function createPDFDocumentObject(telemetryData) {
     doc.text(`${predData.band}`, 148, rankY + 11);
     doc.text(`${predData.competition}`, 148, rankY + 17);
 
-    // AI PERFORMANCE DIAGNOSTIC REPORT SECTION
     let diagY = 133;
     doc.setFillColor(240, 249, 255); doc.rect(10, diagY, 190, 5, 'F');
     doc.setDrawColor(2, 132, 199); doc.setLineWidth(0.4); doc.rect(10, diagY, 190, 5, 'D');
@@ -798,7 +810,6 @@ function createPDFDocumentObject(telemetryData) {
     let splitReport = doc.splitTextToSize(aiReportText, 182);
     doc.text(splitReport, 14, diagY + 10);
 
-    // HISTORICAL INSIGHT ENGINE SECTION
     let insY = 168;
     doc.setFillColor(236, 253, 245); doc.rect(10, insY, 190, 5, 'F');
     doc.setDrawColor(16, 185, 129); doc.setLineWidth(0.4); doc.rect(10, insY, 190, 5, 'D');
@@ -815,7 +826,6 @@ function createPDFDocumentObject(telemetryData) {
         lineCursor += 5;
     });
 
-    // Subject Breakdown Matrix (if applicable)
     let meterY = 195;
     if (reportType === 'subjectwise') {
         doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY, 200, meterY);
@@ -861,7 +871,6 @@ function createPDFDocumentObject(telemetryData) {
         });
     }
 
-    // Footer Signature
     const finalFooterY = 254;
     doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, finalFooterY - 4, 200, finalFooterY - 4);
 
@@ -915,9 +924,6 @@ function exportCurrentJSON() {
     link.click();
 }
 
-// ============================================================================
-// 9. ADVANCED RESULT SHARING (DIRECT PDF / ENHANCED TEXT FALLBACK)
-// ============================================================================
 async function triggerShareMenu() {
     const data = executeCalculationSequence();
     if (!data) return;
@@ -927,7 +933,6 @@ async function triggerShareMenu() {
     const profile = document.getElementById('examProfile').value.toUpperCase();
     const pred = computeRankAndPercentile(data);
 
-    // Attempt direct PDF attachment share if Web Share API Level 2 is supported
     if (navigator.canShare && navigator.canShare({ files: [new File([], 'test.pdf', { type: 'application/pdf' })] })) {
         try {
             const doc = createPDFDocumentObject(data);
@@ -948,7 +953,6 @@ async function triggerShareMenu() {
         }
     }
 
-    // Fallback Method: Rich Formatted Text Message Summary
     const shareText = 
 `🎓 *ECLIPSE7 EXAM EVALUATION REPORT*
 ----------------------------------------
@@ -985,7 +989,7 @@ async function triggerShareMenu() {
 }
 
 // ============================================================================
-// 10. HISTORY VAULT & COMPARISON ENGINE
+// 9. HISTORY VAULT SYSTEM
 // ============================================================================
 function downloadCompleteHistoryPDF() {
     const history = getStoredHistory();
@@ -1106,8 +1110,8 @@ function saveRecordToVault(computed) {
 }
 
 function updateHistoryCounterBadge(count) {
-    const counterNode = document.getElementById('historyCounter');
-    if (counterNode) counterNode.textContent = count;
+    const navCounterNode = document.getElementById('navHistoryCounter');
+    if (navCounterNode) navCounterNode.textContent = count;
 }
 
 function renderHistoryVault(filterQuery = "") {
