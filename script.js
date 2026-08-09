@@ -1093,11 +1093,9 @@ function saveRecordToVault(computed) {
         accuracy: computed.accuracy
     };
 
-    // Save to Firebase Realtime DB if signed in with Google
     if (window.getCurrentUser && window.getCurrentUser() && window.saveScoreToDatabase) {
         window.saveScoreToDatabase(record);
     } else {
-        // Fallback for guest mode in LocalStorage
         record.id = 'E7-REC-' + Date.now();
         let history = getStoredHistory();
         if (history.length > 0 && history[0].studentName === studentName && history[0].testName === testName && history[0].finalScore === record.finalScore) {
