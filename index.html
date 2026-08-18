@@ -3,119 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECLIPSE7 - Advanced Assessment & Analytics Engine</title>
+    <title>ECLIPSE7 | Advanced Performance Engine</title>
     
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
+    <!-- Fonts & Font Awesome Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Canvas Confetti Library -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <!-- Chart.js Library -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- jsPDF & AutoTable -->
+    <!-- External Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    
-    <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- Custom CSS File -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Ambient Dynamic Glow Background Canvas -->
+    <!-- Ambient Canvas Glow Background -->
     <div class="fluent-ambient-canvas">
         <div class="ambient-fluid-orb orb-alpha"></div>
         <div class="ambient-fluid-orb orb-beta"></div>
         <div class="ambient-fluid-orb orb-gamma"></div>
     </div>
 
-    <!-- MAIN CONTAINER -->
-    <main class="soft-glass-container" id="mainAppContainer">
-        
-        <!-- System Toast Notification Box -->
+    <!-- Celebration Emoji Animation Canvas Overlay -->
+    <div id="celebrationOverlay" class="celebration-overlay"></div>
+
+    <!-- MAIN APP CONTAINER WRAPPER -->
+    <div id="mainAppContainer" class="soft-glass-container">
+
+        <!-- Notification Toast Popup -->
         <div id="systemNotification" class="fluent-toast">
-            <i class="fa-solid fa-circle-info"></i>
-            <span id="notificationMessage">System Ready</span>
+            <i id="notificationIcon" class="fa-solid fa-triangle-exclamation"></i>
+            <span id="notificationMessage">Notification Message</span>
         </div>
 
-        <!-- INTEGRATED NAVIGATION & USER PROFILE HEADER -->
-        <nav class="top-nav-bar">
-            <!-- Brand Badge -->
-            <div class="nav-brand-title">
-                <i class="fa-solid fa-bolt text-purple"></i> ECLIPSE7
-            </div>
+        <!-- TOP INTEGRATED NAVIGATION BAR -->
+        <header class="top-nav-bar">
+            <!-- History Trigger Button -->
+            <button class="nav-icon-btn" onclick="toggleHistoryDrawer()" title="View Assessment Vault">
+                <i class="fa-solid fa-box-archive"></i>
+                <span id="navHistoryBadge" class="nav-history-badge">0</span>
+            </button>
 
-            <!-- Integrated Control Group: History Drawer Trigger + User Profile Pill -->
-            <div class="nav-controls-group">
-                <!-- History Drawer Trigger Button -->
-                <button class="nav-icon-btn" id="historyDrawerBtn" onclick="toggleHistoryDrawer()" title="View Assessment Vault">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                    <span class="nav-history-badge" id="historyBadgeCount">0</span>
-                </button>
+            <!-- Brand Identifier -->
+            <div class="nav-brand-title">ECLIPSE7 CORE</div>
 
-                <!-- Dynamic User Profile Container -->
-                <div class="profile-container-wrapper">
-                    <div class="profile-pill" onclick="handleProfileTap()">
-                        <div class="profile-state" id="userProfileState">
-                            <i class="fa-solid fa-circle-user profile-icon"></i>
-                            <span class="user-display-name">Sign In</span>
-                        </div>
-                    </div>
-
-                    <!-- Sign In Tooltip -->
-                    <div id="signin-tooltip" class="signin-tooltip">
-                        <i class="fa-solid fa-sparkles text-purple"></i>
-                        <span>Sign in to sync your score metrics to your cloud account!</span>
-                        <button class="tooltip-close" onclick="closeTooltip(event)"><i class="fa-solid fa-xmark"></i></button>
+            <!-- Profile Auth Pill Container -->
+            <div class="profile-container-wrapper">
+                <div class="profile-pill" id="profilePill" onclick="handleProfileTap()">
+                    <div id="profileState" class="profile-state">
+                        <i id="profileDefaultIcon" class="fa-solid fa-circle-user profile-icon"></i>
+                        <img id="profileAvatar" class="avatar-img hidden" src="" alt="User Avatar">
+                        <span id="profileDisplayName" class="user-display-name">Sign In</span>
                     </div>
                 </div>
-            </div>
-        </nav>
 
-        <!-- APP HEADER SECTION -->
-        <header class="app-header">
-            <div class="header-top-bar">
-                <span class="fluent-badge"><i class="fa-solid fa-shield-halved"></i> PERFORMANCE ENGINE v7.0</span>
-            </div>
-            <h1>Negative Marking Engine</h1>
-            <div class="meta-branding-container">
-                <p class="platform-title-meta">ECLIPSE7 METRIC LABORATORY</p>
-                <p class="author-attribution-meta">FOUNDER: SAIPRASAD BARURE</p>
+                <!-- Sign-In Tooltip Popup -->
+                <div id="signin-tooltip" class="signin-tooltip">
+                    <i class="fa-solid fa-circle-info text-purple"></i>
+                    <span>Sign in with Google to auto-sync student records across sessions.</span>
+                    <button class="tooltip-close" onclick="closeTooltip(event)"><i class="fa-solid fa-xmark"></i></button>
+                </div>
             </div>
         </header>
 
-        <!-- INPUT FORM & CONTROL PANEL -->
-        <form id="assessmentForm" onsubmit="event.preventDefault(); executeCalculationSequence();">
+        <!-- APP HEADER SECTION -->
+        <div class="app-header">
+            <div class="header-top-bar">
+                <span class="fluent-badge">METRICS V7.0</span>
+            </div>
+            <h1>Negative Marking Engine</h1>
+            <div class="meta-branding-container">
+                <p class="platform-title-meta">ECLIPSE7 PERFORMANCE MATRIX</p>
+                <p class="author-attribution-meta">FOUNDER: SAIPRASAD BARURE</p>
+            </div>
+        </div>
+
+        <!-- FORM INPUT CONTROLS SECTION -->
+        <form id="evaluationForm" onsubmit="event.preventDefault();">
             
-            <!-- Student & Test Name Row -->
+            <!-- Student & Test Metadata -->
             <div class="fluent-layout-row">
                 <div class="input-field-group">
-                    <label class="soft-field-label">STUDENT NAME <span class="req-star">*</span></label>
+                    <label class="soft-field-label" for="studentName">STUDENT NAME <span class="req-star">*</span></label>
                     <div class="fluent-input-wrapper">
-                        <i class="fa-solid fa-user-graduate input-field-icon"></i>
-                        <input type="text" id="studentName" placeholder="Enter full name" required>
+                        <i class="fa-solid fa-user input-field-icon"></i>
+                        <input type="text" id="studentName" placeholder="Enter Full Name" required>
                     </div>
                 </div>
-
                 <div class="input-field-group">
-                    <label class="soft-field-label">ASSESSMENT TITLE <span class="req-star">*</span></label>
+                    <label class="soft-field-label" for="testName">ASSESSMENT TITLE <span class="req-star">*</span></label>
                     <div class="fluent-input-wrapper">
                         <i class="fa-solid fa-file-signature input-field-icon"></i>
-                        <input type="text" id="testName" placeholder="e.g., JEE Grand Test 01" required>
+                        <input type="text" id="testName" placeholder="e.g. JEE Full Mock 01" required>
                     </div>
                 </div>
             </div>
 
-            <!-- Exam Profile Dropdown -->
+            <!-- Exam Profile Selector -->
             <div class="input-field-group dropdown-adjustment">
                 <label class="soft-field-label">EXAM CURRICULUM PROFILE</label>
                 <div class="custom-select-box" id="examProfileSelectContainer">
@@ -130,66 +119,47 @@
                 <input type="hidden" id="examProfile" value="jeemain">
             </div>
 
-            <!-- Report Layout & Marking Ratio Dropdown Row -->
-            <div class="fluent-layout-row">
-                <div class="input-field-group dropdown-adjustment">
-                    <label class="soft-field-label">REPORT BREAKDOWN MODE</label>
-                    <div class="custom-select-box" id="customSelect">
-                        <div class="select-box-trigger" id="selectedLabel">Overall Aggregate</div>
-                        <div class="select-box-dropdown" id="selectOptions">
-                            <div class="select-box-option" data-value="overall">Overall Aggregate</div>
-                            <div class="select-box-option" data-value="subjectwise">Subject-wise Breakdown</div>
-                        </div>
+            <!-- Report Granularity Mode -->
+            <div class="input-field-group dropdown-adjustment">
+                <label class="soft-field-label">REPORT MODE</label>
+                <div class="custom-select-box" id="customSelect">
+                    <div class="select-box-trigger" id="selectedLabel">OVERALL METRICS ONLY</div>
+                    <div class="select-box-dropdown" id="selectOptions">
+                        <div class="select-box-option" data-value="overall">OVERALL METRICS ONLY</div>
+                        <div class="select-box-option" data-value="subjectwise">SUBJECT-WISE DETAILED BREAKDOWN</div>
                     </div>
-                    <input type="hidden" id="reportType" value="overall">
                 </div>
-
-                <div class="input-field-group dropdown-adjustment">
-                    <label class="soft-field-label">PENALTY MARKING RATIO</label>
-                    <div class="custom-select-box" id="ratioSelectContainer">
-                        <div class="select-box-trigger" id="ratioLabel">Ratio: 1/4</div>
-                        <div class="select-box-dropdown" id="ratioOptions">
-                            <div class="select-box-option" data-value="0.25">Ratio: 1/4 (-0.25x Penalty)</div>
-                            <div class="select-box-option" data-value="0.333">Ratio: 1/3 (-0.33x Penalty)</div>
-                            <div class="select-box-option" data-value="0.5">Ratio: 1/2 (-0.50x Penalty)</div>
-                            <div class="select-box-option" data-value="1.0">Ratio: 1/1 (-1.00x Penalty)</div>
-                            <div class="select-box-option" data-value="0.0">Ratio: 0/1 (No Penalty)</div>
-                        </div>
-                    </div>
-                    <input type="hidden" id="markingRatio" value="0.25">
-                </div>
+                <input type="hidden" id="reportType" value="overall">
             </div>
 
-            <!-- Main Aggregate Inputs Row -->
+            <!-- Aggregate Parameters Row -->
             <div class="fluent-layout-row">
                 <div class="input-field-group">
-                    <label class="soft-field-label">TOTAL QUESTIONS <span class="req-star">*</span></label>
+                    <label class="soft-field-label" for="totalQs">TOTAL QUESTIONS <span class="req-star">*</span></label>
                     <div class="fluent-input-wrapper">
-                        <i class="fa-solid fa-list-ol input-field-icon"></i>
-                        <input type="number" id="totalQs" placeholder="75" min="1" class="profile-locked-row" required>
+                        <i class="fa-solid fa-list-check input-field-icon"></i>
+                        <input type="number" id="totalQs" value="75" min="1" required>
                     </div>
                 </div>
-
                 <div class="input-field-group">
-                    <label class="soft-field-label">MAX MARKS <span class="req-star">*</span></label>
+                    <label class="soft-field-label" for="maxMarks">MAXIMUM MARKS <span class="req-star">*</span></label>
                     <div class="fluent-input-wrapper">
                         <i class="fa-solid fa-award input-field-icon"></i>
-                        <input type="number" id="maxMarks" placeholder="300" min="1" required>
+                        <input type="number" id="maxMarks" value="300" min="1" required>
                     </div>
                 </div>
             </div>
 
             <div class="fluent-layout-row">
                 <div class="input-field-group">
-                    <label class="soft-field-label">ATTEMPTED QUESTIONS <span class="req-star">*</span></label>
+                    <label class="soft-field-label" for="attempted">ATTEMPTED QUESTIONS <span class="req-star">*</span></label>
                     <div class="fluent-input-wrapper">
                         <i class="fa-solid fa-pen-to-square input-field-icon"></i>
                         <input type="number" id="attempted" placeholder="0" min="0" required>
                     </div>
                 </div>
-
                 <div class="input-field-group">
-                    <label class="soft-field-label">INCORRECT ANSWERS <span class="req-star">*</span></label>
+                    <label class="soft-field-label" for="wrong">WRONG / FAULT ANSWERS <span class="req-star">*</span></label>
                     <div class="fluent-input-wrapper">
                         <i class="fa-solid fa-circle-xmark input-field-icon"></i>
                         <input type="number" id="wrong" placeholder="0" min="0" required>
@@ -197,82 +167,102 @@
                 </div>
             </div>
 
-            <!-- SUBJECT-WISE EXPANDABLE COLLAPSIBLE SECTION -->
+            <!-- Negative Ratio Selector -->
+            <div class="input-field-group dropdown-adjustment">
+                <label class="soft-field-label">NEGATIVE DEDUCTION RATIO</label>
+                <div class="custom-select-box" id="ratioSelectContainer">
+                    <div class="select-box-trigger" id="ratioLabel">Ratio: 1/4 (Standard -25%)</div>
+                    <div class="select-box-dropdown" id="ratioOptions">
+                        <div class="select-box-option" data-value="0.25">1/4 (-25% Negative Penalty)</div>
+                        <div class="select-box-option" data-value="0.33">1/3 (-33.3% Negative Penalty)</div>
+                        <div class="select-box-option" data-value="0.50">1/2 (-50% Negative Penalty)</div>
+                        <div class="select-box-option" data-value="1.00">1/1 (-100% Full Deduction)</div>
+                        <div class="select-box-option" data-value="0">0 (Zero Penalty / Practice Mode)</div>
+                    </div>
+                </div>
+                <input type="hidden" id="markingRatio" value="0.25">
+            </div>
+
+            <!-- SUBJECT-WISE DETAILED BREAKDOWN CONTAINER -->
             <div id="subjectSection" class="subject-breakdown-wrapper">
                 <div class="mandatory-input-notice-bar">
                     <i class="fa-solid fa-circle-info"></i>
-                    <span>Fill total attempts and incorrect counts per subject. Unattempted/Correct values auto-solve reactively.</span>
+                    <span>Enter subject parameters below. Total fields will auto-sync with main input fields.</span>
                 </div>
 
                 <div class="subject-grid-layout-header">
-                    <span>TOTAL</span>
+                    <span>ATTEMPT</span>
                     <span>CORRECT</span>
                     <span>WRONG</span>
                     <span>SKIPPED</span>
                 </div>
 
-                <!-- Physics Section -->
+                <!-- Physics Row -->
                 <div class="subject-header-bar">
-                    <span class="sub-identity-lbl"><i class="fa-solid fa-atom text-purple"></i> PHYSICS</span>
+                    <span class="sub-identity-lbl">PHYSICS SUBSYSTEM</span>
                     <span class="subject-score-chip" id="phyScoreChip">Score: 0.00 / 100</span>
                 </div>
                 <div class="subject-grid-row" data-subject="phy">
-                    <input type="number" id="phyA" placeholder="Total" class="sub-input">
-                    <input type="number" id="phyC" placeholder="Correct" class="sub-input text-emerald">
-                    <input type="number" id="phyW" placeholder="Wrong" class="sub-input text-rose">
-                    <input type="number" id="phyN" placeholder="Skipped" class="sub-input text-blue">
+                    <input type="number" id="phyA" class="sub-input" placeholder="Total">
+                    <input type="number" id="phyC" class="sub-input" placeholder="Correct">
+                    <input type="number" id="phyW" class="sub-input" placeholder="Wrong">
+                    <input type="number" id="phyN" class="sub-input" placeholder="Skip">
                 </div>
 
-                <!-- Chemistry Section -->
+                <!-- Chemistry Row -->
                 <div class="subject-header-bar">
-                    <span class="sub-identity-lbl"><i class="fa-solid fa-flask text-blue"></i> CHEMISTRY</span>
+                    <span class="sub-identity-lbl">CHEMISTRY SUBSYSTEM</span>
                     <span class="subject-score-chip" id="chemScoreChip">Score: 0.00 / 100</span>
                 </div>
                 <div class="subject-grid-row" data-subject="chem">
-                    <input type="number" id="chemA" placeholder="Total" class="sub-input">
-                    <input type="number" id="chemC" placeholder="Correct" class="sub-input text-emerald">
-                    <input type="number" id="chemW" placeholder="Wrong" class="sub-input text-rose">
-                    <input type="number" id="chemN" placeholder="Skipped" class="sub-input text-blue">
+                    <input type="number" id="chemA" class="sub-input" placeholder="Total">
+                    <input type="number" id="chemC" class="sub-input" placeholder="Correct">
+                    <input type="number" id="chemW" class="sub-input" placeholder="Wrong">
+                    <input type="number" id="chemN" class="sub-input" placeholder="Skip">
                 </div>
 
-                <!-- Mathematics / Biology Section -->
+                <!-- Math/Bio Row -->
                 <div class="subject-header-bar">
-                    <span class="sub-identity-lbl"><i class="fa-solid fa-calculator text-emerald"></i> <span id="mathBioLabel">MATHEMATICS</span></span>
+                    <span class="sub-identity-lbl" id="mathBioLabel">MATHEMATICS</span>
                     <span class="subject-score-chip" id="mathBioScoreChip">Score: 0.00 / 100</span>
                 </div>
                 <div class="subject-grid-row" data-subject="mathBio">
-                    <input type="number" id="mathBioA" placeholder="Total" class="sub-input">
-                    <input type="number" id="mathBioC" placeholder="Correct" class="sub-input text-emerald">
-                    <input type="number" id="mathBioW" placeholder="Wrong" class="sub-input text-rose">
-                    <input type="number" id="mathBioN" placeholder="Skipped" class="sub-input text-blue">
+                    <input type="number" id="mathBioA" class="sub-input" placeholder="Total">
+                    <input type="number" id="mathBioC" class="sub-input" placeholder="Correct">
+                    <input type="number" id="mathBioW" class="sub-input" placeholder="Wrong">
+                    <input type="number" id="mathBioN" class="sub-input" placeholder="Skip">
                 </div>
+            </div>
 
-                <div class="quantum-intel-status">
-                    <i class="fa-solid fa-microchip"></i>
-                    <span id="intelMessage">Curriculum: JEE Main mapped. [25 Q / 100 Marks per Subject]. Matrix +4 / -1.</span>
-                </div>
+            <div class="quantum-intel-status">
+                <i class="fa-solid fa-microchip"></i>
+                <span id="intelMessage">Curriculum: JEE Main mapped. [25 Q / 100 Marks per Subject]. Matrix +4 / -1.</span>
             </div>
 
             <!-- Action Buttons -->
             <button type="button" class="fluent-btn btn-primary-gradient" onclick="executeCalculationSequence()">
-                <i class="fa-solid fa-calculator"></i> CALCULATE PERFORMANCE METRICS
+                <i class="fa-solid fa-calculator"></i> COMPUTE EVALUATION METRICS
             </button>
         </form>
 
-        <!-- SCORE HERO DISPLAY DISPLAY -->
-        <div class="fluent-score-hero-display" id="scoreDisplayCard">
-            <span class="score-hero-title">FINAL CALCULATED NET SCORE</span>
-            <div class="score-hero-val" id="score">0.00</div>
+        <!-- SCORE DISPLAY HERO PANEL -->
+        <div id="scoreHeroDisplay" class="fluent-score-hero-display hidden">
+            <span class="score-hero-title">FINAL COMPUTED MARKS</span>
+            <div id="score" class="score-hero-val">0.00</div>
         </div>
 
         <!-- ANALYTICS DASHBOARD CONTAINER -->
         <div id="analyticsDashboardContainer" class="hidden">
             
             <div class="dash-section-title">
-                <i class="fa-solid fa-chart-line text-purple"></i> METRIC SUMMARY & ACCURACY METRICS
+                <i class="fa-solid fa-chart-pie text-purple"></i> METRIC SUMMARY DASHBOARD
             </div>
 
             <div class="dashboard-grid">
+                <div class="dash-card">
+                    <span class="dash-lbl">GRADE</span>
+                    <span class="dash-val grade-badge" id="dashGrade">--</span>
+                </div>
                 <div class="dash-card">
                     <span class="dash-lbl">ACCURACY</span>
                     <span class="dash-val text-emerald" id="dashAccuracy">0%</span>
@@ -282,77 +272,65 @@
                     <span class="dash-val text-blue" id="dashEfficiency">0%</span>
                 </div>
                 <div class="dash-card">
-                    <span class="dash-lbl">GRADE</span>
-                    <span class="dash-val-sub grade-badge" id="dashGrade">N/A</span>
-                </div>
-                <div class="dash-card">
-                    <span class="dash-lbl">CORRECT</span>
-                    <span class="dash-val text-emerald" id="dashCorrect">0</span>
-                </div>
-                <div class="dash-card">
-                    <span class="dash-lbl">WRONG</span>
-                    <span class="dash-val text-rose" id="dashWrong">0</span>
-                </div>
-                <div class="dash-card">
-                    <span class="dash-lbl">SKIPPED</span>
-                    <span class="dash-val text-muted" id="dashSkipped">0</span>
-                </div>
-                <div class="dash-card">
-                    <span class="dash-lbl">PENALTY DEDUCTION</span>
+                    <span class="dash-lbl">PENALTY MARKS</span>
                     <span class="dash-val text-rose" id="dashPenalty">0.00</span>
                 </div>
-                <div class="dash-card" style="grid-column: span 2;">
+                <div class="dash-card">
+                    <span class="dash-lbl">CORRECT / WRONG</span>
+                    <span class="dash-val-sub"><span id="dashCorrect" class="text-emerald">0</span> / <span id="dashWrong" class="text-rose">0</span></span>
+                </div>
+                <div class="dash-card">
                     <span class="dash-lbl">RISK INDEX</span>
-                    <span class="dash-val text-purple" id="dashRiskIndex">Low</span>
+                    <span class="dash-val" id="dashRiskIndex">Low</span>
                 </div>
             </div>
 
-            <!-- AI SMART RANK & PERCENTILE PREDICTION -->
+            <!-- AI PREDICTION CARD -->
             <div class="prediction-card">
                 <div class="prediction-header">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI SMART RANK & PERCENTILE PREDICTOR
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI RANK & PERCENTILE PREDICTION
                 </div>
                 <div class="prediction-grid">
                     <div class="pred-item">
-                        <span class="pred-label">ESTIMATED PERCENTILE</span>
-                        <span class="pred-value text-blue" id="predPercentile">0.00%</span>
+                        <span class="pred-label">EST. PERCENTILE</span>
+                        <span class="pred-value text-purple" id="predPercentile">0.00%</span>
                     </div>
                     <div class="pred-item">
-                        <span class="pred-label">ESTIMATED AIR RANK</span>
-                        <span class="pred-value text-purple" id="predRank">0</span>
+                        <span class="pred-label">EST. AIR RANK</span>
+                        <span class="pred-value text-blue" id="predRank">--</span>
                     </div>
                     <div class="pred-item">
                         <span class="pred-label">PERFORMANCE BAND</span>
-                        <span class="pred-value text-emerald" id="predBand">Developing</span>
+                        <span class="pred-value" id="predBand">--</span>
                     </div>
                     <div class="pred-item">
-                        <span class="pred-label">COMPETITION BAND</span>
-                        <span class="pred-value" id="predCompetition">Top 50%</span>
+                        <span class="pred-label">COMPETITION LEVEL</span>
+                        <span class="pred-value" id="predCompetition">--</span>
                     </div>
                 </div>
             </div>
 
-            <!-- AI PERFORMANCE DIAGNOSTIC REPORT -->
+            <!-- AI DIAGNOSTIC REPORT -->
             <div class="ai-report-box">
                 <div class="ai-report-header">
-                    <i class="fa-solid fa-brain"></i> AI PERFORMANCE DIAGNOSTIC
+                    <i class="fa-solid fa-brain"></i> PERFORMANCE DIAGNOSTIC REPORT
                 </div>
                 <div class="ai-report-content" id="aiReportContent">
-                    Generating intelligence report...
+                    Compute evaluation to view detailed performance metrics.
                 </div>
             </div>
 
             <!-- HISTORICAL INSIGHT ENGINE -->
             <div class="insight-engine-box">
                 <div class="insight-header">
-                    <i class="fa-solid fa-lightbulb"></i> HISTORICAL INSIGHTS & TRENDS
+                    <i class="fa-solid fa-chart-line"></i> HISTORICAL INSIGHT & TRENDS
                 </div>
                 <ul class="insight-list" id="insightList">
-                    <li>No comparative data logged yet.</li>
+                    <li>Awaiting initial evaluation data.</li>
                 </ul>
             </div>
 
-            <!-- VISUAL ANALYTICS CHARTS -->
+            <!-- ANALYTICS CHARTS -->
             <div class="charts-wrapper">
                 <div class="chart-card">
                     <canvas id="currentBreakdownChart"></canvas>
@@ -362,118 +340,104 @@
                 </div>
             </div>
 
-            <!-- EXPORT ACTIONS PANEL -->
+            <!-- EXPORT ACTIONS STACK -->
             <div class="export-actions-grid">
-                <button type="button" class="fluent-btn btn-primary-gradient" onclick="downloadPDFReportSequence()">
-                    <i class="fa-solid fa-file-pdf"></i> DOWNLOAD PDF REPORT
+                <button class="fluent-btn btn-secondary-frosted" onclick="downloadPDFReportSequence()">
+                    <i class="fa-solid fa-file-pdf text-rose"></i> DOWNLOAD PDF
                 </button>
-                <button type="button" class="fluent-btn btn-secondary-frosted" onclick="triggerShareMenu()">
-                    <i class="fa-solid fa-share-nodes"></i> SHARE RESULT
+                <button class="fluent-btn btn-secondary-frosted" onclick="triggerShareMenu()">
+                    <i class="fa-solid fa-share-nodes text-blue"></i> SHARE REPORT
                 </button>
-                <button type="button" class="fluent-btn btn-secondary-frosted" onclick="exportCurrentPNG()">
-                    <i class="fa-solid fa-image"></i> EXPORT IMAGE (PNG)
+                <button class="fluent-btn btn-secondary-frosted" onclick="exportCurrentPNG()">
+                    <i class="fa-solid fa-image text-emerald"></i> EXPORT PNG
                 </button>
-                <button type="button" class="fluent-btn btn-secondary-frosted" onclick="exportCurrentJSON()">
-                    <i class="fa-solid fa-code"></i> EXPORT JSON DATA
+                <button class="fluent-btn btn-secondary-frosted" onclick="exportCurrentJSON()">
+                    <i class="fa-solid fa-code text-purple"></i> EXPORT JSON
                 </button>
             </div>
-
         </div>
 
-        <!-- FOOTER branding -->
+        <!-- FOOTER ATTRIBUTION -->
         <footer class="fluent-footer">
             <div class="secure-badge">
-                <i class="fa-solid fa-shield-check"></i> ECLIPSE7 INTEGRITY MATRIX VERIFIED
+                <i class="fa-solid fa-shield-halved"></i> ECLIPSE7 VERIFIED MATRIX CORE
             </div>
-            <p>© 2026 ECLIPSE7 Performance Laboratory. All Rights Reserved.</p>
+            <span>© 2026 ECLIPSE7. Engineered by Saiprasad Barure.</span>
         </footer>
+    </div>
 
-    </main>
+    <!-- DRAWER OVERLAY -->
+    <div id="drawerOverlay" class="drawer-overlay" onclick="toggleHistoryDrawer()"></div>
 
-    <!-- ASSESSMENT HISTORY DRAWER OVERLAY & PANEL -->
-    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleHistoryDrawer()"></div>
-    
-    <aside class="history-drawer" id="historyDrawer">
+    <!-- HISTORY VAULT DRAWER -->
+    <div id="historyDrawer" class="history-drawer">
         <div class="drawer-header">
             <div class="drawer-title">
-                <i class="fa-solid fa-clock-rotate-left text-purple"></i>
+                <i class="fa-solid fa-vault text-purple"></i>
                 <h3>ASSESSMENT VAULT</h3>
             </div>
-            <button class="drawer-close-btn" onclick="toggleHistoryDrawer()"><i class="fa-solid fa-xmark"></i></button>
+            <button class="drawer-close-btn" onclick="toggleHistoryDrawer()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
 
         <div class="history-onboarding-banner">
-            <i class="fa-solid fa-circle-info"></i>
-            <span>Local & Cloud Assessment History stored seamlessly in your Vault.</span>
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Local & Cloud synched historic test evaluations.</span>
         </div>
 
         <div class="drawer-search-bar">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="historySearchInput" placeholder="Filter candidate or test name..." oninput="filterHistoryVaultList()">
+            <input type="text" id="historySearch" placeholder="Filter by test or student..." oninput="filterHistoryVaultRecords()">
         </div>
 
         <div class="drawer-actions-stack">
-            <button type="button" class="fluent-btn btn-primary-gradient drawer-action-btn" onclick="downloadCompleteHistoryPDF()">
-                <i class="fa-solid fa-file-pdf"></i> EXPORT COMPLETE HISTORY PDF
+            <button class="fluent-btn btn-secondary-frosted drawer-action-btn" onclick="downloadCompleteHistoryPDF()">
+                <i class="fa-solid fa-file-pdf text-rose"></i> EXPORT ALL HISTORY PDF
             </button>
             <div class="drawer-sub-actions">
-                <button type="button" class="history-ctrl-btn" onclick="exportHistoryCSV()"><i class="fa-solid fa-file-csv"></i> CSV</button>
-                <button type="button" class="history-ctrl-btn" onclick="exportHistoryJSON()"><i class="fa-solid fa-file-code"></i> JSON</button>
-                <button type="button" class="history-ctrl-btn" onclick="openComparisonModal()"><i class="fa-solid fa-code-compare"></i> Compare</button>
-                <button type="button" class="history-ctrl-btn" onclick="triggerImportJSON()"><i class="fa-solid fa-file-import"></i> Import</button>
+                <button class="fluent-btn btn-secondary-frosted" onclick="exportHistoryJSON()" title="Export JSON">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+                <button class="fluent-btn btn-secondary-frosted" onclick="triggerJSONImportDialog()" title="Import JSON">
+                    <i class="fa-solid fa-upload"></i>
+                </button>
+                <input type="file" id="importJsonInput" class="hidden" accept=".json" onchange="processJSONHistoryImport(event)">
             </div>
         </div>
 
         <div class="drawer-actions">
-            <span class="history-total-lbl" id="historyRecordCount">0 Records Logged</span>
-            <button class="clear-all-btn" onclick="clearAllHistoryVaultRecords()">Clear History</button>
+            <span class="history-total-lbl">TOTAL LOGS: <span id="historyLogCount">0</span></span>
+            <button class="clear-all-btn" onclick="clearCompleteHistoryVault()">CLEAR ALL</button>
         </div>
 
         <div class="history-list-scroll" id="historyListContainer">
-            <!-- Dynamic History Cards render here -->
+            <!-- Dynamic History Cards Inserted Here -->
         </div>
-    </aside>
+    </div>
 
-    <!-- COMPARISON MODAL -->
-    <div class="compare-modal" id="compareModal">
+    <!-- COMPARE TESTS MODAL -->
+    <div id="compareModal" class="compare-modal">
         <div class="drawer-header">
             <div class="drawer-title">
                 <i class="fa-solid fa-code-compare text-blue"></i>
-                <h3>COMPARE ASSESSMENTS</h3>
+                <h3>ASSESSMENT COMPARISON</h3>
             </div>
-            <button class="drawer-close-btn" onclick="closeComparisonModal()"><i class="fa-solid fa-xmark"></i></button>
+            <button class="drawer-close-btn" onclick="closeCompareModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
-
         <div class="compare-selection-row">
             <select id="compareSelectA" class="compare-dropdown" onchange="renderComparisonTable()"></select>
             <span class="vs-badge">VS</span>
             <select id="compareSelectB" class="compare-dropdown" onchange="renderComparisonTable()"></select>
         </div>
-
-        <div class="comparison-grid-container" id="comparisonTableWrapper">
-            <!-- Dynamic Comparison Table -->
+        <div class="comparison-grid-container" id="comparisonTableContainer">
+            <!-- Dynamic Table Inserted Here -->
         </div>
     </div>
 
-    <!-- FULL REPORT DETAIL MODAL -->
-    <div class="full-report-modal" id="fullReportModal">
-        <div class="drawer-header">
-            <div class="drawer-title">
-                <i class="fa-solid fa-file-lines text-emerald"></i>
-                <h3>FULL ASSESSMENT METRICS</h3>
-            </div>
-            <button class="drawer-close-btn" onclick="closeFullReportModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div class="full-report-scroll-body" id="fullReportModalContent">
-            <!-- Dynamic detailed breakdown -->
-        </div>
-    </div>
-
-    <!-- Hidden File Input for Importing JSON -->
-    <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importHistoryJSONFile(event)">
-
-    <!-- Firebase SDK Modular Imports & Script -->
-    <script type="module" src="script.js"></script>
+    <!-- FIREBASE SDK & CORE LOGIC SCRIPT -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>
