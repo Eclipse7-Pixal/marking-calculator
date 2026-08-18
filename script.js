@@ -1,4 +1,83 @@
 // ============================================================================
+// FIREBASE AUTHENTICATION & STORAGE INTEGRATION (MODULAR SDK)
+// ============================================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// Firebase Configuration (Replace with your actual Firebase config keys if needed)
+const firebaseConfig = {
+    apiKey: "AIzaSyD-YourFirebaseApiKeyHere",
+    authDomain: "eclipse7-engine.firebaseapp.com",
+    projectId: "eclipse7-engine",
+    storageBucket: "eclipse7-engine.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:abcdef123456"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+let currentUser = null;
+
+// Auth State Monitor
+onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    const profileState = document.getElementById('userProfileState');
+    const studentNameInput = document.getElementById('studentName');
+
+    if (user) {
+        const photo = user.photoURL || '';
+        const name = user.displayName || 'User';
+        
+        // Updated Profile Pill Layout: Profile Picture + Hi, + username
+        profileState.innerHTML = `
+            ${photo ? `<img src="${photo}" class="avatar-img" alt="Avatar">` : `<i class="fa-solid fa-circle-user profile-icon"></i>`}
+            <span class="user-display-name">Hi, ${name}</span>
+        `;
+
+        // Automatically set the student name field to default Google username if empty
+        if (studentNameInput && (!studentNameInput.value.trim() || studentNameInput.dataset.autoSet === "true")) {
+            studentNameInput.value = name;
+            studentNameInput.dataset.autoSet = "true";
+        }
+
+        triggerSystemToastNotification(`Welcome back, ${name}!`, false);
+    } else {
+        profileState.innerHTML = `
+            <i class="fa-solid fa-circle-user profile-icon"></i>
+            <span class="user-display-name">Sign In</span>
+        `;
+        if (studentNameInput && studentNameInput.dataset.autoSet === "true") {
+            studentNameInput.value = "";
+            delete studentNameInput.dataset.autoSet;
+        }
+    }
+});
+
+window.loginWithGoogle = async function() {
+    try {
+        await signInWithPopup(auth, provider);
+    } catch (err) {
+        console.error("Authentication Error:", err);
+        triggerSystemToastNotification("Login failed or popup closed.");
+    }
+};
+
+window.logout = async function() {
+    try {
+        await signOut(auth);
+        triggerSystemToastNotification("Signed out successfully.", false);
+    } catch (err) {
+        console.error("Signout Error:", err);
+    }
+};
+
+window.getCurrentUser = function() {
+    return currentUser;
+};
+
+// ============================================================================
 // 1. CURRICULUM PERFORMANCE PROFILE MATRIX CONFIGURATION
 // ============================================================================
 const EXAM_PROFILES = {
@@ -65,23 +144,21 @@ let subjectScores = {
 // ============================================================================
 // 2. DROPDOWN & PROFILE SYSTEM
 // ============================================================================
-function handleProfileTap() {
-    if (window.getCurrentUser && window.getCurrentUser()) {
+window.handleProfileTap = function() {
+    if (currentUser) {
         if (confirm("Do you want to sign out?")) {
             window.logout();
         }
     } else {
-        if (window.loginWithGoogle) {
-            window.loginWithGoogle();
-        }
+        window.loginWithGoogle();
     }
-}
+};
 
-function closeTooltip(e) {
+window.closeTooltip = function(e) {
     if (e) e.stopPropagation();
     const tooltip = document.getElementById('signin-tooltip');
     if (tooltip) tooltip.classList.add('hidden');
-}
+};
 
 function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, callback) {
     const container = document.getElementById(containerId);
@@ -365,7 +442,7 @@ function syncSubjectBreakdownToMainInputs() {
 }
 
 // ============================================================================
-// 6. VALIDATION & TOAST SYSTEM
+// 6. VALIDATION & SHAKE / VIBRATE TOAST SYSTEM
 // ============================================================================
 function triggerSystemToastNotification(message, isError = true) {
     const toast = document.getElementById('systemNotification');
@@ -374,12 +451,12 @@ function triggerSystemToastNotification(message, isError = true) {
 
     msgSpan.textContent = message;
     if (isError) {
-        toast.style.background = "rgba(244, 63, 94, 0.25)";
-        toast.style.borderColor = "rgba(244, 63, 94, 0.4)";
+        toast.style.background = "rgba(244, 63, 94, 0.28)";
+        toast.style.borderColor = "rgba(244, 63, 94, 0.5)";
         toast.style.color = "#fecdd3";
     } else {
-        toast.style.background = "rgba(16, 185, 129, 0.25)";
-        toast.style.borderColor = "rgba(16, 185, 129, 0.4)";
+        toast.style.background = "rgba(16, 185, 129, 0.28)";
+        toast.style.borderColor = "rgba(16, 185, 129, 0.5)";
         toast.style.color = "#a7f3d0";
     }
 
@@ -389,6 +466,19 @@ function triggerSystemToastNotification(message, isError = true) {
 
 function clearInputValidationStyles() {
     document.querySelectorAll('input').forEach(input => input.classList.remove('validation-error'));
+}
+
+function triggerValidationShakeAndVibrate() {
+    const appContainer = document.getElementById('mainAppContainer');
+    if (appContainer) {
+        appContainer.classList.remove('shake-effect');
+        void appContainer.offsetWidth; // Trigger reflow
+        appContainer.classList.add('shake-effect');
+        setTimeout(() => appContainer.classList.remove('shake-effect'), 400);
+    }
+    if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+    }
 }
 
 function scanAndValidateSystemInputs() {
@@ -414,11 +504,13 @@ function scanAndValidateSystemInputs() {
     if (invalidNodes.length === 0) {
         if (parseFloat(wrong.value) > parseFloat(attempted.value)) {
             invalidNodes.push(wrong, attempted);
+            triggerValidationShakeAndVibrate();
             triggerSystemToastNotification("Logic Error: Incorrect answers cannot exceed total attempts.");
             return false;
         }
         if (parseFloat(attempted.value) > parseFloat(totalQs.value)) {
             invalidNodes.push(attempted, totalQs);
+            triggerValidationShakeAndVibrate();
             triggerSystemToastNotification("Logic Error: Total attempts cannot exceed total questions.");
             return false;
         }
@@ -426,7 +518,8 @@ function scanAndValidateSystemInputs() {
 
     if (invalidNodes.length > 0) {
         invalidNodes.forEach(node => node.classList.add('validation-error'));
-        triggerSystemToastNotification("Action Blocked: Please populate required fields correctly.");
+        triggerValidationShakeAndVibrate();
+        triggerSystemToastNotification("Action Blocked: Please fill out all required input fields correctly.");
         return false;
     }
 
@@ -434,9 +527,37 @@ function scanAndValidateSystemInputs() {
 }
 
 // ============================================================================
-// 7. MAIN CALCULATION ENGINE
+// 7. CELEBRATION ANIMATION (CONFETTI 🎉🎊)
 // ============================================================================
-function executeCalculationSequence() {
+function triggerCelebrationConfettiAnimation() {
+    if (typeof confetti === 'function') {
+        // Double burst confetti
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+        setTimeout(() => {
+            confetti({
+                particleCount: 50,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 }
+            });
+            confetti({
+                particleCount: 50,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 }
+            });
+        }, 250);
+    }
+}
+
+// ============================================================================
+// 8. MAIN CALCULATION ENGINE
+// ============================================================================
+window.executeCalculationSequence = function() {
     if (!scanAndValidateSystemInputs()) return null;
 
     const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
@@ -454,11 +575,15 @@ function executeCalculationSequence() {
     const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100) : 0;
     const accuracy = attempted > 0 ? ((correct / attempted) * 100) : 0;
 
+    const student = document.getElementById('studentName').value.trim();
+
     animateNumberCounter('score', finalScore, 2);
 
     const profileKey = document.getElementById('examProfile').value;
 
     const resultData = { 
+        studentName: student,
+        testName: document.getElementById('testName').value.trim(),
         totalQs, maxMarks, attempted, wrong, correct, 
         unattempted, finalScore, efficiency: efficiency.toFixed(2), 
         accuracy: accuracy.toFixed(2), totalPenalty, marksPerCorrect, profileKey,
@@ -475,8 +600,12 @@ function executeCalculationSequence() {
 
     document.getElementById('analyticsDashboardContainer').classList.remove('hidden');
 
+    // Trigger Celebration Toast + Confetti Animations 🎊🎉
+    triggerSystemToastNotification(`🎊🎉 Congratulations ${student}! Score metrics computed successfully.`, false);
+    triggerCelebrationConfettiAnimation();
+
     return resultData;
-}
+};
 
 function animateNumberCounter(elementId, targetValue, decimals = 0, prefix = '', suffix = '') {
     const el = document.getElementById(elementId);
@@ -502,7 +631,7 @@ function calculateGrade(pct) {
     if (pct >= 90) return { grade: "S", color: "#34d399" };
     if (pct >= 80) return { grade: "A+", color: "#38bdf8" };
     if (pct >= 70) return { grade: "A", color: "#60a5fa" };
-    if (pct >= 60) return { grade: "B+", color: "#a78bfa" };
+    if (pct >= 60) return { grade: "B+", color: "#c084fc" };
     if (pct >= 50) return { grade: "B", color: "#c084fc" };
     if (pct >= 40) return { grade: "C", color: "#facc15" };
     if (pct >= 30) return { grade: "D", color: "#fb923c" };
@@ -658,7 +787,7 @@ function renderCurrentDashboardCharts(data) {
             datasets: [{
                 label: 'Subject Score',
                 data: [subjectScores.phy.score, subjectScores.chem.score, subjectScores.mathBio.score],
-                backgroundColor: ['#8b5cf6', '#0284c7', '#10b981']
+                backgroundColor: ['#9333ea', '#0284c7', '#10b981']
             }]
         },
         options: {
@@ -674,7 +803,7 @@ function renderCurrentDashboardCharts(data) {
 }
 
 // ============================================================================
-// 8. DATA EXPORT & PDF GENERATION
+// 9. DATA EXPORT & PDF GENERATION
 // ============================================================================
 function createPDFDocumentObject(telemetryData) {
     const { jsPDF } = window.jspdf;
@@ -881,7 +1010,7 @@ function createPDFDocumentObject(telemetryData) {
     return doc;
 }
 
-function downloadPDFReportSequence() {
+window.downloadPDFReportSequence = function() {
     const telemetryData = executeCalculationSequence();
     if (!telemetryData) return;
 
@@ -899,9 +1028,9 @@ function downloadPDFReportSequence() {
     img.onerror = () => {
         doc.save(`${student.replace(/ /g, "_")}_ECLIPSE7_METRIC_REPORT.pdf`);
     };
-}
+};
 
-function exportCurrentPNG() {
+window.exportCurrentPNG = function() {
     const el = document.getElementById('mainAppContainer');
     html2canvas(el).then(canvas => {
         let link = document.createElement('a');
@@ -909,9 +1038,9 @@ function exportCurrentPNG() {
         link.href = canvas.toDataURL();
         link.click();
     });
-}
+};
 
-function exportCurrentJSON() {
+window.exportCurrentJSON = function() {
     const data = executeCalculationSequence();
     if (!data) return;
     let blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -919,9 +1048,9 @@ function exportCurrentJSON() {
     link.download = 'ECLIPSE7_Result.json';
     link.href = URL.createObjectURL(blob);
     link.click();
-}
+};
 
-async function triggerShareMenu() {
+window.triggerShareMenu = async function() {
     const data = executeCalculationSequence();
     if (!data) return;
 
@@ -983,12 +1112,116 @@ async function triggerShareMenu() {
         navigator.clipboard.writeText(shareText);
         triggerSystemToastNotification("Result Summary copied to clipboard!", false);
     }
-}
+};
 
 // ============================================================================
-// 9. HISTORY VAULT SYSTEM
+// 10. HISTORY VAULT SYSTEM
 // ============================================================================
-function downloadCompleteHistoryPDF() {
+function getStoredHistory() {
+    try {
+        const dataStr = localStorage.getItem(E7_HISTORY_KEY);
+        return dataStr ? JSON.parse(dataStr) : [];
+    } catch(e) {
+        return [];
+    }
+}
+
+function saveRecordToVault(record) {
+    let history = getStoredHistory();
+    const newEntry = {
+        id: Date.now().toString(),
+        timestamp: new Date().toLocaleString(),
+        profile: record.profileKey,
+        studentName: record.studentName,
+        testName: record.testName,
+        finalScore: typeof record.finalScore === 'number' ? record.finalScore.toFixed(2) : record.finalScore,
+        maxMarks: record.maxMarks,
+        efficiency: record.efficiency,
+        accuracy: record.accuracy,
+        fullData: record
+    };
+    
+    history.unshift(newEntry);
+    localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
+    renderHistoryVault();
+}
+
+window.toggleHistoryDrawer = function() {
+    const drawer = document.getElementById('historyDrawer');
+    const overlay = document.getElementById('drawerOverlay');
+    if (drawer && overlay) {
+        drawer.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+};
+
+function renderHistoryVault() {
+    const container = document.getElementById('historyListContainer');
+    const badge = document.getElementById('historyBadgeCount');
+    const countLbl = document.getElementById('historyRecordCount');
+    if (!container) return;
+
+    const history = getStoredHistory();
+    if (badge) badge.textContent = history.length;
+    if (countLbl) countLbl.textContent = `${history.length} Records Logged`;
+
+    if (history.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px 10px; color: var(--text-muted); font-size: 0.8rem;">
+                <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.4;"></i>
+                <p>No assessment records saved in vault.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = history.map(item => `
+        <div class="history-item-card">
+            <div class="history-card-top">
+                <h4 class="history-cand-name">${item.studentName}</h4>
+                <span class="history-badge-profile">${item.profile}</span>
+            </div>
+            <div class="history-card-mid">
+                <span class="history-test-name">${item.testName}</span>
+                <span class="history-card-score">${item.finalScore} / ${item.maxMarks}</span>
+            </div>
+            <div class="history-card-bottom">
+                <span>${item.timestamp}</span>
+                <div class="history-card-controls">
+                    <button class="history-ctrl-btn" onclick="viewDetailedReportModal('${item.id}')"><i class="fa-solid fa-eye"></i> View</button>
+                    <button class="history-ctrl-btn del" onclick="deleteHistoryVaultItem('${item.id}')"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.filterHistoryVaultList = function() {
+    const query = document.getElementById('historySearchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.history-item-card');
+    cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(query) ? 'block' : 'none';
+    });
+};
+
+window.deleteHistoryVaultItem = function(id) {
+    let history = getStoredHistory();
+    history = history.filter(item => item.id !== id);
+    localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
+    renderHistoryVault();
+    triggerSystemToastNotification("Record removed from vault.", false);
+};
+
+window.clearAllHistoryVaultRecords = function() {
+    if (confirm("Are you sure you want to clear all history records?")) {
+        localStorage.removeItem(E7_HISTORY_KEY);
+        renderHistoryVault();
+        triggerSystemToastNotification("History vault cleared.", false);
+    }
+};
+
+window.downloadCompleteHistoryPDF = function() {
     const history = getStoredHistory();
     if (history.length === 0) {
         triggerSystemToastNotification("No history records available to export PDF.");
@@ -1017,313 +1250,164 @@ function downloadCompleteHistoryPDF() {
         head: [['Timestamp', 'Student', 'Test', 'Profile', 'Score', 'Efficiency']],
         body: tableRows,
         theme: 'striped',
-        headStyles: { fillColor: [139, 92, 246] }
+        headStyles: { fillColor: [147, 51, 234] }
     });
 
     doc.save("ECLIPSE7_Complete_History_Report.pdf");
-}
+};
 
-function exportHistoryJSON() {
+window.exportHistoryJSON = function() {
     const history = getStoredHistory();
     let blob = new Blob([JSON.stringify(history, null, 2)], { type: 'application/json' });
     let link = document.createElement('a');
     link.download = 'ECLIPSE7_History_Vault.json';
     link.href = URL.createObjectURL(blob);
     link.click();
-}
+};
 
-function exportHistoryCSV() {
+window.exportHistoryCSV = function() {
     const history = getStoredHistory();
-    if (history.length === 0) return;
-    let csv = "ID,Timestamp,Student,Test,Profile,Score,MaxMarks,Efficiency\n";
+    if (history.length === 0) {
+        triggerSystemToastNotification("No history to export.");
+        return;
+    }
+    let csv = "ID,Timestamp,Student,Test,Profile,Score,MaxMarks,Efficiency,Accuracy\n";
     history.forEach(h => {
-        csv += `"${h.id}","${h.timestamp}","${h.studentName}","${h.testName}","${h.profile}","${h.finalScore}","${h.maxMarks}","${h.efficiency}"\n`;
+        csv += `"${h.id}","${h.timestamp}","${h.studentName}","${h.testName}","${h.profile}",${h.finalScore},${h.maxMarks},${h.efficiency},${h.accuracy}\n`;
     });
     let blob = new Blob([csv], { type: 'text/csv' });
     let link = document.createElement('a');
-    link.download = 'ECLIPSE7_History_Vault.csv';
+    link.download = 'ECLIPSE7_History.csv';
     link.href = URL.createObjectURL(blob);
     link.click();
-}
+};
 
-function toggleHistoryDrawer(show) {
-    const drawer = document.getElementById('historyDrawer');
-    const overlay = document.getElementById('drawerOverlay');
-    if (!drawer || !overlay) return;
+window.triggerImportJSON = function() {
+    document.getElementById('jsonFileInput').click();
+};
 
-    if (show) {
-        drawer.classList.add('active');
-        overlay.classList.add('active');
-        renderHistoryVault();
-    } else {
-        drawer.classList.remove('active');
-        overlay.classList.remove('active');
-    }
-}
-
-function getStoredHistory() {
-    try {
-        const raw = localStorage.getItem(E7_HISTORY_KEY);
-        return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-        console.error("Storage Access Fault", e);
-        return [];
-    }
-}
-
-function saveRecordToVault(computed) {
-    const studentName = document.getElementById('studentName').value.trim();
-    const testName = document.getElementById('testName').value.trim();
-    const profile = document.getElementById('examProfile').value;
-
-    if (!studentName || !testName) return;
-
-    const numScore = typeof computed.finalScore === 'number' ? computed.finalScore.toFixed(2) : computed.finalScore;
-
-    const record = {
-        timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        studentName,
-        testName,
-        profile,
-        finalScore: numScore,
-        maxMarks: computed.maxMarks,
-        totalQs: computed.totalQs,
-        attempted: computed.attempted,
-        wrong: computed.wrong,
-        correct: computed.correct,
-        efficiency: computed.efficiency,
-        accuracy: computed.accuracy
-    };
-
-    if (window.getCurrentUser && window.getCurrentUser() && window.saveScoreToDatabase) {
-        window.saveScoreToDatabase(record);
-    } else {
-        record.id = 'E7-REC-' + Date.now();
-        let history = getStoredHistory();
-        if (history.length > 0 && history[0].studentName === studentName && history[0].testName === testName && history[0].finalScore === record.finalScore) {
-            return;
+window.importHistoryJSONFile = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const imported = JSON.parse(evt.target.result);
+            if (Array.isArray(imported)) {
+                localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(imported));
+                renderHistoryVault();
+                triggerSystemToastNotification("History vault restored successfully!", false);
+            }
+        } catch(err) {
+            triggerSystemToastNotification("Invalid JSON File format.");
         }
+    };
+    reader.readAsText(file);
+};
 
-        history.unshift(record);
-        if (history.length > 50) history = history.slice(0, 50);
-
-        localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
-        updateHistoryCounterBadge(history.length);
-    }
-}
-
-function updateHistoryCounterBadge(count) {
-    const navCounterNode = document.getElementById('navHistoryCounter');
-    if (navCounterNode) navCounterNode.textContent = count;
-}
-
-function renderHistoryVault(filterQuery = "") {
-    const container = document.getElementById('historyListContainer');
-    const totalLabel = document.getElementById('historyTotalText');
-    if (!container) return;
-
-    const history = getStoredHistory();
-    updateHistoryCounterBadge(history.length);
-
-    const filtered = filterQuery.trim() === "" ? history : history.filter(item => 
-        item.studentName.toLowerCase().includes(filterQuery.toLowerCase()) || 
-        item.testName.toLowerCase().includes(filterQuery.toLowerCase())
-    );
-
-    if (totalLabel) totalLabel.textContent = `${filtered.length} Records Shown`;
-
-    if (filtered.length === 0) {
-        container.innerHTML = `
-            <div class="empty-history-state" style="text-align: center; padding: 20px; color: var(--text-muted);">
-                <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                <p>${filterQuery ? "No matching records found." : "Vault empty. Compute a test score to log history."}</p>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = filtered.map(item => `
-        <div class="history-item-card" id="card-${item.id}">
-            <div class="history-card-top">
-                <h4 class="history-cand-name">${escapeHtml(item.studentName)}</h4>
-                <span class="history-badge-profile">${item.profile}</span>
-            </div>
-            <div class="history-card-mid">
-                <span class="history-test-name">${escapeHtml(item.testName)}</span>
-                <span class="history-card-score">${item.finalScore} / ${item.maxMarks}</span>
-            </div>
-            <div class="history-card-bottom">
-                <span>${item.timestamp} | Acc: ${item.efficiency}%</span>
-                <div class="history-card-controls">
-                    <button class="history-ctrl-btn" onclick="restoreHistoryItem('${item.id}')" title="Load into Calculator">
-                        <i class="fa-solid fa-rotate-left"></i> Load
-                    </button>
-                    <button class="history-ctrl-btn del" onclick="deleteHistoryItem('${item.id}')" title="Delete Entry">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function filterHistoryList() {
-    const query = document.getElementById('historySearchInput').value;
-    renderHistoryVault(query);
-}
-
-function restoreHistoryItem(id) {
-    const history = getStoredHistory();
-    const item = history.find(x => x.id === id);
-    if (!item) return;
-
-    document.getElementById('studentName').value = item.studentName;
-    document.getElementById('testName').value = item.testName;
-    document.getElementById('totalQs').value = item.totalQs;
-    document.getElementById('maxMarks').value = item.maxMarks;
-    document.getElementById('attempted').value = item.attempted;
-    document.getElementById('wrong').value = item.wrong;
-
-    document.getElementById('score').innerText = item.finalScore;
-
-    toggleHistoryDrawer(false);
-    triggerSystemToastNotification(`Loaded assessment record for ${item.studentName}`, false);
-    executeCalculationSequence();
-}
-
-function deleteHistoryItem(id) {
-    let history = getStoredHistory();
-    history = history.filter(x => x.id !== id);
-    localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
-    renderHistoryVault(document.getElementById('historySearchInput').value);
-    triggerSystemToastNotification("Record removed from Vault.", false);
-}
-
-function clearAssessmentHistory() {
-    if (confirm("Purge all recorded assessment history from browser vault?")) {
-        localStorage.removeItem(E7_HISTORY_KEY);
-        renderHistoryVault();
-        triggerSystemToastNotification("Vault completely purged.", false);
-    }
-}
-
-function toggleFullReportModal(show) {
-    const modal = document.getElementById('fullReportModal');
-    const overlay = document.getElementById('fullReportOverlay');
-    if (show) { modal.classList.add('active'); overlay.classList.add('active'); }
-    else { modal.classList.remove('active'); overlay.classList.remove('active'); }
-}
-
-function generateAndShowFullHistoryReport() {
-    const history = getStoredHistory();
-    if (history.length === 0) {
-        triggerSystemToastNotification("Vault empty. Add tests to generate history analysis.");
-        return;
-    }
-
-    let totalTests = history.length;
-    let scores = history.map(h => parseFloat(h.finalScore));
-    let highest = Math.max(...scores);
-    let lowest = Math.min(...scores);
-    let avgScore = (scores.reduce((a, b) => a + b, 0) / totalTests).toFixed(2);
-    let avgAcc = (history.reduce((a, item) => a + parseFloat(item.accuracy || item.efficiency || 0), 0) / totalTests).toFixed(2);
-
-    let content = document.getElementById('fullReportContent');
-    content.innerHTML = `
-        <div class="full-report-section">
-            <h4><i class="fa-solid fa-chart-line"></i> Historical Executive Summary</h4>
-            <p>Over the past ${totalTests} recorded assessments, the student has maintained an average score of <strong>${avgScore}</strong> with an average efficiency/accuracy of <strong>${avgAcc}%</strong>.</p>
-            <p>The highest score achieved across all assessments is <strong>${highest}</strong>, with a lower baseline recorded at <strong>${lowest}</strong>.</p>
-        </div>
-        <div class="full-report-section">
-            <h4><i class="fa-solid fa-microchip"></i> Performance & Strategy Recommendations</h4>
-            <p>Assessment trends indicate periodic score fluctuations primarily influenced by incorrect attempts. To maximize total score consistency, it is recommended to restrict uncertain answers and adopt a selective attempt framework in high-penalty sections.</p>
-        </div>
-    `;
-
-    toggleFullReportModal(true);
-}
-
-function toggleCompareModal(show) {
-    const modal = document.getElementById('compareModal');
-    const overlay = document.getElementById('compareModalOverlay');
-    if (show) { modal.classList.add('active'); overlay.classList.add('active'); }
-    else { modal.classList.remove('active'); overlay.classList.remove('active'); }
-}
-
-function openCompareModalLauncher() {
+// ============================================================================
+// 11. COMPARISON & DETAILED REPORT MODALS
+// ============================================================================
+window.openComparisonModal = function() {
     const history = getStoredHistory();
     if (history.length < 2) {
-        triggerSystemToastNotification("At least 2 test entries required for comparison.");
+        triggerSystemToastNotification("At least 2 saved history records are required to compare.");
         return;
     }
 
-    const sel1 = document.getElementById('compareSelect1');
-    const sel2 = document.getElementById('compareSelect2');
-    sel1.innerHTML = ''; sel2.innerHTML = '';
+    const selA = document.getElementById('compareSelectA');
+    const selB = document.getElementById('compareSelectB');
 
-    history.forEach((h) => {
-        let opt1 = document.createElement('option');
-        opt1.value = h.id; opt1.text = `${h.testName} (${h.finalScore})`;
-        let opt2 = opt1.cloneNode(true);
-        
-        sel1.appendChild(opt1);
-        sel2.appendChild(opt2);
-    });
+    const optionsHTML = history.map((h, i) => `<option value="${h.id}">${h.studentName} - ${h.testName} (${h.finalScore})</option>`).join('');
+    selA.innerHTML = optionsHTML;
+    selB.innerHTML = optionsHTML;
 
-    sel2.selectedIndex = Math.min(1, history.length - 1);
-    renderComparisonView();
-    toggleCompareModal(true);
-}
+    if (history.length > 1) selB.selectedIndex = 1;
 
-function renderComparisonView() {
+    document.getElementById('compareModal').classList.add('active');
+    renderComparisonTable();
+};
+
+window.closeComparisonModal = function() {
+    document.getElementById('compareModal').classList.remove('active');
+};
+
+window.renderComparisonTable = function() {
+    const idA = document.getElementById('compareSelectA').value;
+    const idB = document.getElementById('compareSelectB').value;
     const history = getStoredHistory();
-    const id1 = document.getElementById('compareSelect1').value;
-    const id2 = document.getElementById('compareSelect2').value;
 
-    const t1 = history.find(x => x.id === id1);
-    const t2 = history.find(x => x.id === id2);
+    const recA = history.find(h => h.id === idA);
+    const recB = history.find(h => h.id === idB);
 
-    if (!t1 || !t2) return;
+    if (!recA || !recB) return;
 
-    let s1 = parseFloat(t1.finalScore);
-    let s2 = parseFloat(t2.finalScore);
-
-    const grid = document.getElementById('comparisonGrid');
-    grid.innerHTML = `
+    const wrapper = document.getElementById('comparisonTableWrapper');
+    wrapper.innerHTML = `
         <table class="comp-table">
             <thead>
                 <tr>
                     <th>Metric</th>
-                    <th>${t1.testName}</th>
-                    <th>${t2.testName}</th>
+                    <th>${recA.studentName} (${recA.testName})</th>
+                    <th>${recB.studentName} (${recB.testName})</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>Final Score</td>
-                    <td class="${s1 >= s2 ? 'comp-winner' : ''}">${t1.finalScore} / ${t1.maxMarks}</td>
-                    <td class="${s2 >= s1 ? 'comp-winner' : ''}">${t2.finalScore} / ${t2.maxMarks}</td>
+                    <td class="${parseFloat(recA.finalScore) >= parseFloat(recB.finalScore) ? 'comp-winner' : ''}">${recA.finalScore} / ${recA.maxMarks}</td>
+                    <td class="${parseFloat(recB.finalScore) >= parseFloat(recA.finalScore) ? 'comp-winner' : ''}">${recB.finalScore} / ${recB.maxMarks}</td>
                 </tr>
                 <tr>
                     <td>Efficiency</td>
-                    <td>${t1.efficiency}%</td>
-                    <td>${t2.efficiency}%</td>
+                    <td class="${parseFloat(recA.efficiency) >= parseFloat(recB.efficiency) ? 'comp-winner' : ''}">${recA.efficiency}%</td>
+                    <td class="${parseFloat(recB.efficiency) >= parseFloat(recA.efficiency) ? 'comp-winner' : ''}">${recB.efficiency}%</td>
                 </tr>
                 <tr>
-                    <td>Attempts / Wrong</td>
-                    <td>${t1.attempted} / ${t1.wrong}</td>
-                    <td>${t2.attempted} / ${t2.wrong}</td>
+                    <td>Accuracy</td>
+                    <td class="${parseFloat(recA.accuracy) >= parseFloat(recB.accuracy) ? 'comp-winner' : ''}">${recA.accuracy}%</td>
+                    <td class="${parseFloat(recB.accuracy) >= parseFloat(recA.accuracy) ? 'comp-winner' : ''}">${recB.accuracy}%</td>
+                </tr>
+                <tr>
+                    <td>Incorrect Answers</td>
+                    <td>${recA.fullData.wrong}</td>
+                    <td>${recB.fullData.wrong}</td>
                 </tr>
             </tbody>
         </table>
     `;
-}
+};
 
-function escapeHtml(str) {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-}
+window.viewDetailedReportModal = function(id) {
+    const history = getStoredHistory();
+    const item = history.find(h => h.id === id);
+    if (!item) return;
+
+    const modalContent = document.getElementById('fullReportModalContent');
+    const data = item.fullData;
+
+    modalContent.innerHTML = `
+        <div class="full-report-section">
+            <h4><i class="fa-solid fa-user"></i> Assessment Info</h4>
+            <p><strong>Candidate:</strong> ${item.studentName}</p>
+            <p><strong>Test:</strong> ${item.testName}</p>
+            <p><strong>Profile:</strong> ${item.profile.toUpperCase()}</p>
+            <p><strong>Date:</strong> ${item.timestamp}</p>
+        </div>
+
+        <div class="full-report-section">
+            <h4><i class="fa-solid fa-chart-pie"></i> Metrics Breakdown</h4>
+            <p><strong>Score:</strong> ${item.finalScore} / ${item.maxMarks}</p>
+            <p><strong>Efficiency:</strong> ${item.efficiency}%</p>
+            <p><strong>Accuracy:</strong> ${item.accuracy}%</p>
+            <p><strong>Penalty Loss:</strong> -${data.totalPenalty.toFixed(2)} Marks</p>
+            <p><strong>Correct:</strong> ${data.correct} | <strong>Wrong:</strong> ${data.wrong} | <strong>Skipped:</strong> ${data.unattempted}</p>
+        </div>
+    `;
+
+    document.getElementById('fullReportModal').classList.add('active');
+};
+
+window.closeFullReportModal = function() {
+    document.getElementById('fullReportModal').classList.remove('active');
+};
