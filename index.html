@@ -2,298 +2,357 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECLIPSE7 - Advanced Assessment & Analytics Engine</title>
     
-    <title>ECLIPSE7 AI Exam Performance Analytics Engine</title>
-    <meta name="description" content="AI-Powered Exam Performance Analytics Engine & Rank Predictor by Eclipse7. Created by Saiprasad Barure.">
-    <link rel="icon" type="image/x-icon" href="logo.ico">
-
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- External Dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- jsPDF & AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+    
+    <!-- Custom CSS File -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- TOP NAVIGATION BAR -->
-<nav class="top-nav-bar">
-    <button id="menu-toggle-btn" class="nav-icon-btn" onclick="toggleHistoryDrawer(true)" aria-label="Open History">
-        <i class="fa-solid fa-bars"></i>
-        <span class="nav-history-badge" id="navHistoryCounter">0</span>
-    </button>
-
-    <div class="nav-brand-title"></div>
-
-    <div class="profile-container-wrapper">
-        <div id="auth-container" class="profile-pill" onclick="handleProfileTap()">
-            <div id="default-profile" class="profile-state">
-                <i class="fa-solid fa-circle-user profile-icon"></i>
-            </div>
-
-            <div id="user-profile" class="profile-state hidden">
-                <img id="user-avatar" class="avatar-img" src="" alt="Profile" />
-                <span id="user-name" class="user-display-name"></span>
-            </div>
-        </div>
-
-        <div id="signin-tooltip" class="signin-tooltip">
-            <i class="fa-solid fa-sparkles text-purple"></i>
-            <span>Sign in recommended for a better experience across all devices.</span>
-            <button class="tooltip-close" onclick="closeTooltip(event)"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-    </div>
-</nav>
-
-<div class="fluent-ambient-canvas">
-    <div class="ambient-fluid-orb orb-alpha"></div>
-    <div class="ambient-fluid-orb orb-beta"></div>
-    <div class="ambient-fluid-orb orb-gamma"></div>
-</div>
-
-<div class="soft-glass-container" id="mainAppContainer">
-    <div id="systemNotification" class="fluent-toast">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span id="notificationMessage">Validation Token Uninitialized.</span>
+    <!-- Ambient Dynamic Glow Background Canvas -->
+    <div class="fluent-ambient-canvas">
+        <div class="ambient-fluid-orb orb-alpha"></div>
+        <div class="ambient-fluid-orb orb-beta"></div>
+        <div class="ambient-fluid-orb orb-gamma"></div>
     </div>
 
-    <header class="app-header">
-        <div class="header-top-bar" style="justify-content: center;">
-            <div class="fluent-badge">Eclipse7 AI v7.0</div>
-        </div>
-        <h1>Negative Marking Engine</h1>
-    
-        <div class="meta-branding-container">
-            <p class="platform-title-meta">ECLIPSE7 FLUID EVALUATION PLATFORM</p>
-            <p class="author-attribution-meta">By Saiprasad Barure</p>
-        </div>
-    </header>
-
-    <form id="evaluationForm" onsubmit="event.preventDefault();">
+    <!-- MAIN CONTAINER -->
+    <main class="soft-glass-container" id="mainAppContainer">
         
-        <div class="input-field-group">
-            <label class="soft-field-label">Student Name <span class="req-star">*</span></label>
-            <div class="fluent-input-wrapper">
-                <i class="fa-solid fa-fingerprint input-field-icon"></i>
-                <input type="text" id="studentName" placeholder="Enter student identity" required autocomplete="off">
-            </div>
+        <!-- System Toast Notification Box -->
+        <div id="systemNotification" class="fluent-toast">
+            <i class="fa-solid fa-circle-info"></i>
+            <span id="notificationMessage">System Ready</span>
         </div>
 
-        <div class="input-field-group">
-            <label class="soft-field-label">Assessment Name <span class="req-star">*</span></label>
-            <div class="fluent-input-wrapper">
-                <i class="fa-solid fa-hashtag input-field-icon"></i>
-                <input type="text" id="testName" placeholder="(e.g., JEE Main Major, NEET Jumbo)" required autocomplete="off">
+        <!-- INTEGRATED NAVIGATION & USER PROFILE HEADER -->
+        <nav class="top-nav-bar">
+            <!-- Brand Badge -->
+            <div class="nav-brand-title">
+                <i class="fa-solid fa-bolt text-purple"></i> ECLIPSE7
             </div>
-        </div>
 
-        <div class="input-field-group">
-            <label class="soft-field-label">Smart Curriculum Profile <span class="req-star">*</span></label>
-            <div class="custom-select-box" id="examProfileSelectContainer">
-                <div class="select-box-trigger" id="examProfileLabel">CUSTOM MODE (MANUAL OVERRIDE)</div>
-                <div class="select-box-dropdown" id="examProfileOptions">
-                    <div class="select-box-option" data-value="custom">CUSTOM MODE (MANUAL OVERRIDE)</div>
-                    <div class="select-box-option" data-value="jeemain">JEE MAIN PROFILE</div>
-                    <div class="select-box-option" data-value="jeeadv">JEE ADVANCED PROFILE</div>
-                    <div class="select-box-option" data-value="neet">NEET UG PROFILE</div>
+            <!-- Integrated Control Group: History Drawer Trigger + User Profile Pill -->
+            <div class="nav-controls-group">
+                <!-- History Drawer Trigger Button -->
+                <button class="nav-icon-btn" id="historyDrawerBtn" onclick="toggleHistoryDrawer()" title="View Assessment Vault">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span class="nav-history-badge" id="historyBadgeCount">0</span>
+                </button>
+
+                <!-- Dynamic User Profile Container -->
+                <div class="profile-container-wrapper">
+                    <div class="profile-pill" onclick="handleProfileTap()">
+                        <div class="profile-state" id="userProfileState">
+                            <i class="fa-solid fa-circle-user profile-icon"></i>
+                            <span class="user-display-name">Sign In</span>
+                        </div>
+                    </div>
+
+                    <!-- Sign In Tooltip -->
+                    <div id="signin-tooltip" class="signin-tooltip">
+                        <i class="fa-solid fa-sparkles text-purple"></i>
+                        <span>Sign in to sync your score metrics to your cloud account!</span>
+                        <button class="tooltip-close" onclick="closeTooltip(event)"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
                 </div>
-                <input type="hidden" id="examProfile" value="custom" required>
             </div>
-        </div>
+        </nav>
 
-        <div class="fluent-layout-row">
-            <div class="input-field-group">
-                <label class="soft-field-label">Total Questions <span class="req-star">*</span></label>
-                <input type="number" id="totalQs" placeholder="0" min="1" inputmode="numeric" pattern="[0-9]*" required>
+        <!-- APP HEADER SECTION -->
+        <header class="app-header">
+            <div class="header-top-bar">
+                <span class="fluent-badge"><i class="fa-solid fa-shield-halved"></i> PERFORMANCE ENGINE v7.0</span>
             </div>
-            <div class="input-field-group">
-                <label class="soft-field-label">Max Marks <span class="req-star">*</span></label>
-                <input type="number" id="maxMarks" placeholder="0" min="1" inputmode="numeric" pattern="[0-9]*" required>
+            <h1>Negative Marking Engine</h1>
+            <div class="meta-branding-container">
+                <p class="platform-title-meta">ECLIPSE7 METRIC LABORATORY</p>
+                <p class="author-attribution-meta">FOUNDER: SAIPRASAD BARURE</p>
             </div>
-        </div>
+        </header>
 
-        <div class="fluent-layout-row">
-            <div class="input-field-group">
-                <label class="soft-field-label">Total Attempts <span class="req-star">*</span></label>
-                <input type="number" id="attempted" placeholder="0" min="0" inputmode="numeric" pattern="[0-9]*" required>
-            </div>
-            <div class="input-field-group">
-                <label class="soft-field-label">Incorrect <span class="req-star">*</span></label>
-                <input type="number" id="wrong" placeholder="0" min="0" inputmode="numeric" pattern="[0-9]*" required>
-            </div>
-        </div>
-
-        <div class="fluent-layout-row dropdown-adjustment">
-            <div class="custom-select-box" id="ratioSelectContainer">
-                <label class="soft-field-label">Negative Ratio <span class="req-star">*</span></label>
-                <div class="select-box-trigger" id="ratioLabel">Ratio: 1/4</div>
-                <div class="select-box-dropdown" id="ratioOptions">
-                    <div class="select-box-option" data-value="0.25">1/4 Ratio</div>
-                    <div class="select-box-option" data-value="0.333333">1/3 Ratio</div>
-                    <div class="select-box-option" data-value="0.5">1/2 Ratio</div>
-                    <div class="select-box-option" data-value="0">No Penalty</div>
-                </div>
-                <input type="hidden" id="markingRatio" value="0.25" required>
-            </div>
-
-            <div class="custom-select-box" id="customSelect">
-                <label class="soft-field-label">Analytics Mode <span class="req-star">*</span></label>
-                <div class="select-box-trigger" id="selectedLabel">OVERALL MODE</div>
-                <div class="select-box-dropdown" id="selectOptions">
-                    <div class="select-box-option" data-value="overall">OVERALL MODE</div>
-                    <div class="select-box-option" data-value="subjectwise">SUBJECT BREAKDOWN</div>
-                </div>
-                <input type="hidden" id="reportType" value="overall" required>
-            </div>
-        </div>
-
-        <div id="subjectSection" class="subject-breakdown-wrapper">
-            <div class="mandatory-input-notice-bar">
-                <i class="fa-solid fa-circle-info"></i>
-                <span><strong>Subject Matrix Mode:</strong> Provide values per subject section. Scores calculated automatically according to Standard evaluation rules.</span>
-            </div>
-
-            <div class="subject-grid-layout-header">
-                <span>TOTAL Q.</span>
-                <span>CORRECT</span>
-                <span>WRONG</span>
-                <span>NOT ATTM</span>
-            </div>
-             
-            <!-- Physics -->
-            <div class="subject-header-bar">
-                <span class="sub-identity-lbl">PHYSICS</span>
-                <span class="subject-score-chip" id="phyScoreChip">Score: 0.00 / 100</span>
-            </div>
-            <div class="subject-grid-row" data-subject="phy">
-                <input type="number" id="phyA" placeholder="0" class="sub-input sub-tot" min="0" inputmode="numeric" pattern="[0-9]*">
-                <input type="number" id="phyC" placeholder="0" class="sub-input sub-cor" min="0" inputmode="numeric" pattern="[0-9]*">
-                <input type="number" id="phyW" placeholder="0" class="sub-input sub-wro" min="0" inputmode="numeric" pattern="[0-9]*">
-                <input type="number" id="phyN" placeholder="0" class="sub-input sub-not" min="0" inputmode="numeric" pattern="[0-9]*">
-            </div>
-
-            <!-- Chemistry -->
-            <div class="subject-header-bar">
-                <span class="sub-identity-lbl">CHEMISTRY</span>
-                <span class="subject-score-chip" id="chemScoreChip">Score: 0.00 / 100</span>
-            </div>
-            <div class="subject-grid-row" data-subject="chem">
-                <input type="number" id="chemA" placeholder="0" class="sub-input sub-tot" min="0" inputmode="numeric" pattern="[0-9]*">
-                <input type="number" id="chemC" placeholder="0" class="sub-input sub-cor" min="0" inputmode="numeric" pattern="[0-9]*">
-                <input type="number" id="chemW" placeholder="0" class="sub-input sub-wro" min="0" inputmode="numeric" pattern="[0-9]*">
-                <input type="number" id="chemN" placeholder="0" class="sub-input sub-not" min="0" inputmode="numeric" pattern="[0-9]*">
-            </div>
-
-            <!-- Math/Bio -->
-            <div class="subject-header-bar">
-                <span class="sub-identity-lbl" id="mathBioLabel">MATHEMATICS</span>
-                <span class="subject-score-chip" id="mathBioScoreChip">Score: 0.00 / 100</span>
-            </div>
-            <div class="subject-grid-row" data-subject="mathBio">
-                <input type="number" id="mathBioA" placeholder="0" class="sub-input sub-tot" min="0" inputmode="numeric" pattern="[0-9]*">
-                <input type="number" id="mathBioC" placeholder="0" class="sub-input sub-cor" min="0" inputmode="numeric" pattern="[0-9]*">
-                <input type="number" id="mathBioW" placeholder="0" class="sub-input sub-wro" min="0" inputmode="numeric" pattern="[0-9]*">
-                <input type="number" id="mathBioN" placeholder="0" class="sub-input sub-not" min="0" inputmode="numeric" pattern="[0-9]*">
-            </div>
+        <!-- INPUT FORM & CONTROL PANEL -->
+        <form id="assessmentForm" onsubmit="event.preventDefault(); executeCalculationSequence();">
             
-            <div class="quantum-intel-status">
-                <i class="fa-solid fa-microchip"></i> 
-                <span id="intelMessage">Quantum cross-input synchronization layer active.</span>
+            <!-- Student & Test Name Row -->
+            <div class="fluent-layout-row">
+                <div class="input-field-group">
+                    <label class="soft-field-label">STUDENT NAME <span class="req-star">*</span></label>
+                    <div class="fluent-input-wrapper">
+                        <i class="fa-solid fa-user-graduate input-field-icon"></i>
+                        <input type="text" id="studentName" placeholder="Enter full name" required>
+                    </div>
+                </div>
+
+                <div class="input-field-group">
+                    <label class="soft-field-label">ASSESSMENT TITLE <span class="req-star">*</span></label>
+                    <div class="fluent-input-wrapper">
+                        <i class="fa-solid fa-file-signature input-field-icon"></i>
+                        <input type="text" id="testName" placeholder="e.g., JEE Grand Test 01" required>
+                    </div>
+                </div>
             </div>
+
+            <!-- Exam Profile Dropdown -->
+            <div class="input-field-group dropdown-adjustment">
+                <label class="soft-field-label">EXAM CURRICULUM PROFILE</label>
+                <div class="custom-select-box" id="examProfileSelectContainer">
+                    <div class="select-box-trigger" id="examProfileLabel">JEE MAIN PROFILE</div>
+                    <div class="select-box-dropdown" id="examProfileOptions">
+                        <div class="select-box-option" data-value="jeemain">JEE MAIN PROFILE</div>
+                        <div class="select-box-option" data-value="jeeadv">JEE ADVANCED PROFILE</div>
+                        <div class="select-box-option" data-value="neet">NEET UG PROFILE</div>
+                        <div class="select-box-option" data-value="custom">CUSTOM MODE (MANUAL OVERRIDE)</div>
+                    </div>
+                </div>
+                <input type="hidden" id="examProfile" value="jeemain">
+            </div>
+
+            <!-- Report Layout & Marking Ratio Dropdown Row -->
+            <div class="fluent-layout-row">
+                <div class="input-field-group dropdown-adjustment">
+                    <label class="soft-field-label">REPORT BREAKDOWN MODE</label>
+                    <div class="custom-select-box" id="customSelect">
+                        <div class="select-box-trigger" id="selectedLabel">Overall Aggregate</div>
+                        <div class="select-box-dropdown" id="selectOptions">
+                            <div class="select-box-option" data-value="overall">Overall Aggregate</div>
+                            <div class="select-box-option" data-value="subjectwise">Subject-wise Breakdown</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="reportType" value="overall">
+                </div>
+
+                <div class="input-field-group dropdown-adjustment">
+                    <label class="soft-field-label">PENALTY MARKING RATIO</label>
+                    <div class="custom-select-box" id="ratioSelectContainer">
+                        <div class="select-box-trigger" id="ratioLabel">Ratio: 1/4</div>
+                        <div class="select-box-dropdown" id="ratioOptions">
+                            <div class="select-box-option" data-value="0.25">Ratio: 1/4 (-0.25x Penalty)</div>
+                            <div class="select-box-option" data-value="0.333">Ratio: 1/3 (-0.33x Penalty)</div>
+                            <div class="select-box-option" data-value="0.5">Ratio: 1/2 (-0.50x Penalty)</div>
+                            <div class="select-box-option" data-value="1.0">Ratio: 1/1 (-1.00x Penalty)</div>
+                            <div class="select-box-option" data-value="0.0">Ratio: 0/1 (No Penalty)</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="markingRatio" value="0.25">
+                </div>
+            </div>
+
+            <!-- Main Aggregate Inputs Row -->
+            <div class="fluent-layout-row">
+                <div class="input-field-group">
+                    <label class="soft-field-label">TOTAL QUESTIONS <span class="req-star">*</span></label>
+                    <div class="fluent-input-wrapper">
+                        <i class="fa-solid fa-list-ol input-field-icon"></i>
+                        <input type="number" id="totalQs" placeholder="75" min="1" class="profile-locked-row" required>
+                    </div>
+                </div>
+
+                <div class="input-field-group">
+                    <label class="soft-field-label">MAX MARKS <span class="req-star">*</span></label>
+                    <div class="fluent-input-wrapper">
+                        <i class="fa-solid fa-award input-field-icon"></i>
+                        <input type="number" id="maxMarks" placeholder="300" min="1" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fluent-layout-row">
+                <div class="input-field-group">
+                    <label class="soft-field-label">ATTEMPTED QUESTIONS <span class="req-star">*</span></label>
+                    <div class="fluent-input-wrapper">
+                        <i class="fa-solid fa-pen-to-square input-field-icon"></i>
+                        <input type="number" id="attempted" placeholder="0" min="0" required>
+                    </div>
+                </div>
+
+                <div class="input-field-group">
+                    <label class="soft-field-label">INCORRECT ANSWERS <span class="req-star">*</span></label>
+                    <div class="fluent-input-wrapper">
+                        <i class="fa-solid fa-circle-xmark input-field-icon"></i>
+                        <input type="number" id="wrong" placeholder="0" min="0" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBJECT-WISE EXPANDABLE COLLAPSIBLE SECTION -->
+            <div id="subjectSection" class="subject-breakdown-wrapper">
+                <div class="mandatory-input-notice-bar">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Fill total attempts and incorrect counts per subject. Unattempted/Correct values auto-solve reactively.</span>
+                </div>
+
+                <div class="subject-grid-layout-header">
+                    <span>TOTAL</span>
+                    <span>CORRECT</span>
+                    <span>WRONG</span>
+                    <span>SKIPPED</span>
+                </div>
+
+                <!-- Physics Section -->
+                <div class="subject-header-bar">
+                    <span class="sub-identity-lbl"><i class="fa-solid fa-atom text-purple"></i> PHYSICS</span>
+                    <span class="subject-score-chip" id="phyScoreChip">Score: 0.00 / 100</span>
+                </div>
+                <div class="subject-grid-row" data-subject="phy">
+                    <input type="number" id="phyA" placeholder="Total" class="sub-input">
+                    <input type="number" id="phyC" placeholder="Correct" class="sub-input text-emerald">
+                    <input type="number" id="phyW" placeholder="Wrong" class="sub-input text-rose">
+                    <input type="number" id="phyN" placeholder="Skipped" class="sub-input text-blue">
+                </div>
+
+                <!-- Chemistry Section -->
+                <div class="subject-header-bar">
+                    <span class="sub-identity-lbl"><i class="fa-solid fa-flask text-blue"></i> CHEMISTRY</span>
+                    <span class="subject-score-chip" id="chemScoreChip">Score: 0.00 / 100</span>
+                </div>
+                <div class="subject-grid-row" data-subject="chem">
+                    <input type="number" id="chemA" placeholder="Total" class="sub-input">
+                    <input type="number" id="chemC" placeholder="Correct" class="sub-input text-emerald">
+                    <input type="number" id="chemW" placeholder="Wrong" class="sub-input text-rose">
+                    <input type="number" id="chemN" placeholder="Skipped" class="sub-input text-blue">
+                </div>
+
+                <!-- Mathematics / Biology Section -->
+                <div class="subject-header-bar">
+                    <span class="sub-identity-lbl"><i class="fa-solid fa-calculator text-emerald"></i> <span id="mathBioLabel">MATHEMATICS</span></span>
+                    <span class="subject-score-chip" id="mathBioScoreChip">Score: 0.00 / 100</span>
+                </div>
+                <div class="subject-grid-row" data-subject="mathBio">
+                    <input type="number" id="mathBioA" placeholder="Total" class="sub-input">
+                    <input type="number" id="mathBioC" placeholder="Correct" class="sub-input text-emerald">
+                    <input type="number" id="mathBioW" placeholder="Wrong" class="sub-input text-rose">
+                    <input type="number" id="mathBioN" placeholder="Skipped" class="sub-input text-blue">
+                </div>
+
+                <div class="quantum-intel-status">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span id="intelMessage">Curriculum: JEE Main mapped. [25 Q / 100 Marks per Subject]. Matrix +4 / -1.</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <button type="button" class="fluent-btn btn-primary-gradient" onclick="executeCalculationSequence()">
+                <i class="fa-solid fa-calculator"></i> CALCULATE PERFORMANCE METRICS
+            </button>
+        </form>
+
+        <!-- SCORE HERO DISPLAY DISPLAY -->
+        <div class="fluent-score-hero-display" id="scoreDisplayCard">
+            <span class="score-hero-title">FINAL CALCULATED NET SCORE</span>
+            <div class="score-hero-val" id="score">0.00</div>
         </div>
 
-        <button type="button" onclick="executeCalculationSequence()" class="fluent-btn btn-primary-gradient">
-            <span>Compute Assessment Metrics</span>
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </button>
-
-        <div class="fluent-score-hero-display">
-            <label class="score-hero-title">CALCULATED SCORE</label>
-            <div id="score" class="score-hero-val">0.00</div>
-            <div class="fluent-wave-shimmer"></div>
-        </div>
-
-        <div id="analyticsDashboardContainer" class="analytics-dashboard-wrap hidden">
+        <!-- ANALYTICS DASHBOARD CONTAINER -->
+        <div id="analyticsDashboardContainer" class="hidden">
             
-            <div class="dash-section-title"><i class="fa-solid fa-chart-pie"></i> Performance Analytics Matrix</div>
+            <div class="dash-section-title">
+                <i class="fa-solid fa-chart-line text-purple"></i> METRIC SUMMARY & ACCURACY METRICS
+            </div>
+
             <div class="dashboard-grid">
                 <div class="dash-card">
-                    <span class="dash-lbl">Grade</span>
-                    <span class="dash-val grade-badge" id="dashGrade">--</span>
+                    <span class="dash-lbl">ACCURACY</span>
+                    <span class="dash-val text-emerald" id="dashAccuracy">0%</span>
                 </div>
                 <div class="dash-card">
-                    <span class="dash-lbl">Accuracy</span>
-                    <span class="dash-val" id="dashAccuracy">0%</span>
+                    <span class="dash-lbl">EFFICIENCY</span>
+                    <span class="dash-val text-blue" id="dashEfficiency">0%</span>
                 </div>
                 <div class="dash-card">
-                    <span class="dash-lbl">Efficiency</span>
-                    <span class="dash-val" id="dashEfficiency">0%</span>
+                    <span class="dash-lbl">GRADE</span>
+                    <span class="dash-val-sub grade-badge" id="dashGrade">N/A</span>
                 </div>
                 <div class="dash-card">
-                    <span class="dash-lbl">Penalty Marks</span>
+                    <span class="dash-lbl">CORRECT</span>
+                    <span class="dash-val text-emerald" id="dashCorrect">0</span>
+                </div>
+                <div class="dash-card">
+                    <span class="dash-lbl">WRONG</span>
+                    <span class="dash-val text-rose" id="dashWrong">0</span>
+                </div>
+                <div class="dash-card">
+                    <span class="dash-lbl">SKIPPED</span>
+                    <span class="dash-val text-muted" id="dashSkipped">0</span>
+                </div>
+                <div class="dash-card">
+                    <span class="dash-lbl">PENALTY DEDUCTION</span>
                     <span class="dash-val text-rose" id="dashPenalty">0.00</span>
                 </div>
-                <div class="dash-card">
-                    <span class="dash-lbl">Correct / Wrong</span>
-                    <span class="dash-val-sub"><span id="dashCorrect" class="text-emerald">0</span> / <span id="dashWrong" class="text-rose">0</span></span>
-                </div>
-                <div class="dash-card">
-                    <span class="dash-lbl">Skipped</span>
-                    <span class="dash-val" id="dashSkipped">0</span>
-                </div>
-                <div class="dash-card">
-                    <span class="dash-lbl">Risk Index</span>
-                    <span class="dash-val" id="dashRiskIndex">Low</span>
+                <div class="dash-card" style="grid-column: span 2;">
+                    <span class="dash-lbl">RISK INDEX</span>
+                    <span class="dash-val text-purple" id="dashRiskIndex">Low</span>
                 </div>
             </div>
 
+            <!-- AI SMART RANK & PERCENTILE PREDICTION -->
             <div class="prediction-card">
                 <div class="prediction-header">
-                    <i class="fa-solid fa-ranking-star"></i> AI Smart Rank & Percentile Predictor
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI SMART RANK & PERCENTILE PREDICTOR
                 </div>
                 <div class="prediction-grid">
                     <div class="pred-item">
-                        <span class="pred-label">Est. Percentile</span>
-                        <span class="pred-value text-purple" id="predPercentile">--</span>
+                        <span class="pred-label">ESTIMATED PERCENTILE</span>
+                        <span class="pred-value text-blue" id="predPercentile">0.00%</span>
                     </div>
                     <div class="pred-item">
-                        <span class="pred-label">Est. AIR Rank</span>
-                        <span class="pred-value text-blue" id="predRank">--</span>
+                        <span class="pred-label">ESTIMATED AIR RANK</span>
+                        <span class="pred-value text-purple" id="predRank">0</span>
                     </div>
                     <div class="pred-item">
-                        <span class="pred-label">Performance Band</span>
-                        <span class="pred-value" id="predBand">--</span>
+                        <span class="pred-label">PERFORMANCE BAND</span>
+                        <span class="pred-value text-emerald" id="predBand">Developing</span>
                     </div>
                     <div class="pred-item">
-                        <span class="pred-label">Competition Level</span>
-                        <span class="pred-value" id="predCompetition">--</span>
+                        <span class="pred-label">COMPETITION BAND</span>
+                        <span class="pred-value" id="predCompetition">Top 50%</span>
                     </div>
                 </div>
             </div>
 
+            <!-- AI PERFORMANCE DIAGNOSTIC REPORT -->
             <div class="ai-report-box">
                 <div class="ai-report-header">
-                    <i class="fa-solid fa-brain"></i> AI Performance Diagnostic Report
+                    <i class="fa-solid fa-brain"></i> AI PERFORMANCE DIAGNOSTIC
                 </div>
                 <div class="ai-report-content" id="aiReportContent">
-                    Run calculations to generate diagnostic metrics.
+                    Generating intelligence report...
                 </div>
             </div>
 
+            <!-- HISTORICAL INSIGHT ENGINE -->
             <div class="insight-engine-box">
-                <div class="insight-header"><i class="fa-solid fa-lightbulb"></i> Historical Insight Engine</div>
+                <div class="insight-header">
+                    <i class="fa-solid fa-lightbulb"></i> HISTORICAL INSIGHTS & TRENDS
+                </div>
                 <ul class="insight-list" id="insightList">
-                    <li>Log multiple assessments to activate trend cross-referencing.</li>
+                    <li>No comparative data logged yet.</li>
                 </ul>
             </div>
 
+            <!-- VISUAL ANALYTICS CHARTS -->
             <div class="charts-wrapper">
                 <div class="chart-card">
                     <canvas id="currentBreakdownChart"></canvas>
@@ -303,244 +362,118 @@
                 </div>
             </div>
 
+            <!-- EXPORT ACTIONS PANEL -->
             <div class="export-actions-grid">
-                <button type="button" onclick="downloadPDFReportSequence()" class="fluent-btn btn-secondary-frosted">
-                    <i class="fa-solid fa-file-pdf"></i> Current PDF
+                <button type="button" class="fluent-btn btn-primary-gradient" onclick="downloadPDFReportSequence()">
+                    <i class="fa-solid fa-file-pdf"></i> DOWNLOAD PDF REPORT
                 </button>
-                <button type="button" onclick="exportCurrentPNG()" class="fluent-btn btn-secondary-frosted">
-                    <i class="fa-solid fa-file-image"></i> Current PNG
+                <button type="button" class="fluent-btn btn-secondary-frosted" onclick="triggerShareMenu()">
+                    <i class="fa-solid fa-share-nodes"></i> SHARE RESULT
                 </button>
-                <button type="button" onclick="exportCurrentJSON()" class="fluent-btn btn-secondary-frosted">
-                    <i class="fa-solid fa-code"></i> Current JSON
+                <button type="button" class="fluent-btn btn-secondary-frosted" onclick="exportCurrentPNG()">
+                    <i class="fa-solid fa-image"></i> EXPORT IMAGE (PNG)
                 </button>
-                <button type="button" onclick="triggerShareMenu()" class="fluent-btn btn-primary-gradient">
-                    <i class="fa-solid fa-share-nodes"></i> Share Result
+                <button type="button" class="fluent-btn btn-secondary-frosted" onclick="exportCurrentJSON()">
+                    <i class="fa-solid fa-code"></i> EXPORT JSON DATA
                 </button>
             </div>
+
         </div>
-    </form>
 
-    <footer class="fluent-footer">
-        <span class="secure-badge">
-            <i class="fa-solid fa-shield-halved"></i> YOUR DATA IS 100% PRIVATE:
-        </span> 
-        All marks are calculated instantly inside your device's browser. No data is saved or tracked. Built by <b>Saiprasad Barure / Prasad Reddy</b>.
-    </footer>
-</div>
+        <!-- FOOTER branding -->
+        <footer class="fluent-footer">
+            <div class="secure-badge">
+                <i class="fa-solid fa-shield-check"></i> ECLIPSE7 INTEGRITY MATRIX VERIFIED
+            </div>
+            <p>© 2026 ECLIPSE7 Performance Laboratory. All Rights Reserved.</p>
+        </footer>
 
-<div class="drawer-overlay" id="compareModalOverlay" onclick="toggleCompareModal(false)"></div>
-<div class="compare-modal" id="compareModal">
-    <div class="drawer-header">
-        <div class="drawer-title">
-            <i class="fa-solid fa-code-compare text-cyan"></i>
-            <h3>Assessment Comparison Engine</h3>
-        </div>
-        <button class="drawer-close-btn" onclick="toggleCompareModal(false)">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    </div>
-    <div class="compare-selection-row">
-        <select id="compareSelect1" class="compare-dropdown" onchange="renderComparisonView()"></select>
-        <span class="vs-badge">VS</span>
-        <select id="compareSelect2" class="compare-dropdown" onchange="renderComparisonView()"></select>
-    </div>
-    <div id="comparisonGrid" class="comparison-grid-container">
-    </div>
-</div>
+    </main>
 
-<div class="drawer-overlay" id="drawerOverlay" onclick="toggleHistoryDrawer(false)"></div>
-<aside class="history-drawer" id="historyDrawer">
-    <div class="drawer-header">
-        <div class="drawer-title">
-            <i class="fa-solid fa-box-archive text-cyan"></i>
-            <h3>Assessment Vault</h3>
-        </div>
-        <button class="drawer-close-btn" onclick="toggleHistoryDrawer(false)">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    </div>
-
-    <div id="history-onboarding-banner" class="history-onboarding-banner">
-        <i class="fa-solid fa-lightbulb"></i>
-        <span>This is your assessment history vault. Your test scores are saved directly in your browser's local cache.</span>
-    </div>
-
-    <div class="drawer-search-bar">
-        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="text" id="historySearchInput" placeholder="Filter candidate or test name..." oninput="filterHistoryList()">
-    </div>
-
-    <div class="drawer-actions-stack">
-        <button type="button" class="fluent-btn btn-primary-gradient drawer-action-btn" onclick="generateAndShowFullHistoryReport()">
-            <i class="fa-solid fa-chart-line"></i> Generate Complete Report
-        </button>
-        <div class="drawer-sub-actions">
-            <button type="button" class="history-ctrl-btn" onclick="downloadCompleteHistoryPDF()">
-                <i class="fa-solid fa-file-pdf"></i> History PDF
-            </button>
-            <button type="button" class="history-ctrl-btn" onclick="exportHistoryJSON()">
-                <i class="fa-solid fa-file-code"></i> JSON
-            </button>
-            <button type="button" class="history-ctrl-btn" onclick="exportHistoryCSV()">
-                <i class="fa-solid fa-file-csv"></i> CSV
-            </button>
-            <button type="button" class="history-ctrl-btn" onclick="openCompareModalLauncher()">
-                <i class="fa-solid fa-code-compare"></i> Compare
-            </button>
-        </div>
-    </div>
-
-    <div class="drawer-actions">
-        <span class="history-total-lbl" id="historyTotalText">0 Records Stored</span>
-        <button type="button" class="clear-all-btn" onclick="clearAssessmentHistory()">
-            <i class="fa-solid fa-trash-can"></i> Purge Vault
-        </button>
-    </div>
-
-    <div class="history-list-scroll" id="historyListContainer">
-    </div>
-</aside>
-
-<div class="drawer-overlay" id="fullReportOverlay" onclick="toggleFullReportModal(false)"></div>
-<div class="full-report-modal" id="fullReportModal">
-    <div class="drawer-header">
-        <div class="drawer-title">
-            <i class="fa-solid fa-graduation-cap text-cyan"></i>
-            <h3>ECLIPSE7 Full History AI Analytics Report</h3>
-        </div>
-        <button class="drawer-close-btn" onclick="toggleFullReportModal(false)">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    </div>
+    <!-- ASSESSMENT HISTORY DRAWER OVERLAY & PANEL -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleHistoryDrawer()"></div>
     
-    <div id="fullReportContent" class="full-report-scroll-body">
+    <aside class="history-drawer" id="historyDrawer">
+        <div class="drawer-header">
+            <div class="drawer-title">
+                <i class="fa-solid fa-clock-rotate-left text-purple"></i>
+                <h3>ASSESSMENT VAULT</h3>
+            </div>
+            <button class="drawer-close-btn" onclick="toggleHistoryDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="history-onboarding-banner">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Local & Cloud Assessment History stored seamlessly in your Vault.</span>
+        </div>
+
+        <div class="drawer-search-bar">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="historySearchInput" placeholder="Filter candidate or test name..." oninput="filterHistoryVaultList()">
+        </div>
+
+        <div class="drawer-actions-stack">
+            <button type="button" class="fluent-btn btn-primary-gradient drawer-action-btn" onclick="downloadCompleteHistoryPDF()">
+                <i class="fa-solid fa-file-pdf"></i> EXPORT COMPLETE HISTORY PDF
+            </button>
+            <div class="drawer-sub-actions">
+                <button type="button" class="history-ctrl-btn" onclick="exportHistoryCSV()"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                <button type="button" class="history-ctrl-btn" onclick="exportHistoryJSON()"><i class="fa-solid fa-file-code"></i> JSON</button>
+                <button type="button" class="history-ctrl-btn" onclick="openComparisonModal()"><i class="fa-solid fa-code-compare"></i> Compare</button>
+                <button type="button" class="history-ctrl-btn" onclick="triggerImportJSON()"><i class="fa-solid fa-file-import"></i> Import</button>
+            </div>
+        </div>
+
+        <div class="drawer-actions">
+            <span class="history-total-lbl" id="historyRecordCount">0 Records Logged</span>
+            <button class="clear-all-btn" onclick="clearAllHistoryVaultRecords()">Clear History</button>
+        </div>
+
+        <div class="history-list-scroll" id="historyListContainer">
+            <!-- Dynamic History Cards render here -->
+        </div>
+    </aside>
+
+    <!-- COMPARISON MODAL -->
+    <div class="compare-modal" id="compareModal">
+        <div class="drawer-header">
+            <div class="drawer-title">
+                <i class="fa-solid fa-code-compare text-blue"></i>
+                <h3>COMPARE ASSESSMENTS</h3>
+            </div>
+            <button class="drawer-close-btn" onclick="closeComparisonModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="compare-selection-row">
+            <select id="compareSelectA" class="compare-dropdown" onchange="renderComparisonTable()"></select>
+            <span class="vs-badge">VS</span>
+            <select id="compareSelectB" class="compare-dropdown" onchange="renderComparisonTable()"></select>
+        </div>
+
+        <div class="comparison-grid-container" id="comparisonTableWrapper">
+            <!-- Dynamic Comparison Table -->
+        </div>
     </div>
-</div>
 
-<!-- Firebase SDKs & Auth Integration -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getAuth, 
-    GoogleAuthProvider, 
-    signInWithPopup, 
-    signOut, 
-    onAuthStateChanged 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { 
-    getDatabase, 
-    ref, 
-    push, 
-    set, 
-    onValue 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <!-- FULL REPORT DETAIL MODAL -->
+    <div class="full-report-modal" id="fullReportModal">
+        <div class="drawer-header">
+            <div class="drawer-title">
+                <i class="fa-solid fa-file-lines text-emerald"></i>
+                <h3>FULL ASSESSMENT METRICS</h3>
+            </div>
+            <button class="drawer-close-btn" onclick="closeFullReportModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBO9gwXMF789rIhNUktZdmzFXzD-ZAlXLw",
-    authDomain: "eclipse7-calculator.firebaseapp.com",
-    databaseURL: "https://eclipse7-calculator-default-rtdb.firebaseio.com",
-    projectId: "eclipse7-calculator",
-    storageBucket: "eclipse7-calculator.firebasestorage.app",
-    messagingSenderId: "336437169450",
-    appId: "1:336437169450:web:0f136e5a7497d16e746253",
-    measurementId: "G-H5H3LPQBPC"
-  };
+        <div class="full-report-scroll-body" id="fullReportModalContent">
+            <!-- Dynamic detailed breakdown -->
+        </div>
+    </div>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const database = getDatabase(app);
-  const provider = new GoogleAuthProvider();
+    <!-- Hidden File Input for Importing JSON -->
+    <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importHistoryJSONFile(event)">
 
-  let currentUser = null;
-  let dbScoresUnsubscribe = null;
-
-  onAuthStateChanged(auth, (user) => {
-    const defaultProf = document.getElementById("default-profile");
-    const userProfile = document.getElementById("user-profile");
-    const tooltip = document.getElementById("signin-tooltip");
-
-    if (user) {
-      currentUser = user;
-      if (defaultProf) defaultProf.classList.add("hidden");
-      if (userProfile) {
-        userProfile.classList.remove("hidden");
-        document.getElementById("user-name").innerText = user.displayName || "User";
-        document.getElementById("user-avatar").src = user.photoURL || "https://lh3.googleusercontent.com/a/default-user";
-      }
-      if (tooltip) tooltip.classList.add("hidden");
-
-      const userScoresRef = ref(database, 'users/' + user.uid + '/scores');
-      dbScoresUnsubscribe = onValue(userScoresRef, (snapshot) => {
-        const data = snapshot.val();
-        const cloudHistory = [];
-        if (data) {
-          Object.keys(data).forEach(key => {
-            cloudHistory.unshift({ id: key, ...data[key] });
-          });
-        }
-        localStorage.setItem('e7_assessment_history_v2', JSON.stringify(cloudHistory));
-        if (window.renderHistoryVault) {
-          window.renderHistoryVault();
-        }
-      });
-
-    } else {
-      currentUser = null;
-      if (dbScoresUnsubscribe) {
-        dbScoresUnsubscribe();
-        dbScoresUnsubscribe = null;
-      }
-      if (defaultProf) defaultProf.classList.remove("hidden");
-      if (userProfile) userProfile.classList.add("hidden");
-    }
-  });
-
-  window.loginWithGoogle = async function() {
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error("Sign-in error:", error);
-      if (window.triggerSystemToastNotification) {
-        window.triggerSystemToastNotification("Sign-In failed or popup was closed.", true);
-      }
-    }
-  };
-
-  window.logout = async function() {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("Sign-out error:", error);
-    }
-  };
-
-  window.saveScoreToDatabase = function(recordData) {
-    if (!currentUser) return;
-
-    const userScoresRef = ref(database, 'users/' + currentUser.uid + '/scores');
-    const newScoreRef = push(userScoresRef);
-
-    const cleanPayload = JSON.parse(JSON.stringify(recordData));
-
-    set(newScoreRef, {
-      ...cleanPayload,
-      createdAt: Date.now()
-    }).then(() => {
-      if (window.triggerSystemToastNotification) {
-        window.triggerSystemToastNotification("Score saved to Cloud Vault!", false);
-      }
-    }).catch((error) => {
-      console.error("Error saving score to Firebase:", error);
-      if (window.triggerSystemToastNotification) {
-        window.triggerSystemToastNotification("Cloud sync failed: Check Database Rules", true);
-      }
-    });
-  };
-
-  window.getCurrentUser = function() {
-    return currentUser;
-  };
-</script>
-<script src="script.js"></script>
+    <!-- Firebase SDK Modular Imports & Script -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>
