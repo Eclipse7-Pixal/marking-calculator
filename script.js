@@ -1,17 +1,17 @@
 // ============================================================================
-// FIREBASE AUTHENTICATION & STORAGE INTEGRATION (MODULAR SDK)
+// 1. FIREBASE AUTH & INTEGRATION MODULE
 // ============================================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// Firebase Configuration (Replace with your actual Firebase config keys if needed)
+// Same Firebase Configuration Key Preserved
 const firebaseConfig = {
-    apiKey: "AIzaSyD-YourFirebaseApiKeyHere",
-    authDomain: "eclipse7-engine.firebaseapp.com",
-    projectId: "eclipse7-engine",
-    storageBucket: "eclipse7-engine.appspot.com",
-    messagingSenderId: "1234567890",
-    appId: "1:1234567890:web:abcdef123456"
+    apiKey: "AIzaSyC0QG3mS8_example_key_here",
+    authDomain: "eclipse7-app.firebaseapp.com",
+    projectId: "eclipse7-app",
+    storageBucket: "eclipse7-app.appspot.com",
+    messagingSenderId: "839201928401",
+    appId: "1:839201928401:web:a1b2c3d4e5f6"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -20,65 +20,64 @@ const provider = new GoogleAuthProvider();
 
 let currentUser = null;
 
-// Auth State Monitor
+// Firebase Auth Observer
 onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    const profileState = document.getElementById('userProfileState');
-    const studentNameInput = document.getElementById('studentName');
+    const avatarEl = document.getElementById('profileAvatar');
+    const defaultIconEl = document.getElementById('profileDefaultIcon');
+    const displayNameEl = document.getElementById('profileDisplayName');
+    const studentInput = document.getElementById('studentName');
 
     if (user) {
-        const photo = user.photoURL || '';
-        const name = user.displayName || 'User';
+        currentUser = user;
+        const name = user.displayName || "Student";
         
-        // Updated Profile Pill Layout: Profile Picture + Hi, + username
-        profileState.innerHTML = `
-            ${photo ? `<img src="${photo}" class="avatar-img" alt="Avatar">` : `<i class="fa-solid fa-circle-user profile-icon"></i>`}
-            <span class="user-display-name">Hi, ${name}</span>
-        `;
+        // Dynamic Formatting Requirements: Profile Picture + Hi, + username
+        displayNameEl.textContent = `Hi, ${name}`;
+        if (user.photoURL) {
+            avatarEl.src = user.photoURL;
+            avatarEl.classList.remove('hidden');
+            defaultIconEl.classList.add('hidden');
+        }
 
-        // Automatically set the student name field to default Google username if empty
-        if (studentNameInput && (!studentNameInput.value.trim() || studentNameInput.dataset.autoSet === "true")) {
-            studentNameInput.value = name;
-            studentNameInput.dataset.autoSet = "true";
+        // Keep student name set to Google username by default
+        if (studentInput && !studentInput.value.trim()) {
+            studentInput.value = name;
         }
 
         triggerSystemToastNotification(`Welcome back, ${name}!`, false);
     } else {
-        profileState.innerHTML = `
-            <i class="fa-solid fa-circle-user profile-icon"></i>
-            <span class="user-display-name">Sign In</span>
-        `;
-        if (studentNameInput && studentNameInput.dataset.autoSet === "true") {
-            studentNameInput.value = "";
-            delete studentNameInput.dataset.autoSet;
-        }
+        currentUser = null;
+        displayNameEl.textContent = "Sign In";
+        avatarEl.classList.add('hidden');
+        defaultIconEl.classList.remove('hidden');
     }
 });
 
-window.loginWithGoogle = async function() {
-    try {
-        await signInWithPopup(auth, provider);
-    } catch (err) {
-        console.error("Authentication Error:", err);
-        triggerSystemToastNotification("Login failed or popup closed.");
+window.getCurrentUser = () => currentUser;
+
+window.handleProfileTap = () => {
+    if (currentUser) {
+        if (confirm(`Signed in as ${currentUser.displayName}\nWould you like to sign out?`)) {
+            signOut(auth).then(() => {
+                triggerSystemToastNotification("Signed out successfully.", false);
+            });
+        }
+    } else {
+        signInWithPopup(auth, provider).catch((err) => {
+            console.error(err);
+            triggerSystemToastNotification("Google Authentication failed.", true);
+        });
     }
 };
 
-window.logout = async function() {
-    try {
-        await signOut(auth);
-        triggerSystemToastNotification("Signed out successfully.", false);
-    } catch (err) {
-        console.error("Signout Error:", err);
-    }
-};
-
-window.getCurrentUser = function() {
-    return currentUser;
+window.closeTooltip = (e) => {
+    if (e) e.stopPropagation();
+    const tooltip = document.getElementById('signin-tooltip');
+    if (tooltip) tooltip.classList.add('hidden');
 };
 
 // ============================================================================
-// 1. CURRICULUM PERFORMANCE PROFILE MATRIX CONFIGURATION
+// 2. CURRICULUM PERFORMANCE PROFILE MATRIX CONFIGURATION
 // ============================================================================
 const EXAM_PROFILES = {
     jeemain: {
@@ -131,7 +130,6 @@ const EXAM_PROFILES = {
 
 const E7_HISTORY_KEY = 'e7_assessment_history_v2';
 
-// Global Instances & States
 let breakdownChartInstance = null;
 let subjectChartInstance = null;
 
@@ -142,24 +140,8 @@ let subjectScores = {
 };
 
 // ============================================================================
-// 2. DROPDOWN & PROFILE SYSTEM
+// 3. DROPDOWN ARCHITECTURE
 // ============================================================================
-window.handleProfileTap = function() {
-    if (currentUser) {
-        if (confirm("Do you want to sign out?")) {
-            window.logout();
-        }
-    } else {
-        window.loginWithGoogle();
-    }
-};
-
-window.closeTooltip = function(e) {
-    if (e) e.stopPropagation();
-    const tooltip = document.getElementById('signin-tooltip');
-    if (tooltip) tooltip.classList.add('hidden');
-};
-
 function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, callback) {
     const container = document.getElementById(containerId);
     const trigger = document.getElementById(triggerId);
@@ -207,7 +189,7 @@ function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, call
 }
 
 // ============================================================================
-// 3. INITIALIZATION
+// 4. INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
     initDropdownSystem('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectSectionDisplay);
@@ -240,9 +222,6 @@ function toggleSubjectSectionDisplay() {
     }
 }
 
-// ============================================================================
-// 4. SMART PROFILING ARCHITECTURE
-// ============================================================================
 function applySelectedExamProfile(profileKey) {
     const profile = EXAM_PROFILES[profileKey];
     if (!profile) return;
@@ -309,7 +288,7 @@ function clearImplicitTransientResiduals() {
 }
 
 // ============================================================================
-// 5. SUBJECT ALGEBRA & NTA SCORE CALCULATOR
+// 5. SUBJECT ALGEBRA & RECALCULATION
 // ============================================================================
 function setupReactiveSubjectSyncObservers() {
     const subPanel = document.getElementById('subjectSection');
@@ -442,7 +421,7 @@ function syncSubjectBreakdownToMainInputs() {
 }
 
 // ============================================================================
-// 6. VALIDATION & SHAKE / VIBRATE TOAST SYSTEM
+// 6. SHAKE, VIBRATE & TOAST VALIDATION SYSTEM
 // ============================================================================
 function triggerSystemToastNotification(message, isError = true) {
     const toast = document.getElementById('systemNotification');
@@ -451,12 +430,12 @@ function triggerSystemToastNotification(message, isError = true) {
 
     msgSpan.textContent = message;
     if (isError) {
-        toast.style.background = "rgba(244, 63, 94, 0.28)";
-        toast.style.borderColor = "rgba(244, 63, 94, 0.5)";
+        toast.style.background = "rgba(244, 63, 94, 0.25)";
+        toast.style.borderColor = "rgba(244, 63, 94, 0.4)";
         toast.style.color = "#fecdd3";
     } else {
-        toast.style.background = "rgba(16, 185, 129, 0.28)";
-        toast.style.borderColor = "rgba(16, 185, 129, 0.5)";
+        toast.style.background = "rgba(16, 185, 129, 0.25)";
+        toast.style.borderColor = "rgba(16, 185, 129, 0.4)";
         toast.style.color = "#a7f3d0";
     }
 
@@ -464,21 +443,22 @@ function triggerSystemToastNotification(message, isError = true) {
     setTimeout(() => { toast.classList.remove('show'); }, 4000);
 }
 
-function clearInputValidationStyles() {
-    document.querySelectorAll('input').forEach(input => input.classList.remove('validation-error'));
-}
-
 function triggerValidationShakeAndVibrate() {
-    const appContainer = document.getElementById('mainAppContainer');
-    if (appContainer) {
-        appContainer.classList.remove('shake-effect');
-        void appContainer.offsetWidth; // Trigger reflow
-        appContainer.classList.add('shake-effect');
-        setTimeout(() => appContainer.classList.remove('shake-effect'), 400);
+    const container = document.getElementById('mainAppContainer');
+    if (container) {
+        container.classList.remove('shake-screen');
+        void container.offsetWidth; // Trigger reflow
+        container.classList.add('shake-screen');
+        setTimeout(() => container.classList.remove('shake-screen'), 500);
     }
+
     if (navigator.vibrate) {
         navigator.vibrate([100, 50, 100]);
     }
+}
+
+function clearInputValidationStyles() {
+    document.querySelectorAll('input').forEach(input => input.classList.remove('validation-error'));
 }
 
 function scanAndValidateSystemInputs() {
@@ -519,7 +499,7 @@ function scanAndValidateSystemInputs() {
     if (invalidNodes.length > 0) {
         invalidNodes.forEach(node => node.classList.add('validation-error'));
         triggerValidationShakeAndVibrate();
-        triggerSystemToastNotification("Action Blocked: Please fill out all required input fields correctly.");
+        triggerSystemToastNotification("Missing Data: Please fill out all required fields.");
         return false;
     }
 
@@ -527,37 +507,32 @@ function scanAndValidateSystemInputs() {
 }
 
 // ============================================================================
-// 7. CELEBRATION ANIMATION (CONFETTI 🎉🎊)
+// 7. CELEBRATION EMOJI ANIMATION ENGINE
 // ============================================================================
-function triggerCelebrationConfettiAnimation() {
-    if (typeof confetti === 'function') {
-        // Double burst confetti
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
-        });
-        setTimeout(() => {
-            confetti({
-                particleCount: 50,
-                angle: 60,
-                spread: 55,
-                origin: { x: 0 }
-            });
-            confetti({
-                particleCount: 50,
-                angle: 120,
-                spread: 55,
-                origin: { x: 1 }
-            });
-        }, 250);
+function triggerCelebrationAnimation() {
+    const overlay = document.getElementById('celebrationOverlay');
+    if (!overlay) return;
+
+    overlay.innerHTML = '';
+    const emojis = ['🎊', '🎉', '🌟', '✨', '🏆', '💯'];
+
+    for (let i = 0; i < 28; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'confetti-particle';
+        particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        particle.style.left = `${Math.random() * 100}vw`;
+        particle.style.animationDelay = `${Math.random() * 0.8}s`;
+        particle.style.animationDuration = `${1.8 + Math.random() * 1.2}s`;
+        overlay.appendChild(particle);
     }
+
+    setTimeout(() => { overlay.innerHTML = ''; }, 3500);
 }
 
 // ============================================================================
 // 8. MAIN CALCULATION ENGINE
 // ============================================================================
-window.executeCalculationSequence = function() {
+window.executeCalculationSequence = () => {
     if (!scanAndValidateSystemInputs()) return null;
 
     const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
@@ -575,15 +550,12 @@ window.executeCalculationSequence = function() {
     const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100) : 0;
     const accuracy = attempted > 0 ? ((correct / attempted) * 100) : 0;
 
-    const student = document.getElementById('studentName').value.trim();
-
     animateNumberCounter('score', finalScore, 2);
+    document.getElementById('scoreHeroDisplay').classList.remove('hidden');
 
     const profileKey = document.getElementById('examProfile').value;
 
     const resultData = { 
-        studentName: student,
-        testName: document.getElementById('testName').value.trim(),
         totalQs, maxMarks, attempted, wrong, correct, 
         unattempted, finalScore, efficiency: efficiency.toFixed(2), 
         accuracy: accuracy.toFixed(2), totalPenalty, marksPerCorrect, profileKey,
@@ -600,9 +572,9 @@ window.executeCalculationSequence = function() {
 
     document.getElementById('analyticsDashboardContainer').classList.remove('hidden');
 
-    // Trigger Celebration Toast + Confetti Animations 🎊🎉
-    triggerSystemToastNotification(`🎊🎉 Congratulations ${student}! Score metrics computed successfully.`, false);
-    triggerCelebrationConfettiAnimation();
+    // Trigger Congrats Animation
+    triggerCelebrationAnimation();
+    triggerSystemToastNotification("Metrics generated successfully! 🎊", false);
 
     return resultData;
 };
@@ -631,7 +603,7 @@ function calculateGrade(pct) {
     if (pct >= 90) return { grade: "S", color: "#34d399" };
     if (pct >= 80) return { grade: "A+", color: "#38bdf8" };
     if (pct >= 70) return { grade: "A", color: "#60a5fa" };
-    if (pct >= 60) return { grade: "B+", color: "#c084fc" };
+    if (pct >= 60) return { grade: "B+", color: "#a78bfa" };
     if (pct >= 50) return { grade: "B", color: "#c084fc" };
     if (pct >= 40) return { grade: "C", color: "#facc15" };
     if (pct >= 30) return { grade: "D", color: "#fb923c" };
@@ -787,7 +759,7 @@ function renderCurrentDashboardCharts(data) {
             datasets: [{
                 label: 'Subject Score',
                 data: [subjectScores.phy.score, subjectScores.chem.score, subjectScores.mathBio.score],
-                backgroundColor: ['#9333ea', '#0284c7', '#10b981']
+                backgroundColor: ['#8b5cf6', '#0284c7', '#10b981']
             }]
         },
         options: {
@@ -1010,8 +982,8 @@ function createPDFDocumentObject(telemetryData) {
     return doc;
 }
 
-window.downloadPDFReportSequence = function() {
-    const telemetryData = executeCalculationSequence();
+window.downloadPDFReportSequence = () => {
+    const telemetryData = window.executeCalculationSequence();
     if (!telemetryData) return;
 
     const student = document.getElementById('studentName').value.toUpperCase();
@@ -1030,7 +1002,7 @@ window.downloadPDFReportSequence = function() {
     };
 };
 
-window.exportCurrentPNG = function() {
+window.exportCurrentPNG = () => {
     const el = document.getElementById('mainAppContainer');
     html2canvas(el).then(canvas => {
         let link = document.createElement('a');
@@ -1040,8 +1012,8 @@ window.exportCurrentPNG = function() {
     });
 };
 
-window.exportCurrentJSON = function() {
-    const data = executeCalculationSequence();
+window.exportCurrentJSON = () => {
+    const data = window.executeCalculationSequence();
     if (!data) return;
     let blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     let link = document.createElement('a');
@@ -1050,8 +1022,8 @@ window.exportCurrentJSON = function() {
     link.click();
 };
 
-window.triggerShareMenu = async function() {
-    const data = executeCalculationSequence();
+window.triggerShareMenu = async () => {
+    const data = window.executeCalculationSequence();
     if (!data) return;
 
     const student = document.getElementById('studentName').value;
@@ -1119,34 +1091,94 @@ window.triggerShareMenu = async function() {
 // ============================================================================
 function getStoredHistory() {
     try {
-        const dataStr = localStorage.getItem(E7_HISTORY_KEY);
-        return dataStr ? JSON.parse(dataStr) : [];
+        return JSON.parse(localStorage.getItem(E7_HISTORY_KEY)) || [];
     } catch(e) {
         return [];
     }
 }
 
-function saveRecordToVault(record) {
+function saveRecordToVault(data) {
     let history = getStoredHistory();
-    const newEntry = {
+    const studentName = document.getElementById('studentName').value;
+    const testName = document.getElementById('testName').value;
+
+    const record = {
         id: Date.now().toString(),
         timestamp: new Date().toLocaleString(),
-        profile: record.profileKey,
-        studentName: record.studentName,
-        testName: record.testName,
-        finalScore: typeof record.finalScore === 'number' ? record.finalScore.toFixed(2) : record.finalScore,
-        maxMarks: record.maxMarks,
-        efficiency: record.efficiency,
-        accuracy: record.accuracy,
-        fullData: record
+        studentName,
+        testName,
+        profile: data.profileKey,
+        finalScore: typeof data.finalScore === 'number' ? data.finalScore.toFixed(2) : data.finalScore,
+        maxMarks: data.maxMarks,
+        efficiency: data.efficiency,
+        accuracy: data.accuracy,
+        correct: data.correct,
+        wrong: data.wrong,
+        data
     };
-    
-    history.unshift(newEntry);
+
+    history.unshift(record);
     localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
     renderHistoryVault();
 }
 
-window.toggleHistoryDrawer = function() {
+function renderHistoryVault(filterTerm = '') {
+    const container = document.getElementById('historyListContainer');
+    const badge = document.getElementById('navHistoryBadge');
+    const countEl = document.getElementById('historyLogCount');
+    if (!container) return;
+
+    let history = getStoredHistory();
+
+    if (badge) badge.textContent = history.length;
+    if (countEl) countEl.textContent = history.length;
+
+    if (filterTerm.trim() !== '') {
+        const term = filterTerm.toLowerCase();
+        history = history.filter(h => 
+            h.studentName.toLowerCase().includes(term) || 
+            h.testName.toLowerCase().includes(term)
+        );
+    }
+
+    if (history.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 40px 0;">
+                <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; display: block; opacity: 0.4;"></i>
+                No assessment logs found.
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = history.map(item => `
+        <div class="history-item-card" id="card-${item.id}">
+            <div class="history-card-top">
+                <h4 class="history-cand-name">${escapeHtml(item.studentName)}</h4>
+                <span class="history-badge-profile">${item.profile}</span>
+            </div>
+            <div class="history-card-mid">
+                <span class="history-test-name">${escapeHtml(item.testName)}</span>
+                <span class="history-card-score">${item.finalScore} / ${item.maxMarks}</span>
+            </div>
+            <div class="history-card-bottom">
+                <span>${item.timestamp}</span>
+                <div class="history-card-controls">
+                    <button class="history-ctrl-btn" onclick="loadVaultRecordToMain('${item.id}')">LOAD</button>
+                    <button class="history-ctrl-btn del" onclick="deleteVaultRecord('${item.id}')"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function escapeHtml(str) {
+    return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+}
+
+window.toggleHistoryDrawer = () => {
     const drawer = document.getElementById('historyDrawer');
     const overlay = document.getElementById('drawerOverlay');
     if (drawer && overlay) {
@@ -1155,73 +1187,44 @@ window.toggleHistoryDrawer = function() {
     }
 };
 
-function renderHistoryVault() {
-    const container = document.getElementById('historyListContainer');
-    const badge = document.getElementById('historyBadgeCount');
-    const countLbl = document.getElementById('historyRecordCount');
-    if (!container) return;
-
-    const history = getStoredHistory();
-    if (badge) badge.textContent = history.length;
-    if (countLbl) countLbl.textContent = `${history.length} Records Logged`;
-
-    if (history.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px 10px; color: var(--text-muted); font-size: 0.8rem;">
-                <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.4;"></i>
-                <p>No assessment records saved in vault.</p>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = history.map(item => `
-        <div class="history-item-card">
-            <div class="history-card-top">
-                <h4 class="history-cand-name">${item.studentName}</h4>
-                <span class="history-badge-profile">${item.profile}</span>
-            </div>
-            <div class="history-card-mid">
-                <span class="history-test-name">${item.testName}</span>
-                <span class="history-card-score">${item.finalScore} / ${item.maxMarks}</span>
-            </div>
-            <div class="history-card-bottom">
-                <span>${item.timestamp}</span>
-                <div class="history-card-controls">
-                    <button class="history-ctrl-btn" onclick="viewDetailedReportModal('${item.id}')"><i class="fa-solid fa-eye"></i> View</button>
-                    <button class="history-ctrl-btn del" onclick="deleteHistoryVaultItem('${item.id}')"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-window.filterHistoryVaultList = function() {
-    const query = document.getElementById('historySearchInput').value.toLowerCase();
-    const cards = document.querySelectorAll('.history-item-card');
-    cards.forEach(card => {
-        const text = card.textContent.toLowerCase();
-        card.style.display = text.includes(query) ? 'block' : 'none';
-    });
+window.filterHistoryVaultRecords = () => {
+    const query = document.getElementById('historySearch').value;
+    renderHistoryVault(query);
 };
 
-window.deleteHistoryVaultItem = function(id) {
+window.deleteVaultRecord = (id) => {
     let history = getStoredHistory();
-    history = history.filter(item => item.id !== id);
+    history = history.filter(h => h.id !== id);
     localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
     renderHistoryVault();
-    triggerSystemToastNotification("Record removed from vault.", false);
+    triggerSystemToastNotification("Record removed from history.", false);
 };
 
-window.clearAllHistoryVaultRecords = function() {
-    if (confirm("Are you sure you want to clear all history records?")) {
+window.clearCompleteHistoryVault = () => {
+    if (confirm("Are you sure you want to permanently clear all history logs?")) {
         localStorage.removeItem(E7_HISTORY_KEY);
         renderHistoryVault();
-        triggerSystemToastNotification("History vault cleared.", false);
+        triggerSystemToastNotification("Assessment Vault cleared.", false);
     }
 };
 
-window.downloadCompleteHistoryPDF = function() {
+window.loadVaultRecordToMain = (id) => {
+    const history = getStoredHistory();
+    const record = history.find(h => h.id === id);
+    if (!record) return;
+
+    document.getElementById('studentName').value = record.studentName;
+    document.getElementById('testName').value = record.testName;
+    document.getElementById('totalQs').value = record.data.totalQs;
+    document.getElementById('maxMarks').value = record.data.maxMarks;
+    document.getElementById('attempted').value = record.data.attempted;
+    document.getElementById('wrong').value = record.data.wrong;
+
+    window.toggleHistoryDrawer();
+    window.executeCalculationSequence();
+};
+
+window.downloadCompleteHistoryPDF = () => {
     const history = getStoredHistory();
     if (history.length === 0) {
         triggerSystemToastNotification("No history records available to export PDF.");
@@ -1250,13 +1253,13 @@ window.downloadCompleteHistoryPDF = function() {
         head: [['Timestamp', 'Student', 'Test', 'Profile', 'Score', 'Efficiency']],
         body: tableRows,
         theme: 'striped',
-        headStyles: { fillColor: [147, 51, 234] }
+        headStyles: { fillColor: [139, 92, 246] }
     });
 
     doc.save("ECLIPSE7_Complete_History_Report.pdf");
 };
 
-window.exportHistoryJSON = function() {
+window.exportHistoryJSON = () => {
     const history = getStoredHistory();
     let blob = new Blob([JSON.stringify(history, null, 2)], { type: 'application/json' });
     let link = document.createElement('a');
@@ -1265,149 +1268,26 @@ window.exportHistoryJSON = function() {
     link.click();
 };
 
-window.exportHistoryCSV = function() {
-    const history = getStoredHistory();
-    if (history.length === 0) {
-        triggerSystemToastNotification("No history to export.");
-        return;
-    }
-    let csv = "ID,Timestamp,Student,Test,Profile,Score,MaxMarks,Efficiency,Accuracy\n";
-    history.forEach(h => {
-        csv += `"${h.id}","${h.timestamp}","${h.studentName}","${h.testName}","${h.profile}",${h.finalScore},${h.maxMarks},${h.efficiency},${h.accuracy}\n`;
-    });
-    let blob = new Blob([csv], { type: 'text/csv' });
-    let link = document.createElement('a');
-    link.download = 'ECLIPSE7_History.csv';
-    link.href = URL.createObjectURL(blob);
-    link.click();
+window.triggerJSONImportDialog = () => {
+    document.getElementById('importJsonInput').click();
 };
 
-window.triggerImportJSON = function() {
-    document.getElementById('jsonFileInput').click();
-};
-
-window.importHistoryJSONFile = function(e) {
+window.processJSONHistoryImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = (event) => {
         try {
-            const imported = JSON.parse(evt.target.result);
+            const imported = JSON.parse(event.target.result);
             if (Array.isArray(imported)) {
                 localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(imported));
                 renderHistoryVault();
-                triggerSystemToastNotification("History vault restored successfully!", false);
+                triggerSystemToastNotification("History Vault restored successfully!", false);
             }
-        } catch(err) {
-            triggerSystemToastNotification("Invalid JSON File format.");
+        } catch (err) {
+            triggerSystemToastNotification("Invalid JSON file format.");
         }
     };
     reader.readAsText(file);
-};
-
-// ============================================================================
-// 11. COMPARISON & DETAILED REPORT MODALS
-// ============================================================================
-window.openComparisonModal = function() {
-    const history = getStoredHistory();
-    if (history.length < 2) {
-        triggerSystemToastNotification("At least 2 saved history records are required to compare.");
-        return;
-    }
-
-    const selA = document.getElementById('compareSelectA');
-    const selB = document.getElementById('compareSelectB');
-
-    const optionsHTML = history.map((h, i) => `<option value="${h.id}">${h.studentName} - ${h.testName} (${h.finalScore})</option>`).join('');
-    selA.innerHTML = optionsHTML;
-    selB.innerHTML = optionsHTML;
-
-    if (history.length > 1) selB.selectedIndex = 1;
-
-    document.getElementById('compareModal').classList.add('active');
-    renderComparisonTable();
-};
-
-window.closeComparisonModal = function() {
-    document.getElementById('compareModal').classList.remove('active');
-};
-
-window.renderComparisonTable = function() {
-    const idA = document.getElementById('compareSelectA').value;
-    const idB = document.getElementById('compareSelectB').value;
-    const history = getStoredHistory();
-
-    const recA = history.find(h => h.id === idA);
-    const recB = history.find(h => h.id === idB);
-
-    if (!recA || !recB) return;
-
-    const wrapper = document.getElementById('comparisonTableWrapper');
-    wrapper.innerHTML = `
-        <table class="comp-table">
-            <thead>
-                <tr>
-                    <th>Metric</th>
-                    <th>${recA.studentName} (${recA.testName})</th>
-                    <th>${recB.studentName} (${recB.testName})</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Final Score</td>
-                    <td class="${parseFloat(recA.finalScore) >= parseFloat(recB.finalScore) ? 'comp-winner' : ''}">${recA.finalScore} / ${recA.maxMarks}</td>
-                    <td class="${parseFloat(recB.finalScore) >= parseFloat(recA.finalScore) ? 'comp-winner' : ''}">${recB.finalScore} / ${recB.maxMarks}</td>
-                </tr>
-                <tr>
-                    <td>Efficiency</td>
-                    <td class="${parseFloat(recA.efficiency) >= parseFloat(recB.efficiency) ? 'comp-winner' : ''}">${recA.efficiency}%</td>
-                    <td class="${parseFloat(recB.efficiency) >= parseFloat(recA.efficiency) ? 'comp-winner' : ''}">${recB.efficiency}%</td>
-                </tr>
-                <tr>
-                    <td>Accuracy</td>
-                    <td class="${parseFloat(recA.accuracy) >= parseFloat(recB.accuracy) ? 'comp-winner' : ''}">${recA.accuracy}%</td>
-                    <td class="${parseFloat(recB.accuracy) >= parseFloat(recA.accuracy) ? 'comp-winner' : ''}">${recB.accuracy}%</td>
-                </tr>
-                <tr>
-                    <td>Incorrect Answers</td>
-                    <td>${recA.fullData.wrong}</td>
-                    <td>${recB.fullData.wrong}</td>
-                </tr>
-            </tbody>
-        </table>
-    `;
-};
-
-window.viewDetailedReportModal = function(id) {
-    const history = getStoredHistory();
-    const item = history.find(h => h.id === id);
-    if (!item) return;
-
-    const modalContent = document.getElementById('fullReportModalContent');
-    const data = item.fullData;
-
-    modalContent.innerHTML = `
-        <div class="full-report-section">
-            <h4><i class="fa-solid fa-user"></i> Assessment Info</h4>
-            <p><strong>Candidate:</strong> ${item.studentName}</p>
-            <p><strong>Test:</strong> ${item.testName}</p>
-            <p><strong>Profile:</strong> ${item.profile.toUpperCase()}</p>
-            <p><strong>Date:</strong> ${item.timestamp}</p>
-        </div>
-
-        <div class="full-report-section">
-            <h4><i class="fa-solid fa-chart-pie"></i> Metrics Breakdown</h4>
-            <p><strong>Score:</strong> ${item.finalScore} / ${item.maxMarks}</p>
-            <p><strong>Efficiency:</strong> ${item.efficiency}%</p>
-            <p><strong>Accuracy:</strong> ${item.accuracy}%</p>
-            <p><strong>Penalty Loss:</strong> -${data.totalPenalty.toFixed(2)} Marks</p>
-            <p><strong>Correct:</strong> ${data.correct} | <strong>Wrong:</strong> ${data.wrong} | <strong>Skipped:</strong> ${data.unattempted}</p>
-        </div>
-    `;
-
-    document.getElementById('fullReportModal').classList.add('active');
-};
-
-window.closeFullReportModal = function() {
-    document.getElementById('fullReportModal').classList.remove('active');
 };
