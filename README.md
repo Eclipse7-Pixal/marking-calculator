@@ -1,2 +1,2 @@
 # marking-calculator
-trigger deploy
+trigger deploy start
