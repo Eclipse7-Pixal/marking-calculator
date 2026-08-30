@@ -1,73 +1,99 @@
 // ============================================================================
-// 1. CURRICULUM PERFORMANCE PROFILE MATRIX CONFIGURATION
+// ECLIPSE7 ARCHITECTURAL CORE ENGINE v8.0
 // ============================================================================
+
 const EXAM_PROFILES = {
     jeemain: {
-        label: "JEE MAIN PROFILE",
+        label: "JEE MAIN PRESET",
         totalQs: 75,
         maxMarks: 300,
         ratio: "0.25",
-        labelRatio: "Ratio: 1/4",
+        labelRatio: "Ratio: 1/4 (-25%)",
         subjects: {
             phy: { qs: 25, maxMarks: 100 },
             chem: { qs: 25, maxMarks: 100 },
             mathBio: { qs: 25, maxMarks: 100 }
         },
         labelMathBio: "MATHEMATICS",
-        intel: "Curriculum: JEE Main mapped. [25 Q / 100 Marks per Subject]. Matrix +4 / -1."
+        intel: "Curriculum: JEE Main preset applied. [25 Q / 100 Marks per Subject]. Matrix +4 / -1."
     },
     jeeadv: {
-        label: "JEE ADVANCED PROFILE",
+        label: "JEE ADVANCED CONFIGURABLE",
         totalQs: 54,
         maxMarks: 180,
         ratio: "0.25",
-        labelRatio: "Ratio: 1/4",
+        labelRatio: "Ratio: 1/4 (-25%)",
         subjects: {
             phy: { qs: 18, maxMarks: 60 },
             chem: { qs: 18, maxMarks: 60 },
             mathBio: { qs: 18, maxMarks: 60 }
         },
         labelMathBio: "MATHEMATICS",
-        intel: "Curriculum: JEE Advanced layout generated. Standardized 18 Q / 60 Marks per subject."
+        intel: "Curriculum: JEE Advanced layout generated. Standard pattern 18 Q / 60 Marks per subject."
     },
     neet: {
-        label: "NEET UG PROFILE",
+        label: "NEET UG PRESET",
         totalQs: 180,
         maxMarks: 720,
         ratio: "0.25",
-        labelRatio: "Ratio: 1/4",
+        labelRatio: "Ratio: 1/4 (-25%)",
         subjects: {
             phy: { qs: 45, maxMarks: 180 },
             chem: { qs: 45, maxMarks: 180 },
             mathBio: { qs: 90, maxMarks: 360 }
         },
         labelMathBio: "BIOLOGY",
-        intel: "Curriculum: NEET UG mapped. [Phy: 180, Chem: 180, Bio: 360]. Matrix +4 / -1."
+        intel: "Curriculum: NEET UG preset. [Phy: 180, Chem: 180, Bio: 360]. Matrix +4 / -1."
     },
     custom: {
         label: "CUSTOM MODE (MANUAL OVERRIDE)",
-        intel: "Manual Override operational. Custom constraints active across input modules."
+        intel: "Manual Override operational. Input constraints active across form modules."
     }
 };
 
 const E7_HISTORY_KEY = 'e7_assessment_history_v2';
 
-// Global Instances & States
+// Global Instances & Active States
 let breakdownChartInstance = null;
 let subjectChartInstance = null;
+let activeCanonicalResult = null;
 
 let subjectScores = {
-    phy: { correct: 0, wrong: 0, total: 0, score: 0, maxMarks: 100 },
-    chem: { correct: 0, wrong: 0, total: 0, score: 0, maxMarks: 100 },
-    mathBio: { correct: 0, wrong: 0, total: 0, score: 0, maxMarks: 100 }
+    phy: { correct: 0, wrong: 0, skipped: 0, total: 0, score: 0, maxMarks: 100 },
+    chem: { correct: 0, wrong: 0, skipped: 0, total: 0, score: 0, maxMarks: 100 },
+    mathBio: { correct: 0, wrong: 0, skipped: 0, total: 0, score: 0, maxMarks: 100 }
 };
 
 // ============================================================================
-// 2. DROPDOWN & PROFILE SYSTEM
+// SECURITY / SANITIZATION UTILITIES
+// ============================================================================
+function escapeHTML(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>"']/g, function(m) {
+        return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        }[m];
+    });
+}
+
+function generateUniqueID() {
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+    const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    return `E7-${dateStr}-${timeStr}-${rand}`;
+}
+
+// ============================================================================
+// DROPDOWNS & NAVIGATION SYSTEM
 // ============================================================================
 function handleProfileTap() {
     if (window.getCurrentUser && window.getCurrentUser()) {
-        if (confirm("Do you want to sign out?")) {
+        if (confirm("Sign out of your ECLIPSE7 Cloud account?")) {
             window.logout();
         }
     } else {
@@ -108,12 +134,7 @@ function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, call
         item.addEventListener('click', () => {
             const chosenVal = item.getAttribute('data-value');
             hidden.value = chosenVal;
-            
-            if (containerId === 'ratioSelectContainer') {
-                trigger.textContent = `Ratio: ${item.textContent.split(' ')[0]}`;
-            } else {
-                trigger.textContent = item.textContent;
-            }
+            trigger.textContent = item.textContent;
 
             panel.classList.remove('show');
             container.classList.remove('active');
@@ -130,7 +151,7 @@ function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, call
 }
 
 // ============================================================================
-// 3. INITIALIZATION
+// EVENT BINDINGS & SYSTEM INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
     initDropdownSystem('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectSectionDisplay);
@@ -142,10 +163,47 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setupReactiveSubjectSyncObservers();
     setupMainFallbackInputObservers();
+    setupEventListeners();
+    setupSimulatorObservers();
     
     toggleSubjectSectionDisplay();
     renderHistoryVault();
 });
+
+function setupEventListeners() {
+    document.getElementById('auth-container')?.addEventListener('click', handleProfileTap);
+    document.getElementById('closeTooltipBtn')?.addEventListener('click', closeTooltip);
+    document.getElementById('btnCalculate')?.addEventListener('click', executeCalculationSequence);
+
+    // Export Action Handlers
+    document.getElementById('btnExportPDF')?.addEventListener('click', downloadPDFReportSequence);
+    document.getElementById('btnExportPNG')?.addEventListener('click', exportCurrentPNG);
+    document.getElementById('btnExportJSON')?.addEventListener('click', exportCurrentJSON);
+    document.getElementById('btnShareResult')?.addEventListener('click', triggerShareMenu);
+
+    // History & Drawer Controllers
+    document.getElementById('menu-toggle-btn')?.addEventListener('click', () => toggleHistoryDrawer(true));
+    document.getElementById('closeHistoryBtn')?.addEventListener('click', () => toggleHistoryDrawer(false));
+    document.getElementById('drawerOverlay')?.addEventListener('click', () => toggleHistoryDrawer(false));
+    
+    document.getElementById('historySearchInput')?.addEventListener('input', filterHistoryList);
+    document.getElementById('btnGenerateFullReport')?.addEventListener('click', generateAndShowFullHistoryReport);
+    document.getElementById('btnHistoryPDF')?.addEventListener('click', downloadCompleteHistoryPDF);
+    document.getElementById('btnHistoryJSON')?.addEventListener('click', exportHistoryJSON);
+    document.getElementById('btnHistoryCSV')?.addEventListener('click', exportHistoryCSV);
+    document.getElementById('btnHistoryCompare')?.addEventListener('click', openCompareModalLauncher);
+    document.getElementById('btnClearHistory')?.addEventListener('click', clearAssessmentHistory);
+
+    // Modals
+    document.getElementById('closeCompareBtn')?.addEventListener('click', () => toggleCompareModal(false));
+    document.getElementById('compareModalOverlay')?.addEventListener('click', () => toggleCompareModal(false));
+    document.getElementById('closeFullReportBtn')?.addEventListener('click', () => toggleFullReportModal(false));
+    document.getElementById('fullReportOverlay')?.addEventListener('click', () => toggleFullReportModal(false));
+
+    // Dynamic selects for comparison
+    document.getElementById('compareSelect1')?.addEventListener('change', renderComparisonView);
+    document.getElementById('compareSelect2')?.addEventListener('change', renderComparisonView);
+}
 
 function toggleSubjectSectionDisplay() {
     const type = document.getElementById('reportType').value;
@@ -164,7 +222,7 @@ function toggleSubjectSectionDisplay() {
 }
 
 // ============================================================================
-// 4. SMART PROFILING ARCHITECTURE
+// CURRICULUM PROFILES & INPUT ALGEBRA
 // ============================================================================
 function applySelectedExamProfile(profileKey) {
     const profile = EXAM_PROFILES[profileKey];
@@ -209,8 +267,8 @@ function applySelectedExamProfile(profileKey) {
 function setProfileToCustomOverride() {
     const hiddenProf = document.getElementById('examProfile');
     const triggerProf = document.getElementById('examProfileLabel');
-    
     const totalQsInput = document.getElementById('totalQs');
+
     if (totalQsInput) totalQsInput.classList.remove('profile-locked-row');
 
     if(hiddenProf && hiddenProf.value !== 'custom') {
@@ -231,9 +289,6 @@ function clearImplicitTransientResiduals() {
     document.getElementById('wrong').value = '';
 }
 
-// ============================================================================
-// 5. SUBJECT ALGEBRA & NTA SCORE CALCULATOR
-// ============================================================================
 function setupReactiveSubjectSyncObservers() {
     const subPanel = document.getElementById('subjectSection');
     if (!subPanel) return;
@@ -303,6 +358,7 @@ function recalculateSubjectScores() {
         const total = parseFloat(document.getElementById(`${sub}A`).value) || 0;
         const correct = parseFloat(document.getElementById(`${sub}C`).value) || 0;
         const wrong = parseFloat(document.getElementById(`${sub}W`).value) || 0;
+        const skipped = parseFloat(document.getElementById(`${sub}N`).value) || 0;
 
         let maxMarks = subjectScores[sub].maxMarks;
         if (document.getElementById('examProfile').value === 'custom') {
@@ -314,7 +370,7 @@ function recalculateSubjectScores() {
         const marksPerQ = total > 0 ? maxMarks / total : 4; 
         const score = (correct * marksPerQ) - (wrong * marksPerQ * ratio);
 
-        subjectScores[sub] = { correct, wrong, total, score, maxMarks };
+        subjectScores[sub] = { correct, wrong, skipped, total, score, maxMarks };
 
         const chip = document.getElementById(`${sub}ScoreChip`);
         if (chip) {
@@ -345,8 +401,7 @@ function syncSubjectBreakdownToMainInputs() {
     let aggregateCorrect = 0;
     let aggregateWrong = 0;
 
-    const subjects = ['phy', 'chem', 'mathBio'];
-    subjects.forEach(sub => {
+    ['phy', 'chem', 'mathBio'].forEach(sub => {
         const t = parseFloat(document.getElementById(`${sub}A`).value) || 0;
         const c = parseFloat(document.getElementById(`${sub}C`).value) || 0;
         const w = parseFloat(document.getElementById(`${sub}W`).value) || 0;
@@ -365,11 +420,12 @@ function syncSubjectBreakdownToMainInputs() {
 }
 
 // ============================================================================
-// 6. VALIDATION & TOAST SYSTEM
+// VALIDATION ENGINE
 // ============================================================================
 function triggerSystemToastNotification(message, isError = true) {
     const toast = document.getElementById('systemNotification');
     const msgSpan = document.getElementById('notificationMessage');
+    const icon = document.getElementById('toastIcon');
     if (!toast || !msgSpan) return;
 
     msgSpan.textContent = message;
@@ -377,10 +433,12 @@ function triggerSystemToastNotification(message, isError = true) {
         toast.style.background = "rgba(244, 63, 94, 0.25)";
         toast.style.borderColor = "rgba(244, 63, 94, 0.4)";
         toast.style.color = "#fecdd3";
+        if (icon) icon.className = "fa-solid fa-triangle-exclamation";
     } else {
         toast.style.background = "rgba(16, 185, 129, 0.25)";
         toast.style.borderColor = "rgba(16, 185, 129, 0.4)";
         toast.style.color = "#a7f3d0";
+        if (icon) icon.className = "fa-solid fa-circle-check";
     }
 
     toast.classList.add('show');
@@ -391,7 +449,7 @@ function clearInputValidationStyles() {
     document.querySelectorAll('input').forEach(input => input.classList.remove('validation-error'));
 }
 
-function scanAndValidateSystemInputs() {
+function validateInput() {
     clearInputValidationStyles();
     let invalidNodes = [];
 
@@ -406,27 +464,52 @@ function scanAndValidateSystemInputs() {
     const attempted = document.getElementById('attempted');
     const wrong = document.getElementById('wrong');
 
-    if (!totalQs.value || parseFloat(totalQs.value) <= 0) invalidNodes.push(totalQs);
-    if (!maxMarks.value || parseFloat(maxMarks.value) <= 0) invalidNodes.push(maxMarks);
-    if (attempted.value === "" || parseFloat(attempted.value) < 0) invalidNodes.push(attempted);
-    if (wrong.value === "" || parseFloat(wrong.value) < 0) invalidNodes.push(wrong);
+    const tVal = parseFloat(totalQs.value);
+    const mVal = parseFloat(maxMarks.value);
+    const aVal = parseFloat(attempted.value);
+    const wVal = parseFloat(wrong.value);
+
+    if (!totalQs.value || tVal <= 0) invalidNodes.push(totalQs);
+    if (!maxMarks.value || mVal <= 0) invalidNodes.push(maxMarks);
+    if (attempted.value === "" || aVal < 0) invalidNodes.push(attempted);
+    if (wrong.value === "" || wVal < 0) invalidNodes.push(wrong);
 
     if (invalidNodes.length === 0) {
-        if (parseFloat(wrong.value) > parseFloat(attempted.value)) {
+        if (wVal > aVal) {
             invalidNodes.push(wrong, attempted);
-            triggerSystemToastNotification("Logic Error: Incorrect answers cannot exceed total attempts.");
+            triggerSystemToastNotification("Validation Error: Wrong attempts cannot exceed total attempts.");
             return false;
         }
-        if (parseFloat(attempted.value) > parseFloat(totalQs.value)) {
+        if (aVal > tVal) {
             invalidNodes.push(attempted, totalQs);
-            triggerSystemToastNotification("Logic Error: Total attempts cannot exceed total questions.");
+            triggerSystemToastNotification("Validation Error: Total attempts cannot exceed total questions.");
+            return false;
+        }
+    }
+
+    if (document.getElementById('reportType').value === 'subjectwise') {
+        let subSumQs = 0;
+        ['phy', 'chem', 'mathBio'].forEach(sub => {
+            const tot = parseFloat(document.getElementById(`${sub}A`).value) || 0;
+            const cor = parseFloat(document.getElementById(`${sub}C`).value) || 0;
+            const wro = parseFloat(document.getElementById(`${sub}W`).value) || 0;
+            const skp = parseFloat(document.getElementById(`${sub}N`).value) || 0;
+            subSumQs += tot;
+            if (cor + wro + skp !== tot) {
+                invalidNodes.push(document.getElementById(`${sub}A`));
+                triggerSystemToastNotification(`Subject Matrix Mismatch: ${sub.toUpperCase()} sum (C+W+Skipped) must equal total.`);
+            }
+        });
+        if (subSumQs !== tVal) {
+            invalidNodes.push(totalQs);
+            triggerSystemToastNotification("Subject Matrix Mismatch: Sum of subject totals does not match global total.");
             return false;
         }
     }
 
     if (invalidNodes.length > 0) {
         invalidNodes.forEach(node => node.classList.add('validation-error'));
-        triggerSystemToastNotification("Action Blocked: Please populate required fields correctly.");
+        triggerSystemToastNotification("Action Blocked: Please complete required fields correctly.");
         return false;
     }
 
@@ -434,55 +517,276 @@ function scanAndValidateSystemInputs() {
 }
 
 // ============================================================================
-// 7. MAIN CALCULATION ENGINE
+// CANONICAL CALCULATION ENGINE
 // ============================================================================
-function executeCalculationSequence() {
-    if (!scanAndValidateSystemInputs()) return null;
-
-    const totalQs = parseFloat(document.getElementById('totalQs').value) || 0;
-    const maxMarks = parseFloat(document.getElementById('maxMarks').value) || 0;
-    const attempted = parseFloat(document.getElementById('attempted').value) || 0;
-    const wrong = parseFloat(document.getElementById('wrong').value) || 0;
-    const ratio = parseFloat(document.getElementById('markingRatio').value) || 0.25;
-    
-    const correct = attempted - wrong;
-    const unattempted = Math.max(0, totalQs - attempted);
-    const marksPerCorrect = totalQs > 0 ? (maxMarks / totalQs) : 0;
-    
-    const totalPenalty = wrong * (marksPerCorrect * ratio); 
-    const finalScore = (correct * marksPerCorrect) - totalPenalty;
-    const efficiency = maxMarks > 0 ? ((finalScore / maxMarks) * 100) : 0;
-    const accuracy = attempted > 0 ? ((correct / attempted) * 100) : 0;
-
-    animateNumberCounter('score', finalScore, 2);
-
-    const profileKey = document.getElementById('examProfile').value;
-
-    const resultData = { 
-        totalQs, maxMarks, attempted, wrong, correct, 
-        unattempted, finalScore, efficiency: efficiency.toFixed(2), 
-        accuracy: accuracy.toFixed(2), totalPenalty, marksPerCorrect, profileKey,
+function collectInput() {
+    return {
+        studentName: document.getElementById('studentName').value.trim(),
+        testName: document.getElementById('testName').value.trim(),
+        examProfile: document.getElementById('examProfile').value,
+        totalQs: parseFloat(document.getElementById('totalQs').value) || 0,
+        maxMarks: parseFloat(document.getElementById('maxMarks').value) || 0,
+        attempted: parseFloat(document.getElementById('attempted').value) || 0,
+        wrong: parseFloat(document.getElementById('wrong').value) || 0,
+        markingRatio: parseFloat(document.getElementById('markingRatio').value) || 0.25,
+        reportType: document.getElementById('reportType').value,
         subjectScores: JSON.parse(JSON.stringify(subjectScores))
     };
-
-    saveRecordToVault(resultData);
-
-    updateDashboardUI(resultData);
-    computeRankAndPercentile(resultData);
-    generateAIReport(resultData);
-    generateInsightEngineList(resultData);
-    renderCurrentDashboardCharts(resultData);
-
-    document.getElementById('analyticsDashboardContainer').classList.remove('hidden');
-
-    return resultData;
 }
 
+function calculateScore(inputData) {
+    const correct = inputData.attempted - inputData.wrong;
+    const skipped = Math.max(0, inputData.totalQs - inputData.attempted);
+    const marksPerCorrect = inputData.totalQs > 0 ? (inputData.maxMarks / inputData.totalQs) : 0;
+    const penaltyMarks = inputData.wrong * (marksPerCorrect * inputData.markingRatio); 
+    const finalScore = (correct * marksPerCorrect) - penaltyMarks;
+    
+    const efficiency = inputData.maxMarks > 0 ? ((finalScore / inputData.maxMarks) * 100) : 0;
+    const accuracy = inputData.attempted > 0 ? ((correct / inputData.attempted) * 100) : 0;
+    const attemptRate = inputData.totalQs > 0 ? ((inputData.attempted / inputData.totalQs) * 100) : 0;
+
+    return {
+        correct,
+        skipped,
+        marksPerCorrect,
+        penaltyMarks,
+        finalScore,
+        efficiency,
+        accuracy,
+        attemptRate
+    };
+}
+
+function calculateAnalytics(inputData, scoreResult) {
+    let performanceLevel = "Developing";
+    let color = "#f43f5e";
+    const pct = scoreResult.efficiency;
+
+    if (pct >= 90) { performanceLevel = "Exceptional"; color = "#10b981"; }
+    else if (pct >= 80) { performanceLevel = "Excellent"; color = "#34d399"; }
+    else if (pct >= 70) { performanceLevel = "Strong"; color = "#38bdf8"; }
+    else if (pct >= 60) { performanceLevel = "Good"; color = "#60a5fa"; }
+    else if (pct >= 50) { performanceLevel = "Developing"; color = "#c084fc"; }
+
+    let wrongRatio = inputData.attempted > 0 ? (inputData.wrong / inputData.attempted) : 0;
+    let riskIndex = "Low Risk";
+    if (wrongRatio > 0.4) riskIndex = "High Volatility";
+    else if (wrongRatio > 0.2) riskIndex = "Moderate Risk";
+
+    let recommendations = [];
+    if (scoreResult.accuracy < 75) recommendations.push("Reduce speculative attempts to minimize negative marking.");
+    if (scoreResult.skipped > inputData.totalQs * 0.3) recommendations.push("Optimize time allocation to review unanswered questions.");
+    if (recommendations.length === 0) recommendations.push("Maintain current question selection strategy and balanced timing.");
+
+    return {
+        performanceLevel,
+        color,
+        riskIndex,
+        recommendations
+    };
+}
+
+function predictRankAndPercentile(inputData, scoreResult) {
+    let scorePct = Math.max(0, Math.min(100, (scoreResult.finalScore / inputData.maxMarks) * 100));
+    let percentileMin = 0, percentileMax = 0;
+    let rankMin = 0, rankMax = 0;
+
+    if (inputData.examProfile === 'jeemain') {
+        percentileMin = Math.max(0, 100 - Math.pow((100 - scorePct) / 100, 2) * 100);
+        percentileMax = Math.min(99.99, percentileMin + 0.5);
+        rankMin = Math.max(1, Math.round((100 - percentileMax) * 12000));
+        rankMax = Math.round((100 - percentileMin) * 12000);
+    } else if (inputData.examProfile === 'jeeadv') {
+        percentileMin = Math.max(0, 100 - Math.pow((100 - scorePct) / 100, 1.8) * 100);
+        percentileMax = Math.min(99.99, percentileMin + 0.6);
+        rankMin = Math.max(1, Math.round((100 - percentileMax) * 2500));
+        rankMax = Math.round((100 - percentileMin) * 2500);
+    } else if (inputData.examProfile === 'neet') {
+        percentileMin = Math.max(0, 100 - Math.pow((100 - scorePct) / 100, 2.2) * 100);
+        percentileMax = Math.min(99.99, percentileMin + 0.4);
+        rankMin = Math.max(1, Math.round((100 - percentileMax) * 20000));
+        rankMax = Math.round((100 - percentileMin) * 20000);
+    } else {
+        percentileMin = scorePct;
+        percentileMax = Math.min(100, scorePct + 1.0);
+        rankMin = Math.max(1, Math.round((100 - percentileMax) * 1000));
+        rankMax = Math.round((100 - percentileMin) * 1000);
+    }
+
+    return {
+        percentileRange: `${percentileMin.toFixed(1)}% - ${percentileMax.toFixed(1)}%`,
+        rankRange: `${rankMin.toLocaleString()} - ${rankMax.toLocaleString()}`,
+        confidence: "Moderate (Mathematical Model)",
+        methodology: "Normalized Score Curve"
+    };
+}
+
+function buildAssessmentResult(existingID = null) {
+    const rawInput = collectInput();
+    const scoreRes = calculateScore(rawInput);
+    const analyticsRes = calculateAnalytics(rawInput, scoreRes);
+    const predRes = predictRankAndPercentile(rawInput, scoreRes);
+
+    return {
+        id: existingID || generateUniqueID(),
+        schemaVersion: "8.0",
+        createdAt: Date.now(),
+        timestamp: new Date().toLocaleString(),
+
+        student: { name: rawInput.studentName },
+        assessment: { testName: rawInput.testName, examProfile: rawInput.examProfile },
+        
+        scoring: {
+            totalQuestions: rawInput.totalQs,
+            attempted: rawInput.attempted,
+            correct: scoreRes.correct,
+            wrong: rawInput.wrong,
+            skipped: scoreRes.skipped,
+            maxMarks: rawInput.maxMarks,
+            marksPerCorrect: scoreRes.marksPerCorrect,
+            negativeMarkingRatio: rawInput.markingRatio
+        },
+
+        subjects: {
+            enabled: rawInput.reportType === 'subjectwise',
+            data: rawInput.subjectScores
+        },
+
+        result: {
+            finalScore: scoreRes.finalScore,
+            scorePercentage: scoreRes.efficiency.toFixed(2),
+            accuracy: scoreRes.accuracy.toFixed(2),
+            attemptRate: scoreRes.attemptRate.toFixed(2),
+            penaltyMarks: scoreRes.penaltyMarks
+        },
+
+        analytics: analyticsRes,
+        prediction: predRes
+    };
+}
+
+function renderResult(canonicalObj) {
+    activeCanonicalResult = canonicalObj;
+
+    animateNumberCounter('score', canonicalObj.result.finalScore, 2);
+
+    const gradeEl = document.getElementById('dashGrade');
+    if (gradeEl) {
+        gradeEl.innerText = canonicalObj.analytics.performanceLevel;
+        gradeEl.style.backgroundColor = canonicalObj.analytics.color + "22";
+        gradeEl.style.color = canonicalObj.analytics.color;
+        gradeEl.style.border = `1px solid ${canonicalObj.analytics.color}55`;
+    }
+
+    animateNumberCounter('dashAccuracy', parseFloat(canonicalObj.result.accuracy), 1, '', '%');
+    animateNumberCounter('dashEfficiency', parseFloat(canonicalObj.result.scorePercentage), 1, '', '%');
+    animateNumberCounter('dashPenalty', canonicalObj.result.penaltyMarks, 2);
+
+    document.getElementById('dashCorrect').innerText = canonicalObj.scoring.correct;
+    document.getElementById('dashWrong').innerText = canonicalObj.scoring.wrong;
+    document.getElementById('dashSkipped').innerText = canonicalObj.scoring.skipped;
+    document.getElementById('dashRiskIndex').innerText = canonicalObj.analytics.riskIndex;
+
+    document.getElementById('predPercentile').innerText = canonicalObj.prediction.percentileRange;
+    document.getElementById('predRank').innerText = canonicalObj.prediction.rankRange;
+    document.getElementById('predConfidence').innerText = canonicalObj.prediction.confidence;
+    document.getElementById('predMethodology').innerText = canonicalObj.prediction.methodology;
+
+    // Diagnostics Text
+    let diagText = `ECLIPSE7 Performance Diagnostic Engine\n`;
+    diagText += `• Accuracy: ${canonicalObj.result.accuracy}%\n`;
+    diagText += `• Penalty Drag: ${canonicalObj.result.penaltyMarks.toFixed(2)} marks lost to wrong attempts.\n`;
+    diagText += `• Attempt Strategy: ${canonicalObj.result.attemptRate}% total test coverage.\n\n`;
+    diagText += `Recommendations:\n` + canonicalObj.analytics.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n');
+
+    document.getElementById('aiReportContent').innerText = diagText;
+
+    // Insight List
+    const insightList = document.getElementById('insightList');
+    if (insightList) {
+        insightList.innerHTML = '';
+        canonicalObj.analytics.recommendations.forEach(r => {
+            let li = document.createElement('li');
+            li.textContent = r;
+            insightList.appendChild(li);
+        });
+    }
+
+    renderCurrentDashboardCharts(canonicalObj);
+    initSimulatorValues(canonicalObj);
+
+    document.getElementById('analyticsDashboardContainer').classList.remove('hidden');
+}
+
+function executeCalculationSequence() {
+    if (!validateInput()) return null;
+    const resultObj = buildAssessmentResult();
+    renderResult(resultObj);
+    saveAssessment(resultObj);
+    return resultObj;
+}
+
+// ============================================================================
+// SIMULATOR ("WHAT IF?")
+// ============================================================================
+function setupSimulatorObservers() {
+    const s1 = document.getElementById('simWrongToCorrect');
+    const s2 = document.getElementById('simSkipToCorrect');
+
+    if (s1 && s2) {
+        s1.addEventListener('input', updateSimulatorOutcome);
+        s2.addEventListener('input', updateSimulatorOutcome);
+    }
+}
+
+function initSimulatorValues(canonicalObj) {
+    const s1 = document.getElementById('simWrongToCorrect');
+    const s2 = document.getElementById('simSkipToCorrect');
+    if (!s1 || !s2) return;
+
+    s1.max = Math.min(15, canonicalObj.scoring.wrong);
+    s1.value = 0;
+    s2.max = Math.min(15, canonicalObj.scoring.skipped);
+    s2.value = 0;
+
+    document.getElementById('simValWrongToCorrect').textContent = "0";
+    document.getElementById('simValSkipToCorrect').textContent = "0";
+    document.getElementById('simProjectedScore').textContent = canonicalObj.result.finalScore.toFixed(2);
+    document.getElementById('simScoreDelta').textContent = "+0.00";
+}
+
+function updateSimulatorOutcome() {
+    if (!activeCanonicalResult) return;
+
+    const wToC = parseInt(document.getElementById('simWrongToCorrect').value) || 0;
+    const sToC = parseInt(document.getElementById('simSkipToCorrect').value) || 0;
+
+    document.getElementById('simValWrongToCorrect').textContent = wToC;
+    document.getElementById('simValSkipToCorrect').textContent = sToC;
+
+    const mpc = activeCanonicalResult.scoring.marksPerCorrect;
+    const ratio = activeCanonicalResult.scoring.negativeMarkingRatio;
+
+    // Recover negative penalty + add positive score for wrong->correct
+    const recoveredPenalty = wToC * (mpc * ratio);
+    const addedScoreWrong = wToC * mpc;
+    const addedScoreSkip = sToC * mpc;
+
+    const delta = recoveredPenalty + addedScoreWrong + addedScoreSkip;
+    const projected = activeCanonicalResult.result.finalScore + delta;
+
+    document.getElementById('simProjectedScore').textContent = projected.toFixed(2);
+    document.getElementById('simScoreDelta').textContent = `+${delta.toFixed(2)}`;
+}
+
+// ============================================================================
+// ANIMATIONS & CHARTS
+// ============================================================================
 function animateNumberCounter(elementId, targetValue, decimals = 0, prefix = '', suffix = '') {
     const el = document.getElementById(elementId);
     if (!el) return;
     let start = 0;
-    let duration = 800;
+    let duration = 600;
     let startTime = null;
 
     function step(timestamp) {
@@ -497,137 +801,7 @@ function animateNumberCounter(elementId, targetValue, decimals = 0, prefix = '',
     window.requestAnimationFrame(step);
 }
 
-function calculateGrade(pct) {
-    if (pct >= 95) return { grade: "S+", color: "#10b981" };
-    if (pct >= 90) return { grade: "S", color: "#34d399" };
-    if (pct >= 80) return { grade: "A+", color: "#38bdf8" };
-    if (pct >= 70) return { grade: "A", color: "#60a5fa" };
-    if (pct >= 60) return { grade: "B+", color: "#a78bfa" };
-    if (pct >= 50) return { grade: "B", color: "#c084fc" };
-    if (pct >= 40) return { grade: "C", color: "#facc15" };
-    if (pct >= 30) return { grade: "D", color: "#fb923c" };
-    return { grade: "Needs Improvement", color: "#f43f5e" };
-}
-
-function updateDashboardUI(data) {
-    const gradeObj = calculateGrade(parseFloat(data.efficiency));
-    const gradeEl = document.getElementById('dashGrade');
-    gradeEl.innerText = gradeObj.grade;
-    gradeEl.style.backgroundColor = gradeObj.color + "22";
-    gradeEl.style.color = gradeObj.color;
-    gradeEl.style.border = `1px solid ${gradeObj.color}55`;
-
-    animateNumberCounter('dashAccuracy', parseFloat(data.accuracy), 1, '', '%');
-    animateNumberCounter('dashEfficiency', parseFloat(data.efficiency), 1, '', '%');
-    animateNumberCounter('dashPenalty', data.totalPenalty, 2);
-    document.getElementById('dashCorrect').innerText = data.correct;
-    document.getElementById('dashWrong').innerText = data.wrong;
-    document.getElementById('dashSkipped').innerText = data.unattempted;
-
-    let risk = "Low";
-    let wrongRatio = data.attempted > 0 ? (data.wrong / data.attempted) : 0;
-    if (wrongRatio > 0.4) risk = "High Risk";
-    else if (wrongRatio > 0.2) risk = "Moderate";
-    document.getElementById('dashRiskIndex').innerText = risk;
-}
-
-function computeRankAndPercentile(data) {
-    let scorePct = Math.max(0, Math.min(100, (data.finalScore / data.maxMarks) * 100));
-    let percentile = 0;
-    let rank = 0;
-    let band = "Good";
-    let competition = "Top 10%";
-
-    if (data.profileKey === 'jeemain') {
-        percentile = Math.max(0, 100 - Math.pow((100 - scorePct) / 100, 2) * 100);
-        rank = Math.round((100 - percentile) * 12000);
-    } else if (data.profileKey === 'jeeadv') {
-        percentile = Math.max(0, 100 - Math.pow((100 - scorePct) / 100, 1.8) * 100);
-        rank = Math.round((100 - percentile) * 2500);
-    } else if (data.profileKey === 'neet') {
-        percentile = Math.max(0, 100 - Math.pow((100 - scorePct) / 100, 2.2) * 100);
-        rank = Math.round((100 - percentile) * 20000);
-    } else {
-        percentile = scorePct;
-        rank = Math.round((100 - scorePct) * 1000);
-    }
-
-    if (percentile >= 99) { band = "Outstanding"; competition = "Top 1%"; }
-    else if (percentile >= 95) { band = "Excellent"; competition = "Top 5%"; }
-    else if (percentile >= 85) { band = "Very Good"; competition = "Top 15%"; }
-    else if (percentile >= 70) { band = "Above Average"; competition = "Top 30%"; }
-    else { band = "Developing"; competition = "Top 50%+"; }
-
-    animateNumberCounter('predPercentile', percentile, 2, '', '%');
-    animateNumberCounter('predRank', Math.max(1, rank), 0);
-    document.getElementById('predBand').innerText = band;
-    document.getElementById('predCompetition').innerText = competition;
-
-    return { percentile: percentile.toFixed(2), rank: Math.max(1, rank), band, competition };
-}
-
-function generateAIReport(data) {
-    let report = [];
-    let eff = parseFloat(data.efficiency);
-    let acc = parseFloat(data.accuracy);
-
-    if (eff >= 80) report.push("★ Excellent Overall Work. Your performance efficiency is in the top bracket.");
-    else if (eff >= 50) report.push("★ Solid Foundation. Performance is steady but requires accuracy refinement.");
-    else report.push("★ Caution Required. High score volatility detected.");
-
-    report.push(`• Accuracy Analysis: You maintained an accuracy of ${acc}%.`);
-    report.push(`• Negative Mark Analysis: You lost approximately ${data.totalPenalty.toFixed(2)} marks because of risky attempts.`);
-
-    if (data.wrong > 5) {
-        report.push(`• Risk Level: High negative drag. ${data.wrong} questions answered incorrectly.`);
-    } else {
-        report.push(`• Risk Level: Controlled precision. Minimal incorrect responses detected.`);
-    }
-
-    report.push("\nRecommendations:");
-    if (acc < 75) report.push("1. Attempt fewer uncertain questions to safeguard your positive scores.");
-    if (data.unattempted > data.totalQs * 0.3) report.push("2. Work on time management to reduce skipped questions.");
-    report.push("3. Focus on subject consistency to maintain continuous score improvement.");
-
-    document.getElementById('aiReportContent').innerText = report.join("\n");
-    return report.join("\n");
-}
-
-function generateInsightEngineList(currentData) {
-    const listEl = document.getElementById('insightList');
-    listEl.innerHTML = '';
-    const history = getStoredHistory();
-
-    let insights = [];
-    
-    if (currentData.wrong > currentData.correct * 0.35) {
-        insights.push("You attempted too many risky questions in this session.");
-    }
-    
-    if (history.length > 1) {
-        let prev = history[1];
-        let scoreDiff = parseFloat(currentData.finalScore) - parseFloat(prev.finalScore);
-        if (scoreDiff > 0) {
-            insights.push(`Score improved by +${scoreDiff.toFixed(2)} marks compared to previous test.`);
-        } else if (scoreDiff < 0) {
-            insights.push(`Score dropped by ${scoreDiff.toFixed(2)} marks compared to previous test.`);
-        }
-    }
-
-    if (insights.length === 0) {
-        insights.push("Performance metrics logged. Continue testing to track growth trends.");
-    }
-
-    insights.forEach(txt => {
-        let li = document.createElement('li');
-        li.innerText = txt;
-        listEl.appendChild(li);
-    });
-
-    return insights;
-}
-
-function renderCurrentDashboardCharts(data) {
+function renderCurrentDashboardCharts(canonicalObj) {
     if (breakdownChartInstance) breakdownChartInstance.destroy();
     if (subjectChartInstance) subjectChartInstance.destroy();
 
@@ -637,19 +811,20 @@ function renderCurrentDashboardCharts(data) {
         data: {
             labels: ['Correct', 'Wrong', 'Skipped'],
             datasets: [{
-                data: [data.correct, data.wrong, data.unattempted],
+                data: [canonicalObj.scoring.correct, canonicalObj.scoring.wrong, canonicalObj.scoring.skipped],
                 backgroundColor: ['#10b981', '#f43f5e', '#64748b']
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: '#f8fafc', font: { size: 10 } } } }
+            plugins: { legend: { labels: { color: '#f8fafc', font: { family: 'Plus Jakarta Sans', size: 11 } } } }
         }
     });
 
     const ctxBar = document.getElementById('currentSubjectChart').getContext('2d');
     const dynLabel = document.getElementById('mathBioLabel')?.textContent || 'MATHEMATICS';
+    const subData = canonicalObj.subjects.data;
     
     subjectChartInstance = new Chart(ctxBar, {
         type: 'bar',
@@ -657,7 +832,7 @@ function renderCurrentDashboardCharts(data) {
             labels: ['Physics', 'Chemistry', dynLabel],
             datasets: [{
                 label: 'Subject Score',
-                data: [subjectScores.phy.score, subjectScores.chem.score, subjectScores.mathBio.score],
+                data: [subData.phy.score, subData.chem.score, subData.mathBio.score],
                 backgroundColor: ['#8b5cf6', '#0284c7', '#10b981']
             }]
         },
@@ -674,376 +849,169 @@ function renderCurrentDashboardCharts(data) {
 }
 
 // ============================================================================
-// 8. DATA EXPORT & PDF GENERATION
+// STORAGE & HISTORY VAULT ARCHITECTURE
 // ============================================================================
-function createPDFDocumentObject(telemetryData) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
-    
-    const reportType = document.getElementById('reportType').value;
-    const currentProfile = document.getElementById('examProfile').value.toUpperCase();
-    const student = document.getElementById('studentName').value.toUpperCase();
-    const test = document.getElementById('testName').value.toUpperCase();
-    const timestamp = new Date().toLocaleString().toUpperCase();
-
-    const predData = computeRankAndPercentile(telemetryData);
-    const aiReportText = generateAIReport(telemetryData);
-    const insights = generateInsightEngineList(telemetryData);
-
-    doc.setFillColor(255, 255, 255);
-    doc.rect(0, 0, 210, 297, 'F');
-    
-    doc.setDrawColor(240, 244, 248); doc.setLineWidth(0.25);
-    for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
-    for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j);
-
-    doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3);
-    doc.rect(8, 8, 194, 281);
-
-    doc.setFillColor(248, 250, 252); doc.rect(10, 10, 190, 32, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5); doc.rect(10, 10, 190, 32, 'D');
-    
-    doc.setFillColor(14, 165, 233); doc.rect(10, 41, 130, 1, 'F');
-    doc.setFillColor(168, 85, 247); doc.rect(140, 41, 60, 1, 'F');
-
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("NEGATIVE MARKING PERFORMANCE REPORT", 16, 21);
-    
-    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
-    doc.text(`SYSTEM CORE: SCORE_PROFILE_${currentProfile} // CORE v7.0`, 16, 27);
-    
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
-    doc.text("ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE", 16, 35);
-
-    let cardY = 46;
-    doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" STUDENT IDENTITY MATRIX", 12, cardY + 4.2);
-    
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
-    doc.rect(10, cardY + 6, 92, 26, 'DF');
-    doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
-    doc.text("CANDIDATE NAME    :", 14, cardY + 14);
-    doc.text("TARGET EXAM       :", 14, cardY + 20);
-    doc.text("SYSTEM TIMESTAMP  :", 14, cardY + 26);
-    
-    doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
-    doc.text(student.length > 20 ? student.substring(0, 20) + "..." : student, 44, cardY + 14);
-    doc.text(test.length > 20 ? test.substring(0, 20) + "..." : test, 44, cardY + 20);
-    doc.setFont("courier", "bold"); doc.setFontSize(6.5); doc.text(timestamp, 44, cardY + 26);
-
-    doc.setFillColor(241, 245, 249); doc.rect(108, cardY, 92, 6, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(108, cardY, 92, 6, 'D');
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" EVALUATION METRICS SUMMARY", 110, cardY + 4.2);
-    
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
-    doc.rect(108, cardY + 6, 92, 26, 'DF');
-    doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
-    doc.text("TOTAL QUESTIONS    :", 112, cardY + 13);
-    doc.text("MAX EVAL MARKS      :", 112, cardY + 19);
-    doc.text("EVAL USER ATTEMPTS  :", 112, cardY + 25);
-    doc.text("VERIFIED FAULTS     :", 112, cardY + 31);
-    
-    doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
-    doc.text(`${telemetryData.totalQs} ITEMS`, 148, cardY + 13);
-    doc.text(`${telemetryData.maxMarks} MARKS`, 148, cardY + 19);
-    doc.text(`${telemetryData.attempted} UNITS`, 148, cardY + 25);
-    doc.setTextColor(225, 29, 72); doc.text(`${telemetryData.wrong} FAULTS`, 148, cardY + 31);
-
-    let scoreY = 82;
-    doc.setFillColor(250, 251, 253); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
-    doc.rect(10, scoreY, 190, 22, 'DF');
-    doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.3);
-    doc.line(68, scoreY, 68, scoreY + 22); doc.line(142, scoreY, 142, scoreY + 22);
-    
-    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("GROSS MARKS (PRE-PENALTY)", 15, scoreY + 6);
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-    doc.text(`${(telemetryData.correct * telemetryData.marksPerCorrect).toFixed(2)}`, 15, scoreY + 14);
-
-    doc.setTextColor(14, 165, 233); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text("FINAL CALCULATED SCORE", 73, scoreY + 6);
-    doc.setFont("courier", "bold"); doc.setFontSize(18); doc.setTextColor(15, 23, 42);
-    doc.text(`${typeof telemetryData.finalScore === 'number' ? telemetryData.finalScore.toFixed(2) : telemetryData.finalScore} / ${telemetryData.maxMarks}`, 73, scoreY + 15);
-
-    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("ENGINE EFFICIENCY RATIO", 147, scoreY + 6);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(12);
-    doc.text(`${telemetryData.efficiency}%`, 147, scoreY + 14);
-
-    let rankY = 108;
-    doc.setFillColor(243, 244, 246); doc.rect(10, rankY, 190, 5, 'F');
-    doc.setDrawColor(139, 92, 246); doc.setLineWidth(0.4); doc.rect(10, rankY, 190, 5, 'D');
-    doc.setTextColor(109, 40, 217); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" AI SMART RANK & PERCENTILE PREDICTION ENGINE", 12, rankY + 3.8);
-
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(229, 231, 235);
-    doc.rect(10, rankY + 5, 190, 16, 'DF');
-    
-    doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
-    doc.text("ESTIMATED PERCENTILE :", 14, rankY + 11);
-    doc.text("ESTIMATED AIR RANK  :", 14, rankY + 17);
-    doc.text("PERFORMANCE BAND    :", 110, rankY + 11);
-    doc.text("COMPETITION LEVEL   :", 110, rankY + 17);
-
-    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(15, 23, 42);
-    doc.text(`${predData.percentile}%`, 52, rankY + 11);
-    doc.text(`AIR ${predData.rank}`, 52, rankY + 17);
-    doc.text(`${predData.band}`, 148, rankY + 11);
-    doc.text(`${predData.competition}`, 148, rankY + 17);
-
-    let diagY = 133;
-    doc.setFillColor(240, 249, 255); doc.rect(10, diagY, 190, 5, 'F');
-    doc.setDrawColor(2, 132, 199); doc.setLineWidth(0.4); doc.rect(10, diagY, 190, 5, 'D');
-    doc.setTextColor(3, 105, 161); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" AI PERFORMANCE DIAGNOSTIC REPORT", 12, diagY + 3.8);
-
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(229, 231, 235);
-    doc.rect(10, diagY + 5, 190, 26, 'DF');
-
-    doc.setFont("helvetica", "normal"); doc.setFontSize(6.8); doc.setTextColor(51, 65, 85);
-    let splitReport = doc.splitTextToSize(aiReportText, 182);
-    doc.text(splitReport, 14, diagY + 10);
-
-    let insY = 168;
-    doc.setFillColor(236, 253, 245); doc.rect(10, insY, 190, 5, 'F');
-    doc.setDrawColor(16, 185, 129); doc.setLineWidth(0.4); doc.rect(10, insY, 190, 5, 'D');
-    doc.setTextColor(4, 120, 87); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" HISTORICAL INSIGHT ENGINE & TREND ANALYTICS", 12, insY + 3.8);
-
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(229, 231, 235);
-    doc.rect(10, insY + 5, 190, 18, 'DF');
-
-    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(51, 65, 85);
-    let lineCursor = insY + 11;
-    insights.forEach((ins) => {
-        doc.text(`• ${ins}`, 14, lineCursor);
-        lineCursor += 5;
-    });
-
-    let meterY = 195;
-    if (reportType === 'subjectwise') {
-        doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, meterY, 200, meterY);
-        doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(8.5);
-        doc.text("CROSS-SUBJECT ANALYTICS MATRIX", 11, meterY + 5);
-        meterY += 9;
-
-        const dynLabel = document.getElementById('mathBioLabel')?.textContent || 'MATHEMATICS';
-        const rows = [
-            { name: 'PHYSICS SUBSYSTEM', key: 'phy', kA: 'phyA', kC: 'phyC', kW: 'phyW' },
-            { name: 'CHEMISTRY SUBSYSTEM', key: 'chem', kA: 'chemA', kC: 'chemC', kW: 'chemW' },
-            { name: `${dynLabel} SUBSYSTEM`, key: 'mathBio', kA: 'mathBioA', kC: 'mathBioC', kW: 'mathBioW' }
-        ];
-
-        rows.forEach(r => {
-            const total = parseInt(document.getElementById(r.kA).value) || 0;
-            const corr = parseInt(document.getElementById(r.kC).value) || 0;
-            const wrng = parseInt(document.getElementById(r.kW).value) || 0;
-            const sData = subjectScores[r.key];
-
-            doc.setFontSize(6.5); doc.setFont("helvetica", "bold"); doc.setTextColor(71, 85, 105);
-            doc.text(r.name, 11, meterY + 3);
-
-            if (total > 0) {
-                let maxWidth = 80;
-                let cW = (corr / total) * maxWidth;
-                let wW = (wrng / total) * maxWidth;
-                let iW = Math.max(0, maxWidth - (cW + wW));
-
-                doc.setFillColor(16, 185, 129); if(cW > 0) doc.rect(74, meterY, cW, 4.0, 'F');
-                doc.setFillColor(244, 63, 94); if(wW > 0) doc.rect(74 + cW, meterY, wW, 4.0, 'F');
-                doc.setFillColor(241, 245, 249); if(iW > 0) doc.rect(74 + cW + wW, meterY, iW, 4.0, 'F');
-                
-                doc.setDrawColor(203, 213, 225); doc.rect(74, meterY, maxWidth, 4.0, 'D');
-                
-                doc.setFontSize(5.5); doc.setTextColor(15, 23, 42); doc.setFont("courier", "bold");
-                doc.text(`[ MARKS: ${sData.score.toFixed(2)}/${sData.maxMarks} | OK: ${corr} | WRG: ${wrng} ]`, 156, meterY + 2.8);
-            } else {
-                doc.setFont("helvetica", "oblique"); doc.setFontSize(6); doc.setTextColor(148, 163, 184);
-                doc.text("CHANNEL OFFLINE // NO DATA LOADED", 74, meterY + 3);
-            }
-            meterY += 6;
-        });
+function getStoredHistory() {
+    try {
+        const raw = localStorage.getItem(E7_HISTORY_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        console.error("Local storage error:", e);
+        return [];
     }
-
-    const finalFooterY = 254;
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.4); doc.line(10, finalFooterY - 4, 200, finalFooterY - 4);
-
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-    doc.text("MR. PRASAD REDDY", 14, finalFooterY + 4);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
-    doc.text("Chief Executive Officer & Founder of ECLIPSE7", 14, finalFooterY + 9);
-    doc.setFont("courier", "bold"); doc.setFontSize(7); doc.setTextColor(5, 150, 105);
-    doc.text("STATUS: INTEGRITY MATRIX APPROVED & DIGITAL RECORD VERIFIED VIA CORE STREAM", 14, finalFooterY + 14);
-
-    return doc;
 }
 
-function downloadPDFReportSequence() {
-    const telemetryData = executeCalculationSequence();
-    if (!telemetryData) return;
+function saveAssessment(canonicalObj) {
+    let history = getStoredHistory();
+    const existingIndex = history.findIndex(h => h.id === canonicalObj.id);
 
-    const student = document.getElementById('studentName').value.toUpperCase();
-    const doc = createPDFDocumentObject(telemetryData);
-
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = "stamp.jpg"; 
-    
-    img.onload = function() {
-        doc.addImage(img, 'JPEG', 158, 244, 34, 34);
-        doc.save(`${student.replace(/ /g, "_")}_ECLIPSE7_METRIC_REPORT.pdf`);
-    };
-    img.onerror = () => {
-        doc.save(`${student.replace(/ /g, "_")}_ECLIPSE7_METRIC_REPORT.pdf`);
-    };
-}
-
-function exportCurrentPNG() {
-    const el = document.getElementById('mainAppContainer');
-    html2canvas(el).then(canvas => {
-        let link = document.createElement('a');
-        link.download = 'ECLIPSE7_Assessment_Result.png';
-        link.href = canvas.toDataURL();
-        link.click();
-    });
-}
-
-function exportCurrentJSON() {
-    const data = executeCalculationSequence();
-    if (!data) return;
-    let blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    let link = document.createElement('a');
-    link.download = 'ECLIPSE7_Result.json';
-    link.href = URL.createObjectURL(blob);
-    link.click();
-}
-
-async function triggerShareMenu() {
-    const data = executeCalculationSequence();
-    if (!data) return;
-
-    const student = document.getElementById('studentName').value;
-    const test = document.getElementById('testName').value;
-    const profile = document.getElementById('examProfile').value.toUpperCase();
-    const pred = computeRankAndPercentile(data);
-
-    if (navigator.canShare && navigator.canShare({ files: [new File([], 'test.pdf', { type: 'application/pdf' })] })) {
-        try {
-            const doc = createPDFDocumentObject(data);
-            const pdfArrayBuffer = doc.output('arraybuffer');
-            const pdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
-            const fileName = `${student.replace(/ /g, "_")}_ECLIPSE7_Report.pdf`;
-            const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
-
-            await navigator.share({
-                title: `${student}'s Performance Report - ECLIPSE7`,
-                text: `Check out ${student}'s evaluation result for ${test}!`,
-                files: [pdfFile]
-            });
-            triggerSystemToastNotification("Result PDF shared successfully!", false);
-            return;
-        } catch (err) {
-            console.log("PDF file share aborted or unsupported, defaulting to formatted summary...");
-        }
-    }
-
-    const shareText = 
-`🎓 *ECLIPSE7 EXAM EVALUATION REPORT*
-----------------------------------------
-👤 *Student Name:* ${student}
-📝 *Assessment:* ${test}
-🎯 *Profile:* ${profile}
-
-📊 *SCORE SUMMARY*
-• *Final Score:* ${typeof data.finalScore === 'number' ? data.finalScore.toFixed(2) : data.finalScore} / ${data.maxMarks}
-• *Efficiency:* ${data.efficiency}%
-• *Accuracy:* ${data.accuracy}%
-• *Correct Answers:* ${data.correct}
-• *Wrong Answers:* ${data.wrong} (${data.totalPenalty.toFixed(2)} Penalty Marks)
-• *Skipped Questions:* ${data.unattempted}
-
-🚀 *AI PREDICTION METRICS*
-• *Estimated Percentile:* ${pred.percentile}%
-• *Estimated AIR Rank:* ${pred.rank}
-• *Performance Band:* ${pred.band}
-
-----------------------------------------
-⚡ *Calculated via ECLIPSE7 Negative Marking Engine*
-🔗 https://eclipse7.odoo.com/`;
-
-    if (navigator.share) {
-        navigator.share({
-            title: `ECLIPSE7 Assessment Result - ${student}`,
-            text: shareText
-        }).catch(() => {});
+    if (existingIndex >= 0) {
+        history[existingIndex] = canonicalObj;
     } else {
-        navigator.clipboard.writeText(shareText);
-        triggerSystemToastNotification("Result Summary copied to clipboard!", false);
+        history.unshift(canonicalObj);
+    }
+
+    localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
+    renderHistoryVault();
+
+    if (window.saveScoreToDatabase) {
+        window.saveScoreToDatabase(canonicalObj);
     }
 }
 
-// ============================================================================
-// 9. HISTORY VAULT SYSTEM
-// ============================================================================
-function downloadCompleteHistoryPDF() {
+function mergeCloudAndLocalHistory(cloudRecords) {
+    let localHistory = getStoredHistory();
+    let mergedMap = new Map();
+
+    localHistory.forEach(item => mergedMap.set(item.id, item));
+    cloudRecords.forEach(item => mergedMap.set(item.id, item));
+
+    let mergedArray = Array.from(mergedMap.values()).sort((a, b) => b.createdAt - a.createdAt);
+    localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(mergedArray));
+    renderHistoryVault();
+}
+
+function renderHistoryVault() {
+    const container = document.getElementById('historyListContainer');
+    const badge = document.getElementById('navHistoryCounter');
+    const totalTxt = document.getElementById('historyTotalText');
+    if (!container) return;
+
     const history = getStoredHistory();
+    if (badge) badge.textContent = history.length;
+    if (totalTxt) totalTxt.textContent = `${history.length} Records Stored`;
+
     if (history.length === 0) {
-        triggerSystemToastNotification("No history records available to export PDF.");
+        container.innerHTML = `<div class="empty-history-msg">No stored assessment history found.</div>`;
         return;
     }
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
+    let html = '';
+    history.forEach(item => {
+        const student = escapeHTML(item.student?.name || item.studentName || 'Candidate');
+        const test = escapeHTML(item.assessment?.testName || item.testName || 'Assessment');
+        const profile = escapeHTML((item.assessment?.examProfile || item.profile || 'custom').toUpperCase());
+        const score = typeof item.result?.finalScore === 'number' ? item.result.finalScore.toFixed(2) : (item.finalScore || '0.00');
+        const maxM = item.scoring?.maxMarks || item.maxMarks || 300;
+        const eff = item.result?.scorePercentage || item.efficiency || '0.00';
 
-    doc.setFont("helvetica", "bold"); doc.setFontSize(16);
-    doc.text("ECLIPSE7 - Complete History Performance Analytics", 14, 20);
-    doc.setFontSize(9); doc.setTextColor(100);
-    doc.text(`Generated: ${new Date().toLocaleString()} | Total Tests: ${history.length}`, 14, 26);
-
-    const tableRows = history.map(h => [
-        h.timestamp,
-        h.studentName,
-        h.testName,
-        h.profile.toUpperCase(),
-        `${h.finalScore} / ${h.maxMarks}`,
-        `${h.efficiency}%`
-    ]);
-
-    doc.autoTable({
-        startY: 32,
-        head: [['Timestamp', 'Student', 'Test', 'Profile', 'Score', 'Efficiency']],
-        body: tableRows,
-        theme: 'striped',
-        headStyles: { fillColor: [139, 92, 246] }
+        html += `
+        <div class="history-item-card" data-id="${item.id}">
+            <div class="item-card-header">
+                <span class="item-test-title">${test}</span>
+                <span class="item-badge-profile">${profile}</span>
+            </div>
+            <div class="item-student-name"><i class="fa-solid fa-user-graduate"></i> ${student}</div>
+            <div class="item-metrics-grid">
+                <div>Score: <strong>${score} / ${maxM}</strong></div>
+                <div>Accuracy: <strong>${item.result?.accuracy || item.accuracy || 0}%</strong></div>
+                <div>Efficiency: <strong>${eff}%</strong></div>
+                <div>Date: <strong>${item.timestamp || 'N/A'}</strong></div>
+            </div>
+            <div class="item-card-actions">
+                <button class="item-btn btn-restore" onclick="restoreAssessmentState('${item.id}')"><i class="fa-solid fa-rotate-left"></i> Restore</button>
+                <button class="item-btn btn-delete" onclick="deleteAssessmentItem('${item.id}')"><i class="fa-solid fa-trash-can"></i> Delete</button>
+            </div>
+        </div>`;
     });
 
-    doc.save("ECLIPSE7_Complete_History_Report.pdf");
+    container.innerHTML = html;
 }
 
-function exportHistoryJSON() {
+function restoreAssessmentState(id) {
     const history = getStoredHistory();
-    let blob = new Blob([JSON.stringify(history, null, 2)], { type: 'application/json' });
-    let link = document.createElement('a');
-    link.download = 'ECLIPSE7_History_Vault.json';
-    link.href = URL.createObjectURL(blob);
-    link.click();
+    const item = history.find(h => h.id === id);
+    if (!item) return;
+
+    document.getElementById('studentName').value = item.student?.name || item.studentName || '';
+    document.getElementById('testName').value = item.assessment?.testName || item.testName || '';
+    
+    const profileKey = item.assessment?.examProfile || item.profile || 'custom';
+    document.getElementById('examProfile').value = profileKey;
+    document.getElementById('examProfileLabel').textContent = EXAM_PROFILES[profileKey]?.label || EXAM_PROFILES.custom.label;
+
+    document.getElementById('totalQs').value = item.scoring?.totalQuestions || item.totalQs || 0;
+    document.getElementById('maxMarks').value = item.scoring?.maxMarks || item.maxMarks || 0;
+    document.getElementById('attempted').value = item.scoring?.attempted || item.attempted || 0;
+    document.getElementById('wrong').value = item.scoring?.wrong || item.wrong || 0;
+    document.getElementById('markingRatio').value = item.scoring?.negativeMarkingRatio || item.markingRatio || 0.25;
+
+    if (item.subjects?.data) {
+        document.getElementById('reportType').value = 'subjectwise';
+        document.getElementById('selectedLabel').textContent = 'SUBJECT BREAKDOWN';
+        toggleSubjectSectionDisplay();
+
+        ['phy', 'chem', 'mathBio'].forEach(sub => {
+            const sData = item.subjects.data[sub];
+            if (sData) {
+                document.getElementById(`${sub}A`).value = sData.total || 0;
+                document.getElementById(`${sub}C`).value = sData.correct || 0;
+                document.getElementById(`${sub}W`).value = sData.wrong || 0;
+                document.getElementById(`${sub}N`).value = sData.skipped || 0;
+            }
+        });
+        recalculateSubjectScores();
+    } else {
+        document.getElementById('reportType').value = 'overall';
+        document.getElementById('selectedLabel').textContent = 'OVERALL MODE';
+        toggleSubjectSectionDisplay();
+    }
+
+    renderResult(item);
+    toggleHistoryDrawer(false);
+    triggerSystemToastNotification("Assessment state perfectly restored.", false);
 }
 
-function exportHistoryCSV() {
-    const history = getStoredHistory();
-    if (history.length === 0) return;
-    let csv = "ID,Timestamp,Student,Test,Profile,Score,MaxMarks,Efficiency\n";
-    history.forEach(h => {
-        csv += `"${h.id}","${h.timestamp}","${h.studentName}","${h.testName}","${h.profile}","${h.finalScore}","${h.maxMarks}","${h.efficiency}"\n`;
+function deleteAssessmentItem(id) {
+    let history = getStoredHistory();
+    const item = history.find(h => h.id === id);
+    history = history.filter(h => h.id !== id);
+    localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
+    renderHistoryVault();
+
+    if (item && item.firebaseKey && window.deleteScoreFromDatabase) {
+        window.deleteScoreFromDatabase(item.firebaseKey);
+    }
+    triggerSystemToastNotification("Record removed from vault.", false);
+}
+
+function clearAssessmentHistory() {
+    if (!confirm("Are you sure you want to purge all stored assessments?")) return;
+    localStorage.removeItem(E7_HISTORY_KEY);
+    renderHistoryVault();
+    if (window.clearAllDatabaseScores) {
+        window.clearAllDatabaseScores();
+    }
+    triggerSystemToastNotification("History vault purged completely.", false);
+}
+
+function filterHistoryList() {
+    const q = document.getElementById('historySearchInput').value.toLowerCase();
+    const items = document.querySelectorAll('.history-item-card');
+    items.forEach(el => {
+        const text = el.textContent.toLowerCase();
+        el.style.display = text.includes(q) ? 'block' : 'none';
     });
-    let blob = new Blob([csv], { type: 'text/csv' });
-    let link = document.createElement('a');
-    link.download = 'ECLIPSE7_History_Vault.csv';
-    link.href = URL.createObjectURL(blob);
-    link.click();
 }
 
 function toggleHistoryDrawer(show) {
@@ -1061,269 +1029,377 @@ function toggleHistoryDrawer(show) {
     }
 }
 
-function getStoredHistory() {
-    try {
-        const raw = localStorage.getItem(E7_HISTORY_KEY);
-        return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-        console.error("Storage Access Fault", e);
-        return [];
-    }
-}
-
-function saveRecordToVault(computed) {
-    const studentName = document.getElementById('studentName').value.trim();
-    const testName = document.getElementById('testName').value.trim();
-    const profile = document.getElementById('examProfile').value;
-
-    if (!studentName || !testName) return;
-
-    const numScore = typeof computed.finalScore === 'number' ? computed.finalScore.toFixed(2) : computed.finalScore;
-
-    const record = {
-        timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        studentName,
-        testName,
-        profile,
-        finalScore: numScore,
-        maxMarks: computed.maxMarks,
-        totalQs: computed.totalQs,
-        attempted: computed.attempted,
-        wrong: computed.wrong,
-        correct: computed.correct,
-        efficiency: computed.efficiency,
-        accuracy: computed.accuracy
-    };
-
-    if (window.getCurrentUser && window.getCurrentUser() && window.saveScoreToDatabase) {
-        window.saveScoreToDatabase(record);
-    } else {
-        record.id = 'E7-REC-' + Date.now();
-        let history = getStoredHistory();
-        if (history.length > 0 && history[0].studentName === studentName && history[0].testName === testName && history[0].finalScore === record.finalScore) {
-            return;
-        }
-
-        history.unshift(record);
-        if (history.length > 50) history = history.slice(0, 50);
-
-        localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
-        updateHistoryCounterBadge(history.length);
-    }
-}
-
-function updateHistoryCounterBadge(count) {
-    const navCounterNode = document.getElementById('navHistoryCounter');
-    if (navCounterNode) navCounterNode.textContent = count;
-}
-
-function renderHistoryVault(filterQuery = "") {
-    const container = document.getElementById('historyListContainer');
-    const totalLabel = document.getElementById('historyTotalText');
-    if (!container) return;
-
+// ============================================================================
+// COMPARISON ENGINE & FULL REPORT MODALS
+// ============================================================================
+function openCompareModalLauncher() {
     const history = getStoredHistory();
-    updateHistoryCounterBadge(history.length);
-
-    const filtered = filterQuery.trim() === "" ? history : history.filter(item => 
-        item.studentName.toLowerCase().includes(filterQuery.toLowerCase()) || 
-        item.testName.toLowerCase().includes(filterQuery.toLowerCase())
-    );
-
-    if (totalLabel) totalLabel.textContent = `${filtered.length} Records Shown`;
-
-    if (filtered.length === 0) {
-        container.innerHTML = `
-            <div class="empty-history-state" style="text-align: center; padding: 20px; color: var(--text-muted);">
-                <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                <p>${filterQuery ? "No matching records found." : "Vault empty. Compute a test score to log history."}</p>
-            </div>
-        `;
+    if (history.length < 2) {
+        triggerSystemToastNotification("Require at least 2 historical records to run comparison.");
         return;
     }
 
-    container.innerHTML = filtered.map(item => `
-        <div class="history-item-card" id="card-${item.id}">
-            <div class="history-card-top">
-                <h4 class="history-cand-name">${escapeHtml(item.studentName)}</h4>
-                <span class="history-badge-profile">${item.profile}</span>
-            </div>
-            <div class="history-card-mid">
-                <span class="history-test-name">${escapeHtml(item.testName)}</span>
-                <span class="history-card-score">${item.finalScore} / ${item.maxMarks}</span>
-            </div>
-            <div class="history-card-bottom">
-                <span>${item.timestamp} | Acc: ${item.efficiency}%</span>
-                <div class="history-card-controls">
-                    <button class="history-ctrl-btn" onclick="restoreHistoryItem('${item.id}')" title="Load into Calculator">
-                        <i class="fa-solid fa-rotate-left"></i> Load
-                    </button>
-                    <button class="history-ctrl-btn del" onclick="deleteHistoryItem('${item.id}')" title="Delete Entry">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
+    const s1 = document.getElementById('compareSelect1');
+    const s2 = document.getElementById('compareSelect2');
+    s1.innerHTML = ''; s2.innerHTML = '';
+
+    history.forEach((h, idx) => {
+        const opt1 = document.createElement('option');
+        opt1.value = h.id; opt1.textContent = `${h.assessment?.testName || h.testName} (${h.result?.scorePercentage || h.efficiency}%)`;
+        s1.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = h.id; opt2.textContent = `${h.assessment?.testName || h.testName} (${h.result?.scorePercentage || h.efficiency}%)`;
+        s2.appendChild(opt2);
+    });
+
+    s2.selectedIndex = 1;
+    toggleCompareModal(true);
+    renderComparisonView();
 }
 
-function filterHistoryList() {
-    const query = document.getElementById('historySearchInput').value;
-    renderHistoryVault(query);
-}
-
-function restoreHistoryItem(id) {
-    const history = getStoredHistory();
-    const item = history.find(x => x.id === id);
-    if (!item) return;
-
-    document.getElementById('studentName').value = item.studentName;
-    document.getElementById('testName').value = item.testName;
-    document.getElementById('totalQs').value = item.totalQs;
-    document.getElementById('maxMarks').value = item.maxMarks;
-    document.getElementById('attempted').value = item.attempted;
-    document.getElementById('wrong').value = item.wrong;
-
-    document.getElementById('score').innerText = item.finalScore;
-
-    toggleHistoryDrawer(false);
-    triggerSystemToastNotification(`Loaded assessment record for ${item.studentName}`, false);
-    executeCalculationSequence();
-}
-
-function deleteHistoryItem(id) {
-    let history = getStoredHistory();
-    history = history.filter(x => x.id !== id);
-    localStorage.setItem(E7_HISTORY_KEY, JSON.stringify(history));
-    renderHistoryVault(document.getElementById('historySearchInput').value);
-    triggerSystemToastNotification("Record removed from Vault.", false);
-}
-
-function clearAssessmentHistory() {
-    if (confirm("Purge all recorded assessment history from browser vault?")) {
-        localStorage.removeItem(E7_HISTORY_KEY);
-        renderHistoryVault();
-        triggerSystemToastNotification("Vault completely purged.", false);
+function toggleCompareModal(show) {
+    const modal = document.getElementById('compareModal');
+    const overlay = document.getElementById('compareModalOverlay');
+    if (show) {
+        modal?.classList.add('active');
+        overlay?.classList.add('active');
+    } else {
+        modal?.classList.remove('active');
+        overlay?.classList.remove('active');
     }
 }
 
-function toggleFullReportModal(show) {
-    const modal = document.getElementById('fullReportModal');
-    const overlay = document.getElementById('fullReportOverlay');
-    if (show) { modal.classList.add('active'); overlay.classList.add('active'); }
-    else { modal.classList.remove('active'); overlay.classList.remove('active'); }
+function renderComparisonView() {
+    const id1 = document.getElementById('compareSelect1').value;
+    const id2 = document.getElementById('compareSelect2').value;
+    const history = getStoredHistory();
+    const t1 = history.find(h => h.id === id1);
+    const t2 = history.find(h => h.id === id2);
+    const container = document.getElementById('comparisonGrid');
+
+    if (!t1 || !t2) return;
+
+    const eff1 = parseFloat(t1.result?.scorePercentage || t1.efficiency);
+    const eff2 = parseFloat(t2.result?.scorePercentage || t2.efficiency);
+    const diffEff = (eff2 - eff1).toFixed(2);
+    const diffPen = ((t2.result?.penaltyMarks || t2.totalPenalty) - (t1.result?.penaltyMarks || t1.totalPenalty)).toFixed(2);
+
+    container.innerHTML = `
+        <div class="cmp-card">
+            <h4>${escapeHTML(t1.assessment?.testName || t1.testName)}</h4>
+            <p>Score: <strong>${t1.result?.finalScore || t1.finalScore} / ${t1.scoring?.maxMarks || t1.maxMarks}</strong></p>
+            <p>Efficiency: <strong>${eff1}%</strong></p>
+            <p>Accuracy: <strong>${t1.result?.accuracy || t1.accuracy}%</strong></p>
+            <p>Penalty: <strong>${t1.result?.penaltyMarks || t1.totalPenalty}</strong></p>
+        </div>
+        <div class="cmp-card">
+            <h4>${escapeHTML(t2.assessment?.testName || t2.testName)}</h4>
+            <p>Score: <strong>${t2.result?.finalScore || t2.finalScore} / ${t2.scoring?.maxMarks || t2.maxMarks}</strong></p>
+            <p>Efficiency: <strong>${eff2}%</strong></p>
+            <p>Accuracy: <strong>${t2.result?.accuracy || t2.accuracy}%</strong></p>
+            <p>Penalty: <strong>${t2.result?.penaltyMarks || t2.totalPenalty}</strong></p>
+        </div>
+        <div class="cmp-summary-box">
+            <strong>Delta Analysis:</strong> ${diffEff >= 0 ? `+${diffEff}% Efficiency gain` : `${diffEff}% Efficiency loss`}.
+            Penalty difference: ${diffPen} marks.
+        </div>
+    `;
 }
 
 function generateAndShowFullHistoryReport() {
     const history = getStoredHistory();
     if (history.length === 0) {
-        triggerSystemToastNotification("Vault empty. Add tests to generate history analysis.");
+        triggerSystemToastNotification("No history available to generate full report.");
         return;
     }
 
-    let totalTests = history.length;
-    let scores = history.map(h => parseFloat(h.finalScore));
-    let highest = Math.max(...scores);
-    let lowest = Math.min(...scores);
-    let avgScore = (scores.reduce((a, b) => a + b, 0) / totalTests).toFixed(2);
-    let avgAcc = (history.reduce((a, item) => a + parseFloat(item.accuracy || item.efficiency || 0), 0) / totalTests).toFixed(2);
+    const container = document.getElementById('fullReportContent');
+    let avgScorePct = (history.reduce((a, b) => a + parseFloat(b.result?.scorePercentage || b.efficiency), 0) / history.length).toFixed(2);
+    let avgAcc = (history.reduce((a, b) => a + parseFloat(b.result?.accuracy || b.accuracy), 0) / history.length).toFixed(2);
 
-    let content = document.getElementById('fullReportContent');
-    content.innerHTML = `
+    container.innerHTML = `
         <div class="full-report-section">
-            <h4><i class="fa-solid fa-chart-line"></i> Historical Executive Summary</h4>
-            <p>Over the past ${totalTests} recorded assessments, the student has maintained an average score of <strong>${avgScore}</strong> with an average efficiency/accuracy of <strong>${avgAcc}%</strong>.</p>
-            <p>The highest score achieved across all assessments is <strong>${highest}</strong>, with a lower baseline recorded at <strong>${lowest}</strong>.</p>
+            <h4>Executive Analytics Summary</h4>
+            <p>Evaluated <strong>${history.length}</strong> total assessments. Average Efficiency: <strong>${avgScorePct}%</strong> | Average Accuracy: <strong>${avgAcc}%</strong>.</p>
         </div>
         <div class="full-report-section">
-            <h4><i class="fa-solid fa-microchip"></i> Performance & Strategy Recommendations</h4>
-            <p>Assessment trends indicate periodic score fluctuations primarily influenced by incorrect attempts. To maximize total score consistency, it is recommended to restrict uncertain answers and adopt a selective attempt framework in high-penalty sections.</p>
+            <h4>Assessment Progression Timeline</h4>
+            <ul class="timeline-list">
+                ${history.map(h => `
+                    <li>
+                        <strong>${escapeHTML(h.assessment?.testName || h.testName)}</strong> — Score: ${h.result?.finalScore || h.finalScore} (${h.result?.scorePercentage || h.efficiency}%) on ${h.timestamp}
+                    </li>
+                `).join('')}
+            </ul>
         </div>
     `;
 
     toggleFullReportModal(true);
 }
 
-function toggleCompareModal(show) {
-    const modal = document.getElementById('compareModal');
-    const overlay = document.getElementById('compareModalOverlay');
-    if (show) { modal.classList.add('active'); overlay.classList.add('active'); }
-    else { modal.classList.remove('active'); overlay.classList.remove('active'); }
+function toggleFullReportModal(show) {
+    const modal = document.getElementById('fullReportModal');
+    const overlay = document.getElementById('fullReportOverlay');
+    if (show) {
+        modal?.classList.add('active');
+        overlay?.classList.add('active');
+    } else {
+        modal?.classList.remove('active');
+        overlay?.classList.remove('active');
+    }
 }
 
-function openCompareModalLauncher() {
-    const history = getStoredHistory();
-    if (history.length < 2) {
-        triggerSystemToastNotification("At least 2 test entries required for comparison.");
+// ============================================================================
+// EXPORT ENGINE (PDF, PNG, JSON, CSV, SHARE)
+// ============================================================================
+function createPDFDocumentObject(canonicalObj) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    
+    const profile = (canonicalObj.assessment.examProfile).toUpperCase();
+    const student = canonicalObj.student.name.toUpperCase();
+    const test = canonicalObj.assessment.testName.toUpperCase();
+    const timestamp = canonicalObj.timestamp;
+
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, 0, 210, 297, 'F');
+    
+    doc.setDrawColor(240, 244, 248); doc.setLineWidth(0.25);
+    for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
+    for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j);
+
+    doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3);
+    doc.rect(8, 8, 194, 281);
+
+    doc.setFillColor(248, 250, 252); doc.rect(10, 10, 190, 32, 'F');
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5); doc.rect(10, 10, 190, 32, 'D');
+
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
+    doc.text("EXAMINATION PERFORMANCE & METRIC REPORT", 16, 21);
+    
+    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
+    doc.text(`ECLIPSE7 ENGINE // PROFILE: ${profile} // ID: ${canonicalObj.id}`, 16, 27);
+    
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
+    doc.text("ECLIPSE7 PERFORMANCE ANALYTICS PLATFORM | ENGINEER: SAIPRASAD BARURE", 16, 35);
+
+    let cardY = 46;
+    doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text(" STUDENT IDENTITY MATRIX", 12, cardY + 4.2);
+    
+    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
+    doc.rect(10, cardY + 6, 92, 26, 'DF');
+    doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
+    doc.text("CANDIDATE NAME    :", 14, cardY + 14);
+    doc.text("TARGET ASSESSMENT  :", 14, cardY + 20);
+    doc.text("TIMESTAMP           :", 14, cardY + 26);
+    
+    doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
+    doc.text(student.length > 20 ? student.substring(0, 20) + "..." : student, 44, cardY + 14);
+    doc.text(test.length > 20 ? test.substring(0, 20) + "..." : test, 44, cardY + 20);
+    doc.setFont("courier", "bold"); doc.setFontSize(6.5); doc.text(timestamp, 44, cardY + 26);
+
+    doc.setFillColor(241, 245, 249); doc.rect(108, cardY, 92, 6, 'F');
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(108, cardY, 92, 6, 'D');
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text(" EVALUATION METRICS SUMMARY", 110, cardY + 4.2);
+    
+    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
+    doc.rect(108, cardY + 6, 92, 26, 'DF');
+    doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
+    doc.text("TOTAL QUESTIONS    :", 112, cardY + 13);
+    doc.text("MAX EVAL MARKS      :", 112, cardY + 19);
+    doc.text("TOTAL ATTEMPTS      :", 112, cardY + 25);
+    doc.text("INCORRECT FAULTS    :", 112, cardY + 31);
+    
+    doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
+    doc.text(`${canonicalObj.scoring.totalQuestions} ITEMS`, 148, cardY + 13);
+    doc.text(`${canonicalObj.scoring.maxMarks} MARKS`, 148, cardY + 19);
+    doc.text(`${canonicalObj.scoring.attempted} UNITS`, 148, cardY + 25);
+    doc.setTextColor(225, 29, 72); doc.text(`${canonicalObj.scoring.wrong} FAULTS`, 148, cardY + 31);
+
+    let scoreY = 82;
+    doc.setFillColor(250, 251, 253); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
+    doc.rect(10, scoreY, 190, 22, 'DF');
+
+    doc.setTextColor(14, 165, 233); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text("FINAL SCORE", 15, scoreY + 6);
+    doc.setFont("courier", "bold"); doc.setFontSize(16); doc.setTextColor(15, 23, 42);
+    doc.text(`${canonicalObj.result.finalScore.toFixed(2)} / ${canonicalObj.scoring.maxMarks}`, 15, scoreY + 15);
+
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
+    doc.text("SCORE EFFICIENCY", 100, scoreY + 6);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(12);
+    doc.text(`${canonicalObj.result.scorePercentage}%`, 100, scoreY + 14);
+
+    doc.text("ACCURACY", 150, scoreY + 6);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(12);
+    doc.text(`${canonicalObj.result.accuracy}%`, 150, scoreY + 14);
+
+    return doc;
+}
+
+function downloadPDFReportSequence() {
+    if (!activeCanonicalResult) {
+        triggerSystemToastNotification("Please calculate an assessment first.");
         return;
     }
 
-    const sel1 = document.getElementById('compareSelect1');
-    const sel2 = document.getElementById('compareSelect2');
-    sel1.innerHTML = ''; sel2.innerHTML = '';
+    const doc = createPDFDocumentObject(activeCanonicalResult);
+    const fileName = `${activeCanonicalResult.student.name.replace(/ /g, "_")}_ECLIPSE7_Report.pdf`;
+    doc.save(fileName);
+}
 
-    history.forEach((h) => {
-        let opt1 = document.createElement('option');
-        opt1.value = h.id; opt1.text = `${h.testName} (${h.finalScore})`;
-        let opt2 = opt1.cloneNode(true);
-        
-        sel1.appendChild(opt1);
-        sel2.appendChild(opt2);
+function exportCurrentPNG() {
+    if (!activeCanonicalResult) {
+        triggerSystemToastNotification("Please calculate an assessment first.");
+        return;
+    }
+
+    document.getElementById('exportStudentName').textContent = activeCanonicalResult.student.name;
+    document.getElementById('exportTestName').textContent = activeCanonicalResult.assessment.testName;
+    document.getElementById('exportProfileTag').textContent = activeCanonicalResult.assessment.examProfile.toUpperCase();
+    document.getElementById('exportScoreVal').textContent = activeCanonicalResult.result.finalScore.toFixed(2);
+    document.getElementById('exportScoreSub').textContent = `${activeCanonicalResult.result.scorePercentage}% | Band: ${activeCanonicalResult.analytics.performanceLevel}`;
+    document.getElementById('exportAcc').textContent = `${activeCanonicalResult.result.accuracy}%`;
+    document.getElementById('exportAtt').textContent = activeCanonicalResult.scoring.attempted;
+    document.getElementById('exportPen').textContent = activeCanonicalResult.result.penaltyMarks.toFixed(2);
+    document.getElementById('exportDocId').textContent = `ID: ${activeCanonicalResult.id}`;
+
+    const card = document.getElementById('exportReportCard');
+    card.style.display = 'block';
+
+    html2canvas(card, { backgroundColor: '#0f172a' }).then(canvas => {
+        card.style.display = 'none';
+        let link = document.createElement('a');
+        link.download = `${activeCanonicalResult.student.name.replace(/ /g, "_")}_Card.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+}
+
+function exportCurrentJSON() {
+    if (!activeCanonicalResult) {
+        triggerSystemToastNotification("Please calculate an assessment first.");
+        return;
+    }
+    let blob = new Blob([JSON.stringify(activeCanonicalResult, null, 2)], { type: 'application/json' });
+    let link = document.createElement('a');
+    link.download = `${activeCanonicalResult.id}.json`;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
+function downloadCompleteHistoryPDF() {
+    const history = getStoredHistory();
+    if (history.length === 0) {
+        triggerSystemToastNotification("No history records available.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+
+    doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+    doc.text("ECLIPSE7 - Complete History Performance Analytics", 14, 20);
+    doc.setFontSize(9); doc.setTextColor(100);
+    doc.text(`Generated: ${new Date().toLocaleString()} | Total Tests: ${history.length}`, 14, 26);
+
+    const tableRows = history.map(h => [
+        h.timestamp || 'N/A',
+        h.student?.name || h.studentName || 'Candidate',
+        h.assessment?.testName || h.testName || 'Assessment',
+        (h.assessment?.examProfile || h.profile || 'custom').toUpperCase(),
+        `${h.result?.finalScore || h.finalScore} / ${h.scoring?.maxMarks || h.maxMarks}`,
+        `${h.result?.scorePercentage || h.efficiency}%`
+    ]);
+
+    doc.autoTable({
+        startY: 32,
+        head: [['Timestamp', 'Student', 'Test', 'Profile', 'Score', 'Efficiency']],
+        body: tableRows,
+        theme: 'striped',
+        headStyles: { fillColor: [139, 92, 246] }
     });
 
-    sel2.selectedIndex = Math.min(1, history.length - 1);
-    renderComparisonView();
-    toggleCompareModal(true);
+    doc.save("ECLIPSE7_History_Vault_Report.pdf");
 }
 
-function renderComparisonView() {
+function exportHistoryJSON() {
     const history = getStoredHistory();
-    const id1 = document.getElementById('compareSelect1').value;
-    const id2 = document.getElementById('compareSelect2').value;
-
-    const t1 = history.find(x => x.id === id1);
-    const t2 = history.find(x => x.id === id2);
-
-    if (!t1 || !t2) return;
-
-    let s1 = parseFloat(t1.finalScore);
-    let s2 = parseFloat(t2.finalScore);
-
-    const grid = document.getElementById('comparisonGrid');
-    grid.innerHTML = `
-        <table class="comp-table">
-            <thead>
-                <tr>
-                    <th>Metric</th>
-                    <th>${t1.testName}</th>
-                    <th>${t2.testName}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Final Score</td>
-                    <td class="${s1 >= s2 ? 'comp-winner' : ''}">${t1.finalScore} / ${t1.maxMarks}</td>
-                    <td class="${s2 >= s1 ? 'comp-winner' : ''}">${t2.finalScore} / ${t2.maxMarks}</td>
-                </tr>
-                <tr>
-                    <td>Efficiency</td>
-                    <td>${t1.efficiency}%</td>
-                    <td>${t2.efficiency}%</td>
-                </tr>
-                <tr>
-                    <td>Attempts / Wrong</td>
-                    <td>${t1.attempted} / ${t1.wrong}</td>
-                    <td>${t2.attempted} / ${t2.wrong}</td>
-                </tr>
-            </tbody>
-        </table>
-    `;
+    let blob = new Blob([JSON.stringify(history, null, 2)], { type: 'application/json' });
+    let link = document.createElement('a');
+    link.download = 'ECLIPSE7_History_Vault.json';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 }
 
-function escapeHtml(str) {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+function exportHistoryCSV() {
+    const history = getStoredHistory();
+    if (history.length === 0) return;
+    
+    let csv = "ID,Timestamp,Student,Test,Profile,Score,MaxMarks,Efficiency,Accuracy\n";
+    history.forEach(h => {
+        const id = `"${(h.id || '').replace(/"/g, '""')}"`;
+        const ts = `"${(h.timestamp || '').replace(/"/g, '""')}"`;
+        const st = `"${(h.student?.name || h.studentName || '').replace(/"/g, '""')}"`;
+        const tt = `"${(h.assessment?.testName || h.testName || '').replace(/"/g, '""')}"`;
+        const pr = `"${(h.assessment?.examProfile || h.profile || '').replace(/"/g, '""')}"`;
+        const sc = h.result?.finalScore || h.finalScore || 0;
+        const mx = h.scoring?.maxMarks || h.maxMarks || 0;
+        const ef = h.result?.scorePercentage || h.efficiency || 0;
+        const ac = h.result?.accuracy || h.accuracy || 0;
+
+        csv += `${id},${ts},${st},${tt},${pr},${sc},${mx},${ef},${ac}\n`;
+    });
+
+    let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    let link = document.createElement('a');
+    link.download = 'ECLIPSE7_History_Vault.csv';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
+async function triggerShareMenu() {
+    if (!activeCanonicalResult) {
+        triggerSystemToastNotification("Please calculate an assessment first.");
+        return;
+    }
+
+    const shareText = 
+`🎓 *ECLIPSE7 ASSESSMENT REPORT*
+----------------------------------------
+👤 *Student Name:* ${activeCanonicalResult.student.name}
+📝 *Assessment:* ${activeCanonicalResult.assessment.testName}
+🎯 *Profile:* ${activeCanonicalResult.assessment.examProfile.toUpperCase()}
+
+📊 *SCORE METRICS*
+• *Final Score:* ${activeCanonicalResult.result.finalScore.toFixed(2)} / ${activeCanonicalResult.scoring.maxMarks}
+• *Efficiency:* ${activeCanonicalResult.result.scorePercentage}%
+• *Accuracy:* ${activeCanonicalResult.result.accuracy}%
+• *Penalty Lost:* ${activeCanonicalResult.result.penaltyMarks.toFixed(2)} Marks
+
+🚀 *ESTIMATED RANGE*
+• *Percentile Range:* ${activeCanonicalResult.prediction.percentileRange}
+• *Rank Range:* ${activeCanonicalResult.prediction.rankRange}
+
+----------------------------------------
+⚡ *ECLIPSE7 Performance Analytics Engine*
+🔗 https://eclipse7.odoo.com/`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: `ECLIPSE7 Assessment - ${activeCanonicalResult.student.name}`,
+            text: shareText
+        }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(shareText);
+        triggerSystemToastNotification("Result summary copied to clipboard!", false);
+    }
 }
