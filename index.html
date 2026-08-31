@@ -2,399 +2,431 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ECLIPSE7 — Ultra Analytics Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECLIPSE7 — Ultra Premium Negative Marking Calculator</title>
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="gold-dark-theme">
-    <div class="stars-bg"></div>
-    <div class="glow-sphere gold-glow-1"></div>
-    <div class="glow-sphere gold-glow-2"></div>
+<body class="e7-ultra-gold-theme">
+    <!-- Background Particles Canvas -->
+    <canvas id="e7-bg-particles"></canvas>
 
-    <!-- Navigation Header -->
-    <header class="app-header">
-        <div class="header-left">
-            <button id="vault-toggle-btn" class="icon-btn-gold" aria-label="Open History Vault">
+    <!-- Top Navigation Header -->
+    <header class="e7-top-header">
+        <div class="e7-header-left">
+            <button id="e7-vault-toggle-btn" class="e7-icon-btn" aria-label="Open History Vault">
                 <i class="fa-solid fa-bars-staggered"></i>
-                <span id="vault-badge" class="badge-gold">0</span>
+                <span id="e7-vault-badge-count" class="e7-badge">0</span>
             </button>
+            <div class="e7-brand-cluster">
+                <span class="e7-gold-text-gradient e7-brand-title">ECLIPSE7</span>
+                <span class="e7-version-pill">ENGINE v9.0</span>
+            </div>
         </div>
 
-        <div class="header-right">
+        <div class="e7-header-right">
             <!-- Signed Out View -->
-            <div id="auth-guest-view" class="auth-box">
-                <button id="google-signin-btn" class="gold-btn-outline">
+            <div id="e7-auth-logged-out" class="e7-auth-block">
+                <button id="e7-google-signin-btn" class="e7-btn e7-btn-gold-outline">
                     <i class="fa-brands fa-google"></i>
                     <span>Sign In</span>
                 </button>
             </div>
-
             <!-- Signed In View -->
-            <div id="auth-user-view" class="auth-box hidden">
-                <div class="user-chip">
-                    <img id="user-avatar" src="https://ui-avatars.com/api/?name=Saiprasad+Barure&background=161a22&color=d4af37" alt="User Avatar" class="user-avatar-img">
-                    <span id="user-display-name" class="user-name">Saiprasad Barure</span>
-                    <button id="signout-btn" class="icon-btn-subtle" title="Sign Out">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
+            <div id="e7-auth-logged-in" class="e7-auth-block e7-hidden">
+                <div class="e7-user-pill">
+                    <img id="e7-user-avatar" src="" alt="User Avatar" class="e7-avatar-img">
+                    <span id="e7-user-display-name" class="e7-user-name">Saiprasad Barure</span>
+                    <button id="e7-signout-btn" class="e7-small-link" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="app-viewport">
-        <!-- Main Form Card -->
-        <section class="calculator-card glass-gold-card">
-            <div class="card-badge-header">
-                <span class="engine-badge">ECLIPSE7 ENGINE v9.0</span>
+    <!-- Main Content Container -->
+    <main class="e7-main-viewport">
+        <!-- Hero & Title Section -->
+        <section class="e7-hero-card e7-glass-gold">
+            <div class="e7-hero-header">
+                <h1 class="e7-gold-title">Negative Marking & Analytics Platform</h1>
+                <p class="e7-subtext">ECLIPSE7 ASSESSMENT PLATFORM | Engineered by Saiprasad Barure / Prasad Reddy</p>
             </div>
-            
-            <h1 class="platform-title">Negative Marking &amp; Analytics Platform</h1>
-            <p class="platform-subtitle">ECLIPSE7 ASSESSMENT PLATFORM<br>Engineered by Saiprasad Barure / Prasad Reddy</p>
 
-            <form id="calc-form" onsubmit="return false;">
-                <div class="form-grid">
-                    <div class="input-group full-width">
-                        <label for="student-name">Student Name <span class="req">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fa-solid fa-user-graduate input-icon"></i>
-                            <input type="text" id="student-name" placeholder="Enter student name..." value="Saiprasad Barure" required>
+            <!-- Main Inputs Form -->
+            <form id="e7-calculator-form" onsubmit="return false;">
+                <div class="e7-form-grid">
+                    <div class="e7-input-group">
+                        <label for="e7-student-name">Student Name <span class="req">*</span></label>
+                        <div class="e7-input-wrapper">
+                            <i class="fa-solid fa-user-graduate"></i>
+                            <input type="text" id="e7-student-name" placeholder="Enter student full name" required value="Saiprasad Barure">
                         </div>
                     </div>
 
-                    <div class="input-group full-width">
-                        <label for="assessment-name">Assessment Name <span class="req">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fa-solid fa-hashtag input-icon"></i>
-                            <input type="text" id="assessment-name" placeholder="e.g., JEE Main Mock 05, NEET Phase 1" required>
+                    <div class="e7-input-group">
+                        <label for="e7-test-name">Assessment Name <span class="req">*</span></label>
+                        <div class="e7-input-wrapper">
+                            <i class="fa-solid fa-file-signature"></i>
+                            <input type="text" id="e7-test-name" placeholder="(e.g., JEE Main Mock 05, NEET Phase 1)" required>
                         </div>
                     </div>
 
-                    <div class="input-group full-width">
-                        <label for="curriculum-preset">Curriculum Profile Preset <span class="req">*</span></label>
-                        <div class="select-wrapper">
-                            <select id="curriculum-preset">
-                                <option value="JEEMAIN" selected>JEE MAIN (75 Qs, 300 Marks | +4 / -1)</option>
-                                <option value="JEEADV">JEE ADVANCED (Custom Pattern Analysis)</option>
-                                <option value="NEET">NEET UG (180 Qs, 720 Marks | +4 / -1)</option>
-                                <option value="MHTCET">MHT-CET (150 Qs, 200 Marks | No Negative)</option>
+                    <div class="e7-input-group e7-full-width">
+                        <label for="e7-preset-select">Curriculum Profile Preset <span class="req">*</span></label>
+                        <div class="e7-input-wrapper">
+                            <i class="fa-solid fa-sliders"></i>
+                            <select id="e7-preset-select">
+                                <option value="JEEMAIN" selected>JEE MAIN (300 Marks | +4 / -1)</option>
+                                <option value="JEEADV">JEE ADVANCED (Custom Marking)</option>
+                                <option value="NEET">NEET UG (720 Marks | +4 / -1)</option>
+                                <option value="MHTCET">MHT-CET (200 Marks | No Negative)</option>
                                 <option value="CUSTOM">CUSTOM MODE (MANUAL OVERRIDE)</option>
                             </select>
-                            <i class="fa-solid fa-chevron-down select-icon"></i>
                         </div>
                     </div>
 
-                    <div class="input-group">
-                        <label for="total-questions">Total Questions <span class="req">*</span></label>
-                        <input type="number" id="total-questions" min="1" value="75" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="max-marks">Max Marks <span class="req">*</span></label>
-                        <input type="number" id="max-marks" min="1" value="300" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="total-attempts">Total Attempts <span class="req">*</span></label>
-                        <input type="number" id="total-attempts" min="0" value="0" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="incorrect-attempts">Incorrect Attempts <span class="req">*</span></label>
-                        <input type="number" id="incorrect-attempts" min="0" value="0" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="val-correct-mark">Marks per Correct (+)</label>
-                        <input type="number" id="val-correct-mark" value="4" step="0.25">
-                    </div>
-
-                    <div class="input-group">
-                        <label for="val-negative-mark">Penalty per Incorrect (-)</label>
-                        <input type="number" id="val-negative-mark" value="1" step="0.25">
-                    </div>
-                </div>
-
-                <!-- Subject Wise Section Toggle -->
-                <div class="subject-accordion-header" id="subject-toggle-btn">
-                    <span><i class="fa-solid fa-layer-group"></i> Optional: Subject Breakdown (PCM)</span>
-                    <i class="fa-solid fa-chevron-down" id="acc-icon"></i>
-                </div>
-
-                <div class="subject-accordion-body hidden" id="subject-section">
-                    <div class="subject-grid">
-                        <div class="subject-card">
-                            <h4>Physics</h4>
-                            <div class="sub-input-row">
-                                <input type="number" id="phy-correct" placeholder="Correct" min="0">
-                                <input type="number" id="phy-wrong" placeholder="Wrong" min="0">
-                            </div>
+                    <div class="e7-input-group">
+                        <label for="e7-total-q">Total Questions <span class="req">*</span></label>
+                        <div class="e7-input-wrapper">
+                            <i class="fa-solid fa-list-check"></i>
+                            <input type="number" id="e7-total-q" min="1" placeholder="75" value="75" required>
                         </div>
-                        <div class="subject-card">
-                            <h4>Chemistry</h4>
-                            <div class="sub-input-row">
-                                <input type="number" id="chem-correct" placeholder="Correct" min="0">
-                                <input type="number" id="chem-wrong" placeholder="Wrong" min="0">
-                            </div>
+                    </div>
+
+                    <div class="e7-input-group">
+                        <label for="e7-max-marks">Max Marks <span class="req">*</span></label>
+                        <div class="e7-input-wrapper">
+                            <i class="fa-solid fa-trophy"></i>
+                            <input type="number" id="e7-max-marks" min="1" placeholder="300" value="300" required>
                         </div>
-                        <div class="subject-card">
-                            <h4>Mathematics</h4>
-                            <div class="sub-input-row">
-                                <input type="number" id="math-correct" placeholder="Correct" min="0">
-                                <input type="number" id="math-wrong" placeholder="Wrong" min="0">
-                            </div>
+                    </div>
+
+                    <div class="e7-input-group">
+                        <label for="e7-total-attempts">Total Attempts <span class="req">*</span></label>
+                        <div class="e7-input-wrapper">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <input type="number" id="e7-total-attempts" min="0" placeholder="0" value="0" required>
+                        </div>
+                    </div>
+
+                    <div class="e7-input-group">
+                        <label for="e7-incorrect-attempts">Incorrect Attempts <span class="req">*</span></label>
+                        <div class="e7-input-wrapper">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                            <input type="number" id="e7-incorrect-attempts" min="0" placeholder="0" value="0" required>
+                        </div>
+                    </div>
+
+                    <div class="e7-input-group">
+                        <label for="e7-mark-positive">Positive Mark/Q</label>
+                        <div class="e7-input-wrapper">
+                            <i class="fa-solid fa-plus"></i>
+                            <input type="number" step="0.25" id="e7-mark-positive" value="4">
+                        </div>
+                    </div>
+
+                    <div class="e7-input-group">
+                        <label for="e7-mark-negative">Negative Penalty/Q</label>
+                        <div class="e7-input-wrapper">
+                            <i class="fa-solid fa-minus"></i>
+                            <input type="number" step="0.25" id="e7-mark-negative" value="1">
                         </div>
                     </div>
                 </div>
 
-                <div class="form-actions">
-                    <button type="button" id="btn-calculate" class="gold-btn-primary">
-                        <i class="fa-solid fa-bolt"></i> Execute Diagnostic Analysis
+                <!-- Subject Wise Distribution Toggle -->
+                <div class="e7-subject-toggle-bar">
+                    <button type="button" id="e7-toggle-subjects-btn" class="e7-btn e7-btn-subtle">
+                        <i class="fa-solid fa-layer-group"></i> Enable Subject-Wise Split (Physics / Chemistry / Math)
                     </button>
-                    <button type="button" id="btn-reset" class="gold-btn-secondary">
-                        <i class="fa-solid fa-rotate-right"></i> Reset Form
+                </div>
+
+                <!-- Subject Wise Inputs Panel -->
+                <div id="e7-subject-panel" class="e7-subject-container e7-hidden">
+                    <div class="e7-subject-grid">
+                        <!-- Physics -->
+                        <div class="e7-subject-card">
+                            <h3><i class="fa-solid fa-atom"></i> Physics</h3>
+                            <div class="e7-sub-fields">
+                                <input type="number" id="e7-phy-ok" placeholder="Correct Qs" min="0">
+                                <input type="number" id="e7-phy-wrg" placeholder="Wrong Qs" min="0">
+                            </div>
+                        </div>
+                        <!-- Chemistry -->
+                        <div class="e7-subject-card">
+                            <h3><i class="fa-solid fa-flask"></i> Chemistry</h3>
+                            <div class="e7-sub-fields">
+                                <input type="number" id="e7-chem-ok" placeholder="Correct Qs" min="0">
+                                <input type="number" id="e7-chem-wrg" placeholder="Wrong Qs" min="0">
+                            </div>
+                        </div>
+                        <!-- Math -->
+                        <div class="e7-subject-card">
+                            <h3><i class="fa-solid fa-calculator"></i> Mathematics</h3>
+                            <div class="e7-sub-fields">
+                                <input type="number" id="e7-math-ok" placeholder="Correct Qs" min="0">
+                                <input type="number" id="e7-math-wrg" placeholder="Wrong Qs" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="e7-action-bar">
+                    <button type="button" id="e7-calculate-btn" class="e7-btn e7-btn-gold-solid">
+                        <i class="fa-solid fa-bolt"></i> Compute Performance Matrix
+                    </button>
+                    <button type="reset" id="e7-reset-btn" class="e7-btn e7-btn-subtle-reset">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
                     </button>
                 </div>
             </form>
         </section>
 
-        <!-- Evaluation & Analytics Matrix Section -->
-        <section id="analytics-matrix-section" class="calculator-card glass-gold-card hidden margin-top-lg">
-            <div class="section-title-wrapper">
-                <i class="fa-solid fa-chart-line section-icon"></i>
-                <h2>Evaluation &amp; Analytics Matrix</h2>
+        <!-- Evaluation & Analytics Matrix Results -->
+        <section id="e7-results-section" class="e7-hero-card e7-glass-gold e7-results-panel">
+            <div class="e7-section-title">
+                <h2><i class="fa-solid fa-chart-line"></i> Evaluation & Analytics Matrix</h2>
+                <span class="e7-tag-gold">LIVE COMPUTATION</span>
             </div>
 
-            <!-- Top Core Metrics -->
-            <div class="metrics-grid">
-                <div class="metric-box">
-                    <span class="metric-label">Performance Band</span>
-                    <span id="res-perf-band" class="metric-value highlight-gold">--</span>
+            <!-- Core Stat Cards -->
+            <div class="e7-metrics-grid">
+                <div class="e7-metric-card">
+                    <span class="e7-m-label">Final Calculated Score</span>
+                    <div class="e7-m-value e7-gold-glow"><span id="res-final-score">0.00</span> / <span id="res-max-score">300</span></div>
+                    <span class="e7-m-sub">Gross Marks: <span id="res-gross-score">0.00</span></span>
                 </div>
-                <div class="metric-box">
-                    <span class="metric-label">Accuracy</span>
-                    <span id="res-accuracy" class="metric-value">0%</span>
+
+                <div class="e7-metric-card">
+                    <span class="e7-m-label">Accuracy Rate</span>
+                    <div class="e7-m-value" id="res-accuracy">0.00%</div>
+                    <span class="e7-m-sub">Correct: <span id="res-correct-count">0</span> | Wrong: <span id="res-wrong-count">0</span></span>
                 </div>
-                <div class="metric-box">
-                    <span class="metric-label">Efficiency (Score %)</span>
-                    <span id="res-efficiency" class="metric-value">0%</span>
+
+                <div class="e7-metric-card">
+                    <span class="e7-m-label">Efficiency Ratio</span>
+                    <div class="e7-m-value" id="res-efficiency">0.00%</div>
+                    <span class="e7-m-sub">Penalty Lost: -<span id="res-penalty-lost">0.00</span></span>
                 </div>
-                <div class="metric-box">
-                    <span class="metric-label">Penalty Marks Lost</span>
-                    <span id="res-penalty" class="metric-value text-danger">0.00</span>
-                </div>
-                <div class="metric-box">
-                    <span class="metric-label">Correct / Wrong</span>
-                    <span id="res-cw" class="metric-value">0 / 0</span>
-                </div>
-                <div class="metric-box">
-                    <span class="metric-label">Skipped Questions</span>
-                    <span id="res-skipped" class="metric-value">0</span>
-                </div>
-                <div class="metric-box full-span">
-                    <span class="metric-label">Risk Profile</span>
-                    <span id="res-risk" class="metric-value">Low Risk</span>
+
+                <div class="e7-metric-card">
+                    <span class="e7-m-label">Risk Band Profile</span>
+                    <div class="e7-m-value e7-risk-tag" id="res-risk-band">LOW RISK</div>
+                    <span class="e7-m-sub">Unattempted: <span id="res-skipped-count">0</span> Qs</span>
                 </div>
             </div>
 
-            <!-- Score Scenario Simulator -->
-            <div class="simulator-box">
-                <div class="sim-header">
-                    <i class="fa-solid fa-sliders"></i>
-                    <h3>Score Scenario Simulator ("What If?")</h3>
-                </div>
-                <div class="sim-slider-group">
-                    <label>Convert Wrong to Correct: <span id="sim-wrong-val">0</span></label>
+            <!-- Interactive What-If Simulator -->
+            <div class="e7-simulator-box e7-glass-card">
+                <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Score Scenario Simulator ("What If")</h3>
+                <div class="e7-sim-control">
+                    <label>Convert Wrong to Correct: <span id="sim-wrong-val">0</span> Qs</label>
                     <input type="range" id="sim-wrong-slider" min="0" max="0" value="0">
                 </div>
-                <div class="sim-slider-group">
-                    <label>Convert Skipped to Correct: <span id="sim-skip-val">0</span></label>
+                <div class="e7-sim-control">
+                    <label>Convert Skipped to Correct: <span id="sim-skip-val">0</span> Qs</label>
                     <input type="range" id="sim-skip-slider" min="0" max="0" value="0">
                 </div>
-                <div class="sim-output-row">
-                    <span>Simulated Score: <strong id="sim-total-score">0.00</strong></span>
-                    <span class="sim-delta" id="sim-delta-score">+0.00</span>
+                <div class="e7-sim-result">
+                    Simulated Potential Score: <strong id="sim-projected-score" class="e7-gold-text">0.00</strong>
+                    <span id="sim-score-diff" class="e7-diff-tag">+0.00</span>
                 </div>
             </div>
 
             <!-- Rank & Percentile Range Estimator -->
-            <div class="rank-estimator-box">
-                <div class="box-header">
-                    <i class="fa-solid fa-trophy"></i>
-                    <h3>Rank &amp; Percentile Range Estimator</h3>
-                    <span class="tag-gold">Experimental Model</span>
+            <div class="e7-rank-box e7-glass-card">
+                <div class="e7-rank-header">
+                    <h3><i class="fa-solid fa-chart-diagram"></i> Rank & Percentile Range Estimator</h3>
+                    <span class="e7-pill-exp">Experimental AI Curve</span>
                 </div>
-                <div class="rank-grid">
+                <div class="e7-rank-grid">
                     <div>
-                        <span class="sub-lbl">Est. Percentile Range</span>
-                        <div id="est-percentile" class="big-val">--</div>
+                        <span class="r-lbl">Est. Percentile Range</span>
+                        <div class="r-val" id="res-est-percentile">-- %</div>
                     </div>
                     <div>
-                        <span class="sub-lbl">Est. Rank Range</span>
-                        <div id="est-rank" class="big-val">--</div>
-                    </div>
-                    <div>
-                        <span class="sub-lbl">Estimation Confidence</span>
-                        <div id="est-confidence" class="med-val">Moderate</div>
-                    </div>
-                    <div>
-                        <span class="sub-lbl">Methodology</span>
-                        <div class="med-val">Statistical Curve</div>
+                        <span class="r-lbl">Est. AIR Rank Range</span>
+                        <div class="r-val" id="res-est-rank">--</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Printable & Export Trigger Actions -->
-            <div class="matrix-export-actions">
-                <button id="btn-export-ultra-pdf" class="gold-btn-primary">
-                    <i class="fa-solid fa-file-pdf"></i> Generate Printable Metric Report
-                </button>
-                <button id="btn-save-vault" class="gold-btn-secondary">
-                    <i class="fa-solid fa-bookmark"></i> Save to Assessment Vault
-                </button>
+            <!-- AI Performance Diagnostic Engine -->
+            <div class="e7-diagnostic-box e7-glass-card">
+                <h3><i class="fa-solid fa-microchip"></i> ECLIPSE7 Performance Diagnostic Engine</h3>
+                <ul id="res-diagnostic-list" class="e7-diag-list">
+                    <li><i class="fa-solid fa-circle-info"></i> Calculate an assessment to view deep diagnostic insights.</li>
+                </ul>
+            </div>
+
+            <!-- Output Action Toolbar -->
+            <div class="e7-results-actions">
+                <button id="e7-save-vault-btn" class="e7-btn e7-btn-gold-solid"><i class="fa-solid fa-bookmark"></i> Save Record to Vault</button>
+                <button id="e7-print-report-btn" class="e7-btn e7-btn-gold-outline"><i class="fa-solid fa-file-pdf"></i> Generate Printable PDF Report</button>
             </div>
         </section>
     </main>
 
-    <!-- Assessment Vault Drawer -->
-    <aside id="vault-drawer" class="vault-drawer">
-        <div class="drawer-header">
-            <div class="dh-title">
-                <i class="fa-solid fa-box-archive"></i>
-                <h3>Assessment Vault</h3>
+    <!-- Assessment Vault Slide-Out Drawer -->
+    <div id="e7-vault-drawer" class="e7-drawer-overlay">
+        <div class="e7-drawer-content">
+            <div class="e7-drawer-header">
+                <div class="d-title">
+                    <i class="fa-solid fa-vault"></i>
+                    <h2>Assessment Vault</h2>
+                </div>
+                <button id="e7-close-drawer-btn" class="e7-close-btn"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <button id="vault-close-btn" class="icon-btn-gold"><i class="fa-solid fa-xmark"></i></button>
+
+            <p class="e7-drawer-desc">Track performance trends, compare test instances, and export standardized analytics reports.</p>
+
+            <div class="e7-drawer-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="e7-vault-search" placeholder="Filter student or test name...">
+            </div>
+
+            <div class="e7-drawer-actions">
+                <button id="e7-export-vault-pdf" class="e7-sm-btn"><i class="fa-solid fa-file-pdf"></i> Export History PDF</button>
+                <button id="e7-export-vault-json" class="e7-sm-btn"><i class="fa-solid fa-code"></i> JSON</button>
+                <button id="e7-export-vault-csv" class="e7-sm-btn"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                <button id="e7-purge-vault-btn" class="e7-sm-btn e7-danger-sm"><i class="fa-solid fa-trash-can"></i> Purge</button>
+            </div>
+
+            <!-- History Item List Container -->
+            <div id="e7-vault-list" class="e7-vault-list-container">
+                <!-- Injected via JavaScript -->
+            </div>
         </div>
+    </div>
 
-        <div class="drawer-subtext">
-            <p><i class="fa-regular fa-lightbulb"></i> Track performance trends, compare test instances, and export standardized analytics reports.</p>
-        </div>
-
-        <div class="drawer-search">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="vault-search-input" placeholder="Filter student or test name...">
-        </div>
-
-        <div class="drawer-quick-actions">
-            <button id="btn-vault-history-pdf" class="vault-action-btn"><i class="fa-solid fa-file-pdf"></i> History PDF</button>
-            <button id="btn-vault-json" class="vault-action-btn"><i class="fa-solid fa-code"></i> JSON</button>
-            <button id="btn-vault-csv" class="vault-action-btn"><i class="fa-solid fa-file-csv"></i> CSV</button>
-        </div>
-
-        <div class="drawer-count-bar">
-            <span><strong id="vault-count-text">0</strong> Records Stored</span>
-            <button id="btn-purge-vault" class="purge-btn"><i class="fa-solid fa-trash-can"></i> Purge Vault</button>
-        </div>
-
-        <!-- Vault Items Container -->
-        <div id="vault-list-container" class="vault-list">
-            <!-- Dynamic Vault Records Injected Here -->
-        </div>
-    </aside>
-
-    <!-- Backdrop Overlay -->
-    <div id="drawer-backdrop" class="drawer-backdrop"></div>
-
-    <!-- Hidden Ultra Printable Report Template for Direct Window Print Engine -->
-    <div id="printable-report-template" class="print-only">
-        <div class="pdf-container">
-            <div class="pdf-header">
-                <div class="pdf-brand-line">
-                    <span class="pdf-title-main">NEGATIVE MARKING PERFORMANCE REPORT</span>
-                    <span class="pdf-sys-core">SYSTEM CORE: SCORE_PROFILE_ECLIPSE7 // CORE v9.0</span>
+    <!-- PRINTABLE REPORT CONTAINER (HIDDEN UNTIL PRINT) -->
+    <div id="e7-printable-report" class="e7-print-only">
+        <div class="e7-print-wrapper">
+            <!-- Header Block -->
+            <div class="e7-p-header">
+                <div class="e7-p-brand">
+                    <h1>NEGATIVE MARKING PERFORMANCE REPORT</h1>
+                    <p class="e7-p-sub">SYSTEM CORE: SCORE_PROFILE_<span id="p-profile-tag">JEEMAIN</span> // CORE v9.0</p>
+                    <p class="e7-p-lab">ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE</p>
                 </div>
-                <div class="pdf-sub-brand">ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE</div>
-            </div>
-
-            <div class="pdf-section-box">
-                <div class="pdf-box-title">STUDENT IDENTITY MATRIX</div>
-                <div class="pdf-grid-2">
-                    <div><strong>CANDIDATE NAME:</strong> <span id="pdf-val-student">--</span></div>
-                    <div><strong>TARGET EXAM:</strong> <span id="pdf-val-exam">--</span></div>
-                    <div><strong>CURRICULUM PROFILE:</strong> <span id="pdf-val-profile">--</span></div>
-                    <div><strong>SYSTEM TIMESTAMP:</strong> <span id="pdf-val-time">--</span></div>
-                </div>
-            </div>
-
-            <div class="pdf-score-banner">
-                <div class="pdf-score-col">
-                    <span class="pdf-sc-lbl">GROSS MARKS (PRE-PENALTY)</span>
-                    <span class="pdf-sc-val" id="pdf-val-gross">0.00</span>
-                </div>
-                <div class="pdf-score-col pdf-border-x">
-                    <span class="pdf-sc-lbl">FINAL CALCULATED SCORE</span>
-                    <span class="pdf-sc-val gold-text" id="pdf-val-final">0 / 0</span>
-                </div>
-                <div class="pdf-score-col">
-                    <span class="pdf-sc-lbl">ENGINE EFFICIENCY RATIO</span>
-                    <span class="pdf-sc-val" id="pdf-val-efficiency">0%</span>
-                </div>
-            </div>
-
-            <div class="pdf-section-box">
-                <div class="pdf-box-title">EVALUATION METRICS SUMMARY</div>
-                <div class="pdf-grid-4">
-                    <div><strong>TOTAL QUESTIONS:</strong><br><span id="pdf-val-totalq">0</span> ITEMS</div>
-                    <div><strong>MAX EVAL MARKS:</strong><br><span id="pdf-val-maxmarks">0</span> MARKS</div>
-                    <div><strong>EVAL USER ATTEMPTS:</strong><br><span id="pdf-val-attempts">0</span> UNITS</div>
-                    <div><strong>VERIFIED FAULTS:</strong><br><span id="pdf-val-faults">0</span> FAULTS</div>
-                </div>
-            </div>
-
-            <div class="pdf-section-box">
-                <div class="pdf-box-title">AI SMART RANK &amp; PERCENTILE PREDICTION ENGINE</div>
-                <div class="pdf-grid-2">
-                    <div><strong>ESTIMATED PERCENTILE:</strong> <span id="pdf-val-percentile">--</span></div>
-                    <div><strong>ESTIMATED AIR RANK:</strong> <span id="pdf-val-rank">--</span></div>
-                </div>
-            </div>
-
-            <div class="pdf-section-box">
-                <div class="pdf-box-title">CROSS-SUBJECT ANALYTICS MATRIX</div>
-                <div class="pdf-grid-3">
-                    <div class="pdf-sub-card">
-                        <strong class="gold-text">PHYSICS SUBSYSTEM</strong>
-                        <div id="pdf-phy-stat">Marks: 0.00 | OK: 0 | WRG: 0</div>
-                    </div>
-                    <div class="pdf-sub-card">
-                        <strong class="gold-text">CHEMISTRY SUBSYSTEM</strong>
-                        <div id="pdf-chem-stat">Marks: 0.00 | OK: 0 | WRG: 0</div>
-                    </div>
-                    <div class="pdf-sub-card">
-                        <strong class="gold-text">MATHEMATICS SUBSYSTEM</strong>
-                        <div id="pdf-math-stat">Marks: 0.00 | OK: 0 | WRG: 0</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pdf-footer-signature">
-                <div class="pdf-sig-block">
-                    <div class="pdf-sig-name">MR. PRASAD REDDY</div>
-                    <div class="pdf-sig-title">Chief Executive Officer &amp; Founder of ECLIPSE7</div>
-                    <div class="pdf-sig-status">STATUS: INTEGRITY MATRIX APPROVED &amp; DIGITAL RECORD VERIFIED VIA CORE STREAM</div>
-                </div>
-                <div class="pdf-stamp-wrapper">
-                    <!-- SVG Golden / Red Verification Stamp directly integrated -->
-                    <svg class="pdf-stamp-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="100" cy="100" r="90" fill="none" stroke="#b31217" stroke-width="5" stroke-dasharray="8 4"/>
-                        <circle cx="100" cy="100" r="80" fill="none" stroke="#b31217" stroke-width="3"/>
-                        <circle cx="100" cy="100" r="62" fill="none" stroke="#b31217" stroke-width="2"/>
-                        <path id="stampTextPath1" d="M 30,100 A 70,70 0 1,1 170,100" fill="none"/>
-                        <path id="stampTextPath2" d="M 170,100 A 70,70 0 1,1 30,100" fill="none"/>
-                        <text fill="#b31217" font-size="12" font-weight="900" letter-spacing="2">
-                            <textPath href="#stampTextPath1" startOffset="50%" text-anchor="middle">★ ECLIPSE7 ★</textPath>
+                <!-- Verification Stamp Section -->
+                <div class="e7-p-stamp-box">
+                    <svg class="e7-stamp-svg" viewBox="0 0 200 200">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="#8B0000" stroke-width="4" stroke-dasharray="8 4"/>
+                        <circle cx="100" cy="100" r="82" fill="none" stroke="#8B0000" stroke-width="2"/>
+                        <path id="stampArcTop" fill="none" d="M 25,100 A 75,75 0 1,1 175,100" />
+                        <path id="stampArcBottom" fill="none" d="M 175,100 A 75,75 0 0,1 25,100" />
+                        <text fill="#8B0000" font-size="14" font-weight="bold" letter-spacing="2">
+                            <textPath href="#stampArcTop" startOffset="50%" text-anchor="middle">• ECLIPSE7 • REDDY</textPath>
                         </text>
-                        <text fill="#b31217" font-size="10" font-weight="800" letter-spacing="1.5">
-                            <textPath href="#stampTextPath2" startOffset="50%" text-anchor="middle">CEO &amp; FOUNDER PRASAD REDDY</textPath>
+                        <text fill="#8B0000" font-size="12" font-weight="bold" letter-spacing="1">
+                            <textPath href="#stampArcBottom" startOffset="50%" text-anchor="middle">CEO & FOUNDER PRASAD</textPath>
                         </text>
-                        <rect x="25" y="82" width="150" height="36" fill="#ffffff" stroke="#b31217" stroke-width="2"/>
-                        <text x="100" y="106" fill="#b31217" font-size="20" font-weight="900" text-anchor="middle" letter-spacing="3">VERIFIED</text>
+                        <rect x="20" y="80" width="160" height="40" fill="#8B0000" rx="4" transform="rotate(-12 100 100)"/>
+                        <text x="100" y="106" fill="#FFFFFF" font-size="22" font-weight="900" text-anchor="middle" transform="rotate(-12 100 100)" letter-spacing="3">VERIFIED</text>
                     </svg>
+                </div>
+            </div>
+
+            <hr class="e7-p-divider">
+
+            <!-- Student Identity Table -->
+            <div class="e7-p-section">
+                <h3 class="e7-p-title">STUDENT IDENTITY MATRIX</h3>
+                <table class="e7-p-table">
+                    <tr>
+                        <td><strong>CANDIDATE NAME:</strong> <span id="p-student-name">--</span></td>
+                        <td><strong>TARGET ASSESSMENT:</strong> <span id="p-test-name">--</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>SYSTEM TIMESTAMP:</strong> <span id="p-timestamp">--</span></td>
+                        <td><strong>EVALUATION PROFILE:</strong> <span id="p-preset">--</span></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Key Performance Metrics Summary -->
+            <div class="e7-p-section">
+                <h3 class="e7-p-title">KEY PERFORMANCE METRICS SUMMARY</h3>
+                <div class="e7-p-grid-3">
+                    <div class="e7-p-card">
+                        <span>GROSS MARKS (PRE-PENALTY)</span>
+                        <h4 id="p-gross-marks">0.00</h4>
+                    </div>
+                    <div class="e7-p-card main-gold">
+                        <span>FINAL CALCULATED SCORE</span>
+                        <h4><span id="p-final-score">0.00</span> / <span id="p-max-marks">300</span></h4>
+                    </div>
+                    <div class="e7-p-card">
+                        <span>ENGINE EFFICIENCY RATIO</span>
+                        <h4 id="p-efficiency">0.00%</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breakdown Table -->
+            <div class="e7-p-section">
+                <h3 class="e7-p-title">EVALUATION METRICS SUMMARY</h3>
+                <table class="e7-p-data-table">
+                    <tr>
+                        <th>Total Questions</th>
+                        <th>Max Eval Marks</th>
+                        <th>Total User Attempts</th>
+                        <th>Verified Faults (Incorrect)</th>
+                        <th>Accuracy</th>
+                    </tr>
+                    <tr>
+                        <td id="p-total-q">0</td>
+                        <td id="p-table-max">0</td>
+                        <td id="p-total-att">0</td>
+                        <td id="p-incorrect-att">0</td>
+                        <td id="p-accuracy">0.00%</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Subject-Wise Breakdowns (If Enabled) -->
+            <div id="p-subject-section" class="e7-p-section">
+                <h3 class="e7-p-title">CROSS-SUBJECT ANALYTICS MATRIX</h3>
+                <div class="e7-p-grid-3">
+                    <div class="e7-p-card">
+                        <span>PHYSICS SUBSYSTEM</span>
+                        <p id="p-phy-stat">MARKS: -- | OK: -- | WRG: --</p>
+                    </div>
+                    <div class="e7-p-card">
+                        <span>CHEMISTRY SUBSYSTEM</span>
+                        <p id="p-chem-stat">MARKS: -- | OK: -- | WRG: --</p>
+                    </div>
+                    <div class="e7-p-card">
+                        <span>MATHEMATICS SUBSYSTEM</span>
+                        <p id="p-math-stat">MARKS: -- | OK: -- | WRG: --</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Rank & Diagnostic Report -->
+            <div class="e7-p-section">
+                <h3 class="e7-p-title">AI SMART RANK & DIAGNOSTIC REPORT</h3>
+                <p><strong>ESTIMATED PERCENTILE:</strong> <span id="p-est-percentile">--</span> | <strong>ESTIMATED AIR RANK:</strong> <span id="p-est-rank">--</span></p>
+                <div id="p-diagnostic-text" class="e7-p-diag-box">
+                    <!-- Diagnostic summary injected here -->
+                </div>
+            </div>
+
+            <!-- Official Footer Sign-off -->
+            <div class="e7-p-footer">
+                <div class="e7-p-sign">
+                    <p class="e7-p-sig-name">MR. PRASAD REDDY</p>
+                    <p class="e7-p-sig-title">Chief Executive Officer & Founder of ECLIPSE7</p>
+                    <p class="e7-p-sig-status">STATUS: INTEGRITY MATRIX APPROVED & DIGITAL RECORD VERIFIED VIA CORE STREAM</p>
+                </div>
+                <div class="e7-p-badge">
+                    <span>ECLIPSE7 ● VERIFIED FOUNDER PRASAD</span>
                 </div>
             </div>
         </div>
