@@ -2,1953 +2,404 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECLIPSE7 — Ultra-Max Analytics & Negative Marking Engine</title>
-    
-    <!-- Google Fonts & FontAwesome -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ECLIPSE7 — Ultra Analytics Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-
-    <!-- html2pdf.js for Printable Analytics Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-    <style>
-        /* ==========================================================================
-           1. ULTRA-MAX DARK + GOLDEN THEME SYSTEM (CSS VARIABLES)
-           ========================================================================== */
-        :root {
-            --bg-base: #08070b;
-            --bg-surface: #100e17;
-            --bg-card: rgba(20, 17, 28, 0.75);
-            --bg-card-hover: rgba(28, 24, 40, 0.85);
-            
-            --gold-primary: #f3c663;
-            --gold-light: #ffe596;
-            --gold-dark: #b8860b;
-            --gold-gradient: linear-gradient(135deg, #ffe596 0%, #f3c663 50%, #b8860b 100%);
-            --gold-glow: 0 0 20px rgba(243, 198, 99, 0.25);
-            
-            --accent-red: #ff4d4d;
-            --accent-green: #00e676;
-            --accent-blue: #29b6f6;
-            
-            --text-main: #f5f5f7;
-            --text-muted: #9a94a8;
-            --text-gold: #f3c663;
-            
-            --border-subtle: rgba(243, 198, 99, 0.15);
-            --border-active: rgba(243, 198, 99, 0.5);
-            
-            --radius-lg: 18px;
-            --radius-md: 12px;
-            --radius-sm: 8px;
-            
-            --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* ==========================================================================
-           2. BASE & RESET STYLES
-           ========================================================================== */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body {
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            min-height: 100vh;
-            background-image: 
-                radial-gradient(circle at 15% 15%, rgba(243, 198, 99, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, rgba(184, 134, 11, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(16, 14, 23, 0.5) 0%, #08070b 100%);
-            background-attachment: fixed;
-            padding-bottom: 60px;
-            overflow-x: hidden;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--bg-base);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(243, 198, 99, 0.2);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(243, 198, 99, 0.4);
-        }
-
-        /* ==========================================================================
-           3. APPLICATION HEADER & TOOLBAR
-           ========================================================================== */
-        .app-header {
-            max-width: 1200px;
-            margin: 20px auto 10px auto;
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(16, 14, 23, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-lg);
-            position: relative;
-            z-index: 100;
-        }
-
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .brand-logo-badge {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            background: var(--gold-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #08070b;
-            font-weight: 800;
-            font-size: 1.2rem;
-            box-shadow: var(--gold-glow);
-        }
-
-        .brand-titles h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.15rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .brand-titles p {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .btn-vault-trigger {
-            background: rgba(243, 198, 99, 0.1);
-            border: 1px solid var(--border-subtle);
-            color: var(--gold-primary);
-            padding: 10px 18px;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            font-size: 0.88rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition-smooth);
-            position: relative;
-        }
-
-        .btn-vault-trigger:hover {
-            background: rgba(243, 198, 99, 0.2);
-            border-color: var(--gold-primary);
-            box-shadow: var(--gold-glow);
-        }
-
-        .vault-badge-count {
-            background: var(--gold-gradient);
-            color: #08070b;
-            font-size: 0.75rem;
-            font-weight: 800;
-            padding: 2px 7px;
-            border-radius: 10px;
-        }
-
-        /* Auth Container Logic */
-        .auth-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-auth-signin {
-            background: var(--gold-gradient);
-            color: #08070b;
-            border: none;
-            padding: 10px 20px;
-            border-radius: var(--radius-sm);
-            font-weight: 700;
-            font-size: 0.88rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition-smooth);
-            box-shadow: var(--gold-glow);
-        }
-
-        .btn-auth-signin:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.1);
-        }
-
-        .user-profile-chip {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-subtle);
-            padding: 6px 14px 6px 8px;
-            border-radius: 30px;
-        }
-
-        .user-profile-chip img {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 1px solid var(--gold-primary);
-        }
-
-        .user-profile-chip span {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        .btn-auth-logout {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px;
-            transition: var(--transition-smooth);
-        }
-
-        .btn-auth-logout:hover {
-            color: var(--accent-red);
-        }
-
-        /* Auth Hint Banner */
-        .auth-sync-hint {
-            position: absolute;
-            top: calc(100% + 10px);
-            right: 24px;
-            background: rgba(16, 14, 23, 0.95);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
-            padding: 10px 16px;
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.4s ease-out;
-            z-index: 99;
-        }
-
-        .auth-sync-hint button {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
-        /* ==========================================================================
-           4. MAIN CONTENT WRAPPER & CALCULATOR CARD
-           ========================================================================== */
-        .main-wrapper {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 16px;
-        }
-
-        .calc-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-lg);
-            padding: 32px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            margin-bottom: 24px;
-            transition: var(--transition-smooth);
-        }
-
-        .calc-card-header {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .engine-version-tag {
-            display: inline-block;
-            background: rgba(243, 198, 99, 0.08);
-            border: 1px solid var(--border-subtle);
-            color: var(--gold-primary);
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 20px;
-            letter-spacing: 1.5px;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-        }
-
-        .calc-card-header h2 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        .calc-card-header p {
-            color: var(--text-muted);
-            font-size: 0.88rem;
-        }
-
-        /* Form Layout Grid */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .form-group label {
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--text-main);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .form-group label span.req {
-            color: var(--gold-primary);
-        }
-
-        .input-control-wrapper {
-            position: relative;
-        }
-
-        .input-control-wrapper i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            transition: var(--transition-smooth);
-        }
-
-        .form-input, .form-select {
-            width: 100%;
-            background: rgba(10, 8, 15, 0.8);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            padding: 14px 16px 14px 44px;
-            color: var(--text-main);
-            font-size: 0.95rem;
-            font-weight: 500;
-            outline: none;
-            transition: var(--transition-smooth);
-        }
-
-        .form-select {
-            appearance: none;
-            cursor: pointer;
-        }
-
-        .form-input:focus, .form-select:focus {
-            border-color: var(--gold-primary);
-            box-shadow: 0 0 0 3px rgba(243, 198, 99, 0.15);
-            background: rgba(16, 14, 23, 0.95);
-        }
-
-        .form-input:focus + i, .form-select:focus + i {
-            color: var(--gold-primary);
-        }
-
-        /* Preset Chips Bar */
-        .preset-bar {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 6px;
-        }
-
-        .chip-preset {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-muted);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-        }
-
-        .chip-preset:hover, .chip-preset.active {
-            background: rgba(243, 198, 99, 0.15);
-            border-color: var(--gold-primary);
-            color: var(--gold-primary);
-        }
-
-        /* Action Buttons */
-        .calc-actions {
-            margin-top: 28px;
-            display: flex;
-            gap: 14px;
-        }
-
-        .btn-submit-calc {
-            flex: 2;
-            background: var(--gold-gradient);
-            color: #08070b;
-            border: none;
-            padding: 16px 24px;
-            border-radius: var(--radius-md);
-            font-weight: 800;
-            font-size: 1rem;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: var(--transition-smooth);
-            box-shadow: var(--gold-glow);
-        }
-
-        .btn-submit-calc:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-
-        .btn-reset-calc {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-muted);
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-        }
-
-        .btn-reset-calc:hover {
-            background: rgba(255, 77, 77, 0.1);
-            border-color: rgba(255, 77, 77, 0.4);
-            color: var(--accent-red);
-        }
-
-        /* ==========================================================================
-           5. EVALUATION & ANALYTICS MATRIX PANEL (DYNAMICALLY VISIBLE)
-           ========================================================================== */
-        .analytics-panel {
-            display: none; /* Initially Hidden */
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .analytics-panel.visible {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .section-title-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .section-title-bar h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--gold-primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Metric Cards Grid */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        @media (max-width: 992px) {
-            .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        .metric-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-            transition: var(--transition-smooth);
-        }
-
-        .metric-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--gold-gradient);
-            opacity: 0.6;
-        }
-
-        .metric-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .metric-value {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .metric-value.highlight-gold {
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .metric-value.highlight-red {
-            color: var(--accent-red);
-        }
-
-        .metric-sub {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* Simulator & Diagnostic Box */
-        .deep-analytics-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-
-        @media (max-width: 768px) {
-            .deep-analytics-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .analytics-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            padding: 24px;
-        }
-
-        .analytics-box h4 {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--gold-light);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Simulator Controls */
-        .sim-slider-group {
-            margin-bottom: 16px;
-        }
-
-        .sim-slider-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-
-        .sim-slider {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(255, 255, 255, 0.1);
-            outline: none;
-            accent-color: var(--gold-primary);
-            cursor: pointer;
-        }
-
-        .sim-result-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 12px;
-            border-top: 1px dashed var(--border-subtle);
-            margin-top: 16px;
-        }
-
-        .sim-score-val {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--accent-green);
-        }
-
-        /* Export Bar */
-        .export-action-bar {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .btn-export-pdf {
-            background: rgba(243, 198, 99, 0.12);
-            border: 1px solid var(--gold-primary);
-            color: var(--gold-light);
-            padding: 12px 24px;
-            border-radius: var(--radius-sm);
-            font-weight: 700;
-            font-size: 0.88rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition-smooth);
-        }
-
-        .btn-export-pdf:hover {
-            background: var(--gold-gradient);
-            color: #08070b;
-            box-shadow: var(--gold-glow);
-        }
-
-        /* ==========================================================================
-           6. ASSESSMENT VAULT DRAWER / MODAL (`image_00a34c.jpg` FIX)
-           ========================================================================== */
-        .vault-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(4, 3, 6, 0.85);
-            backdrop-filter: blur(12px);
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: var(--transition-smooth);
-        }
-
-        .vault-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .vault-drawer {
-            position: fixed;
-            top: 0;
-            right: -450px;
-            width: 100%;
-            max-width: 450px;
-            height: 100%;
-            background: #0d0b14;
-            border-left: 1px solid var(--border-subtle);
-            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
-            z-index: 1001;
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition-smooth);
-        }
-
-        .vault-overlay.active .vault-drawer {
-            right: 0;
-        }
-
-        .vault-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .vault-header h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.3rem;
-            color: var(--gold-primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-close-vault {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-        }
-
-        .btn-close-vault:hover {
-            color: var(--text-main);
-        }
-
-        .vault-toolbar {
-            padding: 16px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .vault-search-box {
-            position: relative;
-        }
-
-        .vault-search-box input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
-            padding: 10px 14px 10px 36px;
-            color: var(--text-main);
-            font-size: 0.85rem;
-            outline: none;
-        }
-
-        .vault-search-box i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 0.8rem;
-        }
-
-        .vault-action-row {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-vault-action {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-muted);
-            padding: 8px;
-            border-radius: var(--radius-sm);
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: var(--transition-smooth);
-        }
-
-        .btn-vault-action:hover {
-            background: rgba(243, 198, 99, 0.1);
-            color: var(--gold-light);
-            border-color: var(--gold-primary);
-        }
-
-        .vault-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .vault-item-card {
-            background: rgba(20, 17, 28, 0.9);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            padding: 16px;
-            position: relative;
-            transition: var(--transition-smooth);
-        }
-
-        .vault-item-card:hover {
-            border-color: var(--gold-primary);
-            transform: translateX(-4px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-
-        .vault-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-
-        .vault-item-title {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--text-main);
-        }
-
-        .vault-item-preset {
-            font-size: 0.68rem;
-            font-weight: 800;
-            background: rgba(243, 198, 99, 0.15);
-            color: var(--gold-primary);
-            padding: 2px 8px;
-            border-radius: 10px;
-            text-transform: uppercase;
-        }
-
-        .vault-item-meta {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .vault-item-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            background: rgba(0,0,0,0.3);
-            padding: 8px;
-            border-radius: var(--radius-sm);
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .v-stat-val {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 0.88rem;
-            color: var(--gold-light);
-        }
-
-        .v-stat-lbl {
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        .vault-item-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-v-item {
-            flex: 1;
-            padding: 6px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-        }
-
-        .btn-v-restore {
-            background: rgba(41, 182, 246, 0.15);
-            color: var(--accent-blue);
-            border-color: rgba(41, 182, 246, 0.3);
-        }
-
-        .btn-v-restore:hover {
-            background: var(--accent-blue);
-            color: #08070b;
-        }
-
-        .btn-v-delete {
-            background: rgba(255, 77, 77, 0.15);
-            color: var(--accent-red);
-            border-color: rgba(255, 77, 77, 0.3);
-        }
-
-        .btn-v-delete:hover {
-            background: var(--accent-red);
-            color: #ffffff;
-        }
-
-        /* ==========================================================================
-           7. PRINT / PDF REPORT STYLING (ECS_ECLIPSE7_METRIC_REPORT TEMPLATE)
-           ========================================================================== */
-        #pdfReportTemplate {
-            display: none; /* Off-screen template rendered during export */
-            width: 800px;
-            background: #ffffff;
-            color: #111111;
-            padding: 40px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-        }
-
-        .pdf-border-wrap {
-            border: 2px solid #b8860b;
-            padding: 30px;
-            position: relative;
-        }
-
-        .pdf-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #111;
-            padding-bottom: 20px;
-            margin-bottom: 24px;
-        }
-
-        .pdf-brand h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 22px;
-            font-weight: 800;
-            color: #08070b;
-            letter-spacing: 1px;
-        }
-
-        .pdf-brand p {
-            font-size: 11px;
-            color: #555;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .pdf-meta-box {
-            text-align: right;
-            font-size: 10px;
-            color: #444;
-        }
-
-        .pdf-section-title {
-            font-size: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: #111;
-            color: #fff;
-            padding: 6px 12px;
-            margin-bottom: 16px;
-        }
-
-        .pdf-grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .pdf-info-table, .pdf-data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-        }
-
-        .pdf-info-table td {
-            padding: 6px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .pdf-info-table td.lbl {
-            font-weight: 700;
-            color: #555;
-            width: 40%;
-        }
-
-        .pdf-data-table th {
-            background: #f4f4f6;
-            text-align: left;
-            padding: 8px;
-            font-size: 10px;
-            text-transform: uppercase;
-            border-bottom: 2px solid #ddd;
-        }
-
-        .pdf-data-table td {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .pdf-score-banner {
-            background: #faf8f2;
-            border: 1px solid #b8860b;
-            border-radius: 8px;
-            padding: 16px;
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .pdf-score-val {
-            font-size: 20px;
-            font-weight: 800;
-            color: #b8860b;
-        }
-
-        .pdf-score-lbl {
-            font-size: 9px;
-            text-transform: uppercase;
-            color: #666;
-            margin-top: 2px;
-        }
-
-        .pdf-footer {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-        }
-
-        .pdf-signatory p {
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .pdf-signatory span {
-            font-size: 9px;
-            color: #666;
-        }
-
-        /* SVG Gold Verified Stamp */
-        .pdf-stamp-container {
-            width: 110px;
-            height: 110px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="gold-dark-theme">
+    <div class="stars-bg"></div>
+    <div class="glow-sphere gold-glow-1"></div>
+    <div class="glow-sphere gold-glow-2"></div>
 
-    <!-- ==========================================================================
-       HEADER TOOLBAR
-       ========================================================================== -->
+    <!-- Navigation Header -->
     <header class="app-header">
-        <div class="header-brand">
-            <div class="brand-logo-badge">E7</div>
-            <div class="brand-titles">
-                <h1>ECLIPSE7 ANALYTICS</h1>
-                <p>Performance Diagnostic & Assessment Engine</p>
-            </div>
+        <div class="header-left">
+            <button id="vault-toggle-btn" class="icon-btn-gold" aria-label="Open History Vault">
+                <i class="fa-solid fa-bars-staggered"></i>
+                <span id="vault-badge" class="badge-gold">0</span>
+            </button>
         </div>
 
-        <div class="header-actions">
-            <button class="btn-vault-trigger" onclick="toggleVaultDrawer()">
-                <i class="fa-solid fa-vault"></i> Vault
-                <span class="vault-badge-count" id="vaultItemCount">0</span>
-            </button>
-
-            <div class="auth-container" id="authContainer">
-                <!-- Auth state dynamically injected here -->
-                <button class="btn-auth-signin" id="btnGoogleSignIn" onclick="handleGoogleSignIn()">
-                    <i class="fa-brands fa-google"></i> Sign In
+        <div class="header-right">
+            <!-- Signed Out View -->
+            <div id="auth-guest-view" class="auth-box">
+                <button id="google-signin-btn" class="gold-btn-outline">
+                    <i class="fa-brands fa-google"></i>
+                    <span>Sign In</span>
                 </button>
             </div>
-        </div>
 
-        <!-- Auth Sync Hint Banner -->
-        <div class="auth-sync-hint" id="authSyncHint">
-            <span><i class="fa-solid fa-cloud-arrow-up" style="color: var(--gold-primary);"></i> Sign in with Google to sync assessment history across devices.</span>
-            <button onclick="dismissAuthHint()"><i class="fa-solid fa-xmark"></i></button>
+            <!-- Signed In View -->
+            <div id="auth-user-view" class="auth-box hidden">
+                <div class="user-chip">
+                    <img id="user-avatar" src="https://ui-avatars.com/api/?name=Saiprasad+Barure&background=161a22&color=d4af37" alt="User Avatar" class="user-avatar-img">
+                    <span id="user-display-name" class="user-name">Saiprasad Barure</span>
+                    <button id="signout-btn" class="icon-btn-subtle" title="Sign Out">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
-    <!-- ==========================================================================
-       MAIN CALCULATOR INTERFACE
-       ========================================================================== -->
-    <main class="main-wrapper">
-        <section class="calc-card">
-            <div class="calc-card-header">
-                <span class="engine-version-tag">ECLIPSE7 ENGINE v8.0 GOLD</span>
-                <h2>Negative Marking & Analytics Platform</h2>
-                <p>Precision scoring algorithm with dynamic error analysis and rank projection</p>
+    <!-- Main Container -->
+    <main class="app-viewport">
+        <!-- Main Form Card -->
+        <section class="calculator-card glass-gold-card">
+            <div class="card-badge-header">
+                <span class="engine-badge">ECLIPSE7 ENGINE v9.0</span>
             </div>
+            
+            <h1 class="platform-title">Negative Marking &amp; Analytics Platform</h1>
+            <p class="platform-subtitle">ECLIPSE7 ASSESSMENT PLATFORM<br>Engineered by Saiprasad Barure / Prasad Reddy</p>
 
-            <form id="calculatorForm" onsubmit="event.preventDefault(); processCalculation();">
+            <form id="calc-form" onsubmit="return false;">
                 <div class="form-grid">
-                    <!-- Student Name -->
-                    <div class="form-group">
-                        <label>Student Name <span class="req">*</span></label>
-                        <div class="input-control-wrapper">
-                            <input type="text" id="studentName" class="form-input" placeholder="e.g., Saiprasad Barure" required>
-                            <i class="fa-solid fa-user"></i>
+                    <div class="input-group full-width">
+                        <label for="student-name">Student Name <span class="req">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-user-graduate input-icon"></i>
+                            <input type="text" id="student-name" placeholder="Enter student name..." value="Saiprasad Barure" required>
                         </div>
                     </div>
 
-                    <!-- Assessment Name -->
-                    <div class="form-group">
-                        <label>Assessment / Exam Title <span class="req">*</span></label>
-                        <div class="input-control-wrapper">
-                            <input type="text" id="testTitle" class="form-input" placeholder="e.g., JEE Main Mock Test 05" required>
-                            <i class="fa-solid fa-file-pen"></i>
+                    <div class="input-group full-width">
+                        <label for="assessment-name">Assessment Name <span class="req">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-hashtag input-icon"></i>
+                            <input type="text" id="assessment-name" placeholder="e.g., JEE Main Mock 05, NEET Phase 1" required>
                         </div>
                     </div>
 
-                    <!-- Exam Profile Preset Selector -->
-                    <div class="form-group full-width">
-                        <label>Curriculum Profile Preset <span class="req">*</span></label>
-                        <div class="input-control-wrapper">
-                            <select id="examPreset" class="form-select" onchange="applyPresetValues()">
-                                <option value="CUSTOM">CUSTOM MODE (Manual Marking Override)</option>
-                                <option value="JEEMAIN" selected>JEE MAIN (75 Qs | 300 Marks | +4 / -1)</option>
-                                <option value="JEEADV">JEE ADVANCED (54 Qs | 180 Marks | +3 / -1)</option>
-                                <option value="NEET">NEET UG (180 Qs | 720 Marks | +4 / -1)</option>
-                                <option value="MHTCET">MHT-CET (150 Qs | 200 Marks | +1, +2 / 0)</option>
+                    <div class="input-group full-width">
+                        <label for="curriculum-preset">Curriculum Profile Preset <span class="req">*</span></label>
+                        <div class="select-wrapper">
+                            <select id="curriculum-preset">
+                                <option value="JEEMAIN" selected>JEE MAIN (75 Qs, 300 Marks | +4 / -1)</option>
+                                <option value="JEEADV">JEE ADVANCED (Custom Pattern Analysis)</option>
+                                <option value="NEET">NEET UG (180 Qs, 720 Marks | +4 / -1)</option>
+                                <option value="MHTCET">MHT-CET (150 Qs, 200 Marks | No Negative)</option>
+                                <option value="CUSTOM">CUSTOM MODE (MANUAL OVERRIDE)</option>
                             </select>
-                            <i class="fa-solid fa-sliders"></i>
-                        </div>
-                        <div class="preset-bar">
-                            <button type="button" class="chip-preset" onclick="setPreset('JEEMAIN')">JEE Main</button>
-                            <button type="button" class="chip-preset" onclick="setPreset('JEEADV')">JEE Advanced</button>
-                            <button type="button" class="chip-preset" onclick="setPreset('NEET')">NEET UG</button>
-                            <button type="button" class="chip-preset" onclick="setPreset('MHTCET')">MHT-CET</button>
-                            <button type="button" class="chip-preset" onclick="setPreset('CUSTOM')">Custom</button>
+                            <i class="fa-solid fa-chevron-down select-icon"></i>
                         </div>
                     </div>
 
-                    <!-- Total Questions & Max Marks -->
-                    <div class="form-group">
-                        <label>Total Questions <span class="req">*</span></label>
-                        <div class="input-control-wrapper">
-                            <input type="number" id="totalQuestions" class="form-input" min="1" placeholder="75" required>
-                            <i class="fa-solid fa-list-check"></i>
-                        </div>
+                    <div class="input-group">
+                        <label for="total-questions">Total Questions <span class="req">*</span></label>
+                        <input type="number" id="total-questions" min="1" value="75" required>
                     </div>
 
-                    <div class="form-group">
-                        <label>Maximum Marks <span class="req">*</span></label>
-                        <div class="input-control-wrapper">
-                            <input type="number" id="maxMarks" class="form-input" min="1" placeholder="300" required>
-                            <i class="fa-solid fa-award"></i>
-                        </div>
+                    <div class="input-group">
+                        <label for="max-marks">Max Marks <span class="req">*</span></label>
+                        <input type="number" id="max-marks" min="1" value="300" required>
                     </div>
 
-                    <!-- Attempts & Incorrect Attempts -->
-                    <div class="form-group">
-                        <label>Total Attempted Questions <span class="req">*</span></label>
-                        <div class="input-control-wrapper">
-                            <input type="number" id="totalAttempts" class="form-input" min="0" placeholder="0" required>
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </div>
+                    <div class="input-group">
+                        <label for="total-attempts">Total Attempts <span class="req">*</span></label>
+                        <input type="number" id="total-attempts" min="0" value="0" required>
                     </div>
 
-                    <div class="form-group">
-                        <label>Incorrect Attempts (Faults) <span class="req">*</span></label>
-                        <div class="input-control-wrapper">
-                            <input type="number" id="incorrectAttempts" class="form-input" min="0" placeholder="0" required>
-                            <i class="fa-solid fa-circle-xmark"></i>
-                        </div>
+                    <div class="input-group">
+                        <label for="incorrect-attempts">Incorrect Attempts <span class="req">*</span></label>
+                        <input type="number" id="incorrect-attempts" min="0" value="0" required>
                     </div>
 
-                    <!-- Marking Scheme Weights -->
-                    <div class="form-group">
-                        <label>Positive Weight (+ Marks) <span class="req">*</span></label>
-                        <div class="input-control-wrapper">
-                            <input type="number" step="0.25" id="posMark" class="form-input" value="4" required>
-                            <i class="fa-solid fa-plus"></i>
-                        </div>
+                    <div class="input-group">
+                        <label for="val-correct-mark">Marks per Correct (+)</label>
+                        <input type="number" id="val-correct-mark" value="4" step="0.25">
                     </div>
 
-                    <div class="form-group">
-                        <label>Negative Penalty (- Marks) <span class="req">*</span></label>
-                        <div class="input-control-wrapper">
-                            <input type="number" step="0.25" id="negMark" class="form-input" value="1" required>
-                            <i class="fa-solid fa-minus"></i>
+                    <div class="input-group">
+                        <label for="val-negative-mark">Penalty per Incorrect (-)</label>
+                        <input type="number" id="val-negative-mark" value="1" step="0.25">
+                    </div>
+                </div>
+
+                <!-- Subject Wise Section Toggle -->
+                <div class="subject-accordion-header" id="subject-toggle-btn">
+                    <span><i class="fa-solid fa-layer-group"></i> Optional: Subject Breakdown (PCM)</span>
+                    <i class="fa-solid fa-chevron-down" id="acc-icon"></i>
+                </div>
+
+                <div class="subject-accordion-body hidden" id="subject-section">
+                    <div class="subject-grid">
+                        <div class="subject-card">
+                            <h4>Physics</h4>
+                            <div class="sub-input-row">
+                                <input type="number" id="phy-correct" placeholder="Correct" min="0">
+                                <input type="number" id="phy-wrong" placeholder="Wrong" min="0">
+                            </div>
+                        </div>
+                        <div class="subject-card">
+                            <h4>Chemistry</h4>
+                            <div class="sub-input-row">
+                                <input type="number" id="chem-correct" placeholder="Correct" min="0">
+                                <input type="number" id="chem-wrong" placeholder="Wrong" min="0">
+                            </div>
+                        </div>
+                        <div class="subject-card">
+                            <h4>Mathematics</h4>
+                            <div class="sub-input-row">
+                                <input type="number" id="math-correct" placeholder="Correct" min="0">
+                                <input type="number" id="math-wrong" placeholder="Wrong" min="0">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Submit & Reset Bar -->
-                <div class="calc-actions">
-                    <button type="submit" class="btn-submit-calc">
-                        <i class="fa-solid fa-bolt"></i> Calculate Assessment Metrics
+                <div class="form-actions">
+                    <button type="button" id="btn-calculate" class="gold-btn-primary">
+                        <i class="fa-solid fa-bolt"></i> Execute Diagnostic Analysis
                     </button>
-                    <button type="button" class="btn-reset-calc" onclick="resetCalculatorForm()">
-                        <i class="fa-solid fa-rotate-left"></i> Clear
+                    <button type="button" id="btn-reset" class="gold-btn-secondary">
+                        <i class="fa-solid fa-rotate-right"></i> Reset Form
                     </button>
                 </div>
             </form>
         </section>
 
-        <!-- ==========================================================================
-           EVALUATION & ANALYTICS MATRIX PANEL
-           ========================================================================== -->
-        <section class="analytics-panel" id="analyticsPanel">
-            <div class="section-title-bar">
-                <h3><i class="fa-solid fa-chart-line"></i> Evaluation & Analytics Matrix</h3>
-                <span class="engine-version-tag" id="computedTimestamp">LIVE EVALUATION</span>
+        <!-- Evaluation & Analytics Matrix Section -->
+        <section id="analytics-matrix-section" class="calculator-card glass-gold-card hidden margin-top-lg">
+            <div class="section-title-wrapper">
+                <i class="fa-solid fa-chart-line section-icon"></i>
+                <h2>Evaluation &amp; Analytics Matrix</h2>
             </div>
 
-            <!-- Metrics Grid -->
+            <!-- Top Core Metrics -->
             <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-label">Final Score</div>
-                    <div class="metric-value highlight-gold" id="resFinalScore">0.00</div>
-                    <div class="metric-sub" id="resGrossScore">Gross: 0.00</div>
+                <div class="metric-box">
+                    <span class="metric-label">Performance Band</span>
+                    <span id="res-perf-band" class="metric-value highlight-gold">--</span>
                 </div>
-
-                <div class="metric-card">
-                    <div class="metric-label">Accuracy Rate</div>
-                    <div class="metric-value" id="resAccuracy">0.00%</div>
-                    <div class="metric-sub" id="resCorrectWrong">0 Correct / 0 Wrong</div>
+                <div class="metric-box">
+                    <span class="metric-label">Accuracy</span>
+                    <span id="res-accuracy" class="metric-value">0%</span>
                 </div>
-
-                <div class="metric-card">
-                    <div class="metric-label">Efficiency Ratio</div>
-                    <div class="metric-value" id="resEfficiency">0.00%</div>
-                    <div class="metric-sub" id="resPerformanceBand">Band: --</div>
+                <div class="metric-box">
+                    <span class="metric-label">Efficiency (Score %)</span>
+                    <span id="res-efficiency" class="metric-value">0%</span>
                 </div>
-
-                <div class="metric-card">
-                    <div class="metric-label">Penalty Marks Lost</div>
-                    <div class="metric-value highlight-red" id="resPenaltyLost">0.00</div>
-                    <div class="metric-sub" id="resSkippedQuestions">0 Skipped Qs</div>
+                <div class="metric-box">
+                    <span class="metric-label">Penalty Marks Lost</span>
+                    <span id="res-penalty" class="metric-value text-danger">0.00</span>
                 </div>
-            </div>
-
-            <!-- Deep Diagnostic & Simulator Grid -->
-            <div class="deep-analytics-grid">
-                <!-- What-If Score Simulator -->
-                <div class="analytics-box">
-                    <h4><i class="fa-solid fa-wand-magic-sparkles"></i> Score Scenario Simulator ("What If?")</h4>
-                    
-                    <div class="sim-slider-group">
-                        <div class="sim-slider-label">
-                            <span>Convert Wrong to Correct:</span>
-                            <span id="simWrongVal">0</span>
-                        </div>
-                        <input type="range" id="simWrongSlider" class="sim-slider" min="0" value="0" oninput="updateSimulator()">
-                    </div>
-
-                    <div class="sim-slider-group">
-                        <div class="sim-slider-label">
-                            <span>Convert Skipped to Correct:</span>
-                            <span id="simSkippedVal">0</span>
-                        </div>
-                        <input type="range" id="simSkippedSlider" class="sim-slider" min="0" value="0" oninput="updateSimulator()">
-                    </div>
-
-                    <div class="sim-result-bar">
-                        <span style="font-size: 0.85rem; color: var(--text-muted);">Simulated Potential Score:</span>
-                        <span class="sim-score-val" id="simulatedScoreVal">0.00 (+0.00)</span>
-                    </div>
+                <div class="metric-box">
+                    <span class="metric-label">Correct / Wrong</span>
+                    <span id="res-cw" class="metric-value">0 / 0</span>
                 </div>
-
-                <!-- Rank & Diagnostic Insight -->
-                <div class="analytics-box">
-                    <h4><i class="fa-solid fa-brain"></i> AI Diagnostic Engine & Rank Estimator</h4>
-                    <p id="resDiagnosticText" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px;">
-                        Calculate an assessment to view diagnostic feedback.
-                    </p>
-                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--gold-light);">
-                        <strong>Est. Percentile:</strong> <span id="resEstPercentile">--</span> | 
-                        <strong>Est. AIR Rank:</strong> <span id="resEstRank">--</span>
-                    </div>
+                <div class="metric-box">
+                    <span class="metric-label">Skipped Questions</span>
+                    <span id="res-skipped" class="metric-value">0</span>
+                </div>
+                <div class="metric-box full-span">
+                    <span class="metric-label">Risk Profile</span>
+                    <span id="res-risk" class="metric-value">Low Risk</span>
                 </div>
             </div>
 
-            <!-- Export Action Bar -->
-            <div class="export-action-bar">
-                <button class="btn-export-pdf" onclick="generatePDFReport()">
-                    <i class="fa-solid fa-file-pdf"></i> Export Official Gold Metric PDF Report
+            <!-- Score Scenario Simulator -->
+            <div class="simulator-box">
+                <div class="sim-header">
+                    <i class="fa-solid fa-sliders"></i>
+                    <h3>Score Scenario Simulator ("What If?")</h3>
+                </div>
+                <div class="sim-slider-group">
+                    <label>Convert Wrong to Correct: <span id="sim-wrong-val">0</span></label>
+                    <input type="range" id="sim-wrong-slider" min="0" max="0" value="0">
+                </div>
+                <div class="sim-slider-group">
+                    <label>Convert Skipped to Correct: <span id="sim-skip-val">0</span></label>
+                    <input type="range" id="sim-skip-slider" min="0" max="0" value="0">
+                </div>
+                <div class="sim-output-row">
+                    <span>Simulated Score: <strong id="sim-total-score">0.00</strong></span>
+                    <span class="sim-delta" id="sim-delta-score">+0.00</span>
+                </div>
+            </div>
+
+            <!-- Rank & Percentile Range Estimator -->
+            <div class="rank-estimator-box">
+                <div class="box-header">
+                    <i class="fa-solid fa-trophy"></i>
+                    <h3>Rank &amp; Percentile Range Estimator</h3>
+                    <span class="tag-gold">Experimental Model</span>
+                </div>
+                <div class="rank-grid">
+                    <div>
+                        <span class="sub-lbl">Est. Percentile Range</span>
+                        <div id="est-percentile" class="big-val">--</div>
+                    </div>
+                    <div>
+                        <span class="sub-lbl">Est. Rank Range</span>
+                        <div id="est-rank" class="big-val">--</div>
+                    </div>
+                    <div>
+                        <span class="sub-lbl">Estimation Confidence</span>
+                        <div id="est-confidence" class="med-val">Moderate</div>
+                    </div>
+                    <div>
+                        <span class="sub-lbl">Methodology</span>
+                        <div class="med-val">Statistical Curve</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Printable & Export Trigger Actions -->
+            <div class="matrix-export-actions">
+                <button id="btn-export-ultra-pdf" class="gold-btn-primary">
+                    <i class="fa-solid fa-file-pdf"></i> Generate Printable Metric Report
+                </button>
+                <button id="btn-save-vault" class="gold-btn-secondary">
+                    <i class="fa-solid fa-bookmark"></i> Save to Assessment Vault
                 </button>
             </div>
         </section>
     </main>
 
-    <!-- ==========================================================================
-       ASSESSMENT VAULT DRAWER
-       ========================================================================== -->
-    <div class="vault-overlay" id="vaultOverlay" onclick="toggleVaultDrawer()">
-        <div class="vault-drawer" onclick="event.stopPropagation()">
-            <div class="vault-header">
-                <h3><i class="fa-solid fa-vault"></i> Assessment Vault</h3>
-                <button class="btn-close-vault" onclick="toggleVaultDrawer()"><i class="fa-solid fa-xmark"></i></button>
+    <!-- Assessment Vault Drawer -->
+    <aside id="vault-drawer" class="vault-drawer">
+        <div class="drawer-header">
+            <div class="dh-title">
+                <i class="fa-solid fa-box-archive"></i>
+                <h3>Assessment Vault</h3>
             </div>
-
-            <div class="vault-toolbar">
-                <div class="vault-search-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="vaultSearchInput" placeholder="Filter by test or student name..." onkeyup="filterVaultRecords()">
-                </div>
-                <div class="vault-action-row">
-                    <button class="btn-vault-action" onclick="exportVaultJSON()"><i class="fa-solid fa-download"></i> JSON</button>
-                    <button class="btn-vault-action" onclick="exportVaultCSV()"><i class="fa-solid fa-file-csv"></i> CSV</button>
-                    <button class="btn-vault-action" onclick="clearAllVaultHistory()" style="color: var(--accent-red);"><i class="fa-solid fa-trash-can"></i> Purge</button>
-                </div>
-            </div>
-
-            <div class="vault-content" id="vaultListContainer">
-                <!-- Vault item cards dynamically appended here -->
-            </div>
+            <button id="vault-close-btn" class="icon-btn-gold"><i class="fa-solid fa-xmark"></i></button>
         </div>
-    </div>
 
-    <!-- ==========================================================================
-       HIDDEN PRINTABLE PDF TEMPLATE (STAMP & FORM-FACTOR MATCHING ECS REPORT)
-       ========================================================================== -->
-    <div id="pdfReportTemplate">
-        <div class="pdf-border-wrap">
+        <div class="drawer-subtext">
+            <p><i class="fa-regular fa-lightbulb"></i> Track performance trends, compare test instances, and export standardized analytics reports.</p>
+        </div>
+
+        <div class="drawer-search">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="vault-search-input" placeholder="Filter student or test name...">
+        </div>
+
+        <div class="drawer-quick-actions">
+            <button id="btn-vault-history-pdf" class="vault-action-btn"><i class="fa-solid fa-file-pdf"></i> History PDF</button>
+            <button id="btn-vault-json" class="vault-action-btn"><i class="fa-solid fa-code"></i> JSON</button>
+            <button id="btn-vault-csv" class="vault-action-btn"><i class="fa-solid fa-file-csv"></i> CSV</button>
+        </div>
+
+        <div class="drawer-count-bar">
+            <span><strong id="vault-count-text">0</strong> Records Stored</span>
+            <button id="btn-purge-vault" class="purge-btn"><i class="fa-solid fa-trash-can"></i> Purge Vault</button>
+        </div>
+
+        <!-- Vault Items Container -->
+        <div id="vault-list-container" class="vault-list">
+            <!-- Dynamic Vault Records Injected Here -->
+        </div>
+    </aside>
+
+    <!-- Backdrop Overlay -->
+    <div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+    <!-- Hidden Ultra Printable Report Template for Direct Window Print Engine -->
+    <div id="printable-report-template" class="print-only">
+        <div class="pdf-container">
             <div class="pdf-header">
-                <div class="pdf-brand">
-                    <h1 id="pdfSystemTitle">ECLIPSE7 PERFORMANCE METRIC REPORT</h1>
-                    <p>ENGINE CORE v8.0 GOLD // EVALUATION & DIAGNOSTIC MATRIX</p>
+                <div class="pdf-brand-line">
+                    <span class="pdf-title-main">NEGATIVE MARKING PERFORMANCE REPORT</span>
+                    <span class="pdf-sys-core">SYSTEM CORE: SCORE_PROFILE_ECLIPSE7 // CORE v9.0</span>
                 </div>
-                <div class="pdf-meta-box">
-                    <div><strong>PLATFORM:</strong> ECLIPSE7 SYSTEM</div>
-                    <div><strong>ENGINEER:</strong> SAIPRASAD BARURE</div>
-                    <div id="pdfDocId"><strong>REPORT ID:</strong> E7-2026-0000</div>
-                </div>
+                <div class="pdf-sub-brand">ECLIPSE7 PERFORMANCE MATRIX LABORATORY | FOUNDER: SAIPRASAD BARURE</div>
             </div>
 
-            <div class="pdf-section-title">STUDENT IDENTITY & ASSESSMENT MATRIX</div>
-            <div class="pdf-grid-2">
-                <table class="pdf-info-table">
-                    <tr><td class="lbl">CANDIDATE NAME:</td><td id="pdfStudentName">--</td></tr>
-                    <tr><td class="lbl">TARGET ASSESSMENT:</td><td id="pdfTestTitle">--</td></tr>
-                    <tr><td class="lbl">PRESET PROFILE:</td><td id="pdfProfileName">--</td></tr>
-                </table>
-                <table class="pdf-info-table">
-                    <tr><td class="lbl">TIMESTAMP:</td><td id="pdfTimestamp">--</td></tr>
-                    <tr><td class="lbl">TOTAL QUESTIONS:</td><td id="pdfTotalQuestions">--</td></tr>
-                    <tr><td class="lbl">MAXIMUM MARKS:</td><td id="pdfMaxMarks">--</td></tr>
-                </table>
+            <div class="pdf-section-box">
+                <div class="pdf-box-title">STUDENT IDENTITY MATRIX</div>
+                <div class="pdf-grid-2">
+                    <div><strong>CANDIDATE NAME:</strong> <span id="pdf-val-student">--</span></div>
+                    <div><strong>TARGET EXAM:</strong> <span id="pdf-val-exam">--</span></div>
+                    <div><strong>CURRICULUM PROFILE:</strong> <span id="pdf-val-profile">--</span></div>
+                    <div><strong>SYSTEM TIMESTAMP:</strong> <span id="pdf-val-time">--</span></div>
+                </div>
             </div>
 
             <div class="pdf-score-banner">
-                <div>
-                    <div class="pdf-score-val" id="pdfFinalScore">0.00 / 0</div>
-                    <div class="pdf-score-lbl">Calculated Score</div>
+                <div class="pdf-score-col">
+                    <span class="pdf-sc-lbl">GROSS MARKS (PRE-PENALTY)</span>
+                    <span class="pdf-sc-val" id="pdf-val-gross">0.00</span>
                 </div>
-                <div>
-                    <div class="pdf-score-val" id="pdfAccuracy">0.00%</div>
-                    <div class="pdf-score-lbl">Accuracy Rate</div>
+                <div class="pdf-score-col pdf-border-x">
+                    <span class="pdf-sc-lbl">FINAL CALCULATED SCORE</span>
+                    <span class="pdf-sc-val gold-text" id="pdf-val-final">0 / 0</span>
                 </div>
-                <div>
-                    <div class="pdf-score-val" id="pdfEfficiency">0.00%</div>
-                    <div class="pdf-score-lbl">Efficiency Ratio</div>
+                <div class="pdf-score-col">
+                    <span class="pdf-sc-lbl">ENGINE EFFICIENCY RATIO</span>
+                    <span class="pdf-sc-val" id="pdf-val-efficiency">0%</span>
                 </div>
             </div>
 
-            <div class="pdf-section-title">EVALUATION METRICS & BREAKDOWN</div>
-            <table class="pdf-data-table" style="margin-bottom: 20px;">
-                <thead>
-                    <tr>
-                        <th>Total Attempts</th>
-                        <th>Correct Attempts</th>
-                        <th>Verified Faults (Wrong)</th>
-                        <th>Skipped Questions</th>
-                        <th>Penalty Marks Lost</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td id="pdfAttempts">0</td>
-                        <td id="pdfCorrect">0</td>
-                        <td id="pdfWrong">0</td>
-                        <td id="pdfSkipped">0</td>
-                        <td id="pdfPenalty" style="color: #c0392b; font-weight: bold;">0.00</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="pdf-section-title">AI PERFORMANCE DIAGNOSTIC & RANK PROJECTION</div>
-            <div style="font-size: 11px; line-height: 1.6; color: #333; margin-bottom: 20px;" id="pdfDiagnosticBody">
-                --
+            <div class="pdf-section-box">
+                <div class="pdf-box-title">EVALUATION METRICS SUMMARY</div>
+                <div class="pdf-grid-4">
+                    <div><strong>TOTAL QUESTIONS:</strong><br><span id="pdf-val-totalq">0</span> ITEMS</div>
+                    <div><strong>MAX EVAL MARKS:</strong><br><span id="pdf-val-maxmarks">0</span> MARKS</div>
+                    <div><strong>EVAL USER ATTEMPTS:</strong><br><span id="pdf-val-attempts">0</span> UNITS</div>
+                    <div><strong>VERIFIED FAULTS:</strong><br><span id="pdf-val-faults">0</span> FAULTS</div>
+                </div>
             </div>
 
-            <div class="pdf-footer">
-                <div class="pdf-signatory">
-                    <p>MR. PRASAD REDDY</p>
-                    <span>Chief Executive Officer & Founder of ECLIPSE7</span><br>
-                    <span style="font-size: 8px; color: #888;">STATUS: INTEGRITY MATRIX APPROVED & DIGITAL RECORD VERIFIED VIA CORE STREAM</span>
+            <div class="pdf-section-box">
+                <div class="pdf-box-title">AI SMART RANK &amp; PERCENTILE PREDICTION ENGINE</div>
+                <div class="pdf-grid-2">
+                    <div><strong>ESTIMATED PERCENTILE:</strong> <span id="pdf-val-percentile">--</span></div>
+                    <div><strong>ESTIMATED AIR RANK:</strong> <span id="pdf-val-rank">--</span></div>
                 </div>
+            </div>
 
-                <!-- SVG CEO & FOUNDER VERIFIED STAMP -->
-                <div class="pdf-stamp-container">
-                    <svg viewBox="0 0 200 200" width="100%" height="100%">
-                        <circle cx="100" cy="100" r="90" fill="none" stroke="#b8860b" stroke-width="4" stroke-dasharray="8 4"/>
-                        <circle cx="100" cy="100" r="82" fill="none" stroke="#b8860b" stroke-width="2"/>
-                        <circle cx="100" cy="100" r="62" fill="none" stroke="#b8860b" stroke-width="1.5"/>
-                        <rect x="25" y="85" width="150" height="30" fill="#ffffff" stroke="#b8860b" stroke-width="2"/>
-                        <text x="100" y="105" font-family="'Space Grotesk', sans-serif" font-weight="900" font-size="18" fill="#b8860b" text-anchor="middle">VERIFIED</text>
-                        <path id="circlePathTop" fill="none" d="M 30,100 A 70,70 0 0,1 170,100" />
-                        <text font-size="11" font-weight="bold" fill="#b8860b" letter-spacing="2">
-                            <textPath href="#circlePathTop" startOffset="50%" text-anchor="middle">ECLIPSE7 • PRASAD REDDY</textPath>
+            <div class="pdf-section-box">
+                <div class="pdf-box-title">CROSS-SUBJECT ANALYTICS MATRIX</div>
+                <div class="pdf-grid-3">
+                    <div class="pdf-sub-card">
+                        <strong class="gold-text">PHYSICS SUBSYSTEM</strong>
+                        <div id="pdf-phy-stat">Marks: 0.00 | OK: 0 | WRG: 0</div>
+                    </div>
+                    <div class="pdf-sub-card">
+                        <strong class="gold-text">CHEMISTRY SUBSYSTEM</strong>
+                        <div id="pdf-chem-stat">Marks: 0.00 | OK: 0 | WRG: 0</div>
+                    </div>
+                    <div class="pdf-sub-card">
+                        <strong class="gold-text">MATHEMATICS SUBSYSTEM</strong>
+                        <div id="pdf-math-stat">Marks: 0.00 | OK: 0 | WRG: 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pdf-footer-signature">
+                <div class="pdf-sig-block">
+                    <div class="pdf-sig-name">MR. PRASAD REDDY</div>
+                    <div class="pdf-sig-title">Chief Executive Officer &amp; Founder of ECLIPSE7</div>
+                    <div class="pdf-sig-status">STATUS: INTEGRITY MATRIX APPROVED &amp; DIGITAL RECORD VERIFIED VIA CORE STREAM</div>
+                </div>
+                <div class="pdf-stamp-wrapper">
+                    <!-- SVG Golden / Red Verification Stamp directly integrated -->
+                    <svg class="pdf-stamp-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="#b31217" stroke-width="5" stroke-dasharray="8 4"/>
+                        <circle cx="100" cy="100" r="80" fill="none" stroke="#b31217" stroke-width="3"/>
+                        <circle cx="100" cy="100" r="62" fill="none" stroke="#b31217" stroke-width="2"/>
+                        <path id="stampTextPath1" d="M 30,100 A 70,70 0 1,1 170,100" fill="none"/>
+                        <path id="stampTextPath2" d="M 170,100 A 70,70 0 1,1 30,100" fill="none"/>
+                        <text fill="#b31217" font-size="12" font-weight="900" letter-spacing="2">
+                            <textPath href="#stampTextPath1" startOffset="50%" text-anchor="middle">★ ECLIPSE7 ★</textPath>
                         </text>
-                        <path id="circlePathBottom" fill="none" d="M 170,100 A 70,70 0 0,1 30,100" />
-                        <text font-size="10" font-weight="bold" fill="#b8860b" letter-spacing="1.5">
-                            <textPath href="#circlePathBottom" startOffset="50%" text-anchor="middle">CEO & FOUNDER APPROVED</textPath>
+                        <text fill="#b31217" font-size="10" font-weight="800" letter-spacing="1.5">
+                            <textPath href="#stampTextPath2" startOffset="50%" text-anchor="middle">CEO &amp; FOUNDER PRASAD REDDY</textPath>
                         </text>
+                        <rect x="25" y="82" width="150" height="36" fill="#ffffff" stroke="#b31217" stroke-width="2"/>
+                        <text x="100" y="106" fill="#b31217" font-size="20" font-weight="900" text-anchor="middle" letter-spacing="3">VERIFIED</text>
                     </svg>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ==========================================================================
-       8. JAVASCRIPT APPLICATION LOGIC
-       ========================================================================== -->
-    <script>
-        /* --------------------------------------------------------------------------
-           A. FIREBASE CONFIGURATION & STATE
-           -------------------------------------------------------------------------- */
-        const firebaseConfig = {
-            apiKey: "AIzaSyD-EXAMPLE-KEY-ECLIPSE7",
-            authDomain: "eclipse7-analytics.firebaseapp.com",
-            projectId: "eclipse7-analytics",
-            storageBucket: "eclipse7-analytics.appspot.com",
-            messagingSenderId: "102938475610",
-            appId: "1:102938475610:web:abcdef123456"
-        };
-
-        // Initialize Firebase safely
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        let currentUser = null;
-        let vaultHistory = [];
-        let currentActiveCalculation = null;
-
-        /* --------------------------------------------------------------------------
-           B. AUTHENTICATION & UI STATE MANAGEMENT
-           -------------------------------------------------------------------------- */
-        auth.onAuthStateChanged((user) => {
-            const authContainer = document.getElementById('authContainer');
-            const authSyncHint = document.getElementById('authSyncHint');
-
-            if (user) {
-                currentUser = user;
-                // Auto-fill student name if available
-                if (user.displayName && !document.getElementById('studentName').value) {
-                    document.getElementById('studentName').value = user.displayName;
-                }
-
-                // Render Logged In Profile UI
-                authContainer.innerHTML = `
-                    <div class="user-profile-chip">
-                        <img src="${user.photoURL || 'https://via.placeholder.com/30'}" alt="Profile">
-                        <span>${user.displayName || 'Student User'}</span>
-                        <button class="btn-auth-logout" onclick="handleSignOut()" title="Sign Out">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
-                    </div>
-                `;
-
-                if (authSyncHint) authSyncHint.style.display = 'none';
-                loadVaultDataFromCloud();
-            } else {
-                currentUser = null;
-                // Render Sign In Button UI
-                authContainer.innerHTML = `
-                    <button class="btn-auth-signin" onclick="handleGoogleSignIn()">
-                        <i class="fa-brands fa-google"></i> Sign In
-                    </button>
-                `;
-                loadVaultDataFromLocal();
-            }
-        });
-
-        function handleGoogleSignIn() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch((error) => {
-                console.log("Auth Simulation / Local Fallback active: ", error.message);
-                // Fallback mock authentication for offline/local environment demo
-                currentUser = {
-                    uid: "local-user-777",
-                    displayName: "Saiprasad Barure",
-                    photoURL: "https://lh3.googleusercontent.com/a/default-user"
-                };
-                document.getElementById('studentName').value = currentUser.displayName;
-                document.getElementById('authContainer').innerHTML = `
-                    <div class="user-profile-chip">
-                        <img src="${currentUser.photoURL}" alt="Profile">
-                        <span>${currentUser.displayName}</span>
-                        <button class="btn-auth-logout" onclick="handleSignOut()" title="Sign Out">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
-                    </div>
-                `;
-                document.getElementById('authSyncHint').style.display = 'none';
-                loadVaultDataFromLocal();
-            });
-        }
-
-        function handleSignOut() {
-            auth.signOut().then(() => {
-                location.reload();
-            });
-        }
-
-        function dismissAuthHint() {
-            document.getElementById('authSyncHint').style.display = 'none';
-        }
-
-        /* --------------------------------------------------------------------------
-           C. PRESET CONFIGURATION ENGINE
-           -------------------------------------------------------------------------- */
-        const EXAM_PRESETS = {
-            JEEMAIN: { q: 75, m: 300, pos: 4, neg: 1 },
-            JEEADV: { q: 54, m: 180, pos: 3, neg: 1 },
-            NEET: { q: 180, m: 720, pos: 4, neg: 1 },
-            MHTCET: { q: 150, m: 200, pos: 1, neg: 0 },
-            CUSTOM: { q: '', m: '', pos: 4, neg: 1 }
-        };
-
-        function setPreset(presetKey) {
-            document.getElementById('examPreset').value = presetKey;
-            applyPresetValues();
-        }
-
-        function applyPresetValues() {
-            const key = document.getElementById('examPreset').value;
-            const config = EXAM_PRESETS[key];
-            
-            // Highlight preset chip buttons
-            document.querySelectorAll('.chip-preset').forEach(btn => {
-                btn.classList.toggle('active', btn.textContent.toUpperCase().replace(/\s+/g, '') === key);
-            });
-
-            if (key !== 'CUSTOM') {
-                document.getElementById('totalQuestions').value = config.q;
-                document.getElementById('maxMarks').value = config.m;
-                document.getElementById('posMark').value = config.pos;
-                document.getElementById('negMark').value = config.neg;
-            }
-        }
-
-        /* --------------------------------------------------------------------------
-           D. CORE CALCULATION ENGINE & DIAGNOSTICS
-           -------------------------------------------------------------------------- */
-        function processCalculation() {
-            const studentName = document.getElementById('studentName').value.trim();
-            const testTitle = document.getElementById('testTitle').value.trim();
-            const presetKey = document.getElementById('examPreset').value;
-            const totalQ = parseInt(document.getElementById('totalQuestions').value) || 0;
-            const maxM = parseFloat(document.getElementById('maxMarks').value) || 0;
-            const attempts = parseInt(document.getElementById('totalAttempts').value) || 0;
-            const incorrect = parseInt(document.getElementById('incorrectAttempts').value) || 0;
-            const posWeight = parseFloat(document.getElementById('posMark').value) || 0;
-            const negWeight = parseFloat(document.getElementById('negMark').value) || 0;
-
-            // Validations
-            if (attempts > totalQ) {
-                alert("Attempts cannot exceed total questions.");
-                return;
-            }
-            if (incorrect > attempts) {
-                alert("Incorrect attempts cannot exceed total attempts.");
-                return;
-            }
-
-            const correct = attempts - incorrect;
-            const skipped = totalQ - attempts;
-            const grossScore = correct * posWeight;
-            const penaltyLost = incorrect * negWeight;
-            const finalScore = grossScore - penaltyLost;
-
-            const accuracy = attempts > 0 ? (correct / attempts) * 100 : 0;
-            const efficiency = maxM > 0 ? (finalScore / maxM) * 100 : 0;
-
-            // Performance Band Classification
-            let band = "Developing";
-            if (efficiency >= 75) band = "Ultra Elite";
-            else if (efficiency >= 60) band = "Competitive";
-            else if (efficiency >= 40) band = "Moderate";
-
-            // Save active calculation state
-            currentActiveCalculation = {
-                id: 'E7-' + Date.now().toString(36).toUpperCase(),
-                timestamp: new Date().toLocaleString(),
-                studentName,
-                testTitle,
-                presetKey,
-                totalQ,
-                maxM,
-                attempts,
-                incorrect,
-                correct,
-                skipped,
-                posWeight,
-                negWeight,
-                grossScore,
-                penaltyLost,
-                finalScore,
-                accuracy,
-                efficiency,
-                band
-            };
-
-            // Update UI Analytics Matrix
-            renderAnalyticsPanel(currentActiveCalculation);
-            
-            // Save into Vault
-            saveRecordToVault(currentActiveCalculation);
-        }
-
-        function renderAnalyticsPanel(calc) {
-            document.getElementById('resFinalScore').textContent = `${calc.finalScore.toFixed(2)} / ${calc.maxM}`;
-            document.getElementById('resGrossScore').textContent = `Gross: ${calc.grossScore.toFixed(2)}`;
-            
-            document.getElementById('resAccuracy').textContent = `${calc.accuracy.toFixed(2)}%`;
-            document.getElementById('resCorrectWrong').textContent = `${calc.correct} Correct / ${calc.incorrect} Wrong`;
-            
-            document.getElementById('resEfficiency').textContent = `${calc.efficiency.toFixed(2)}%`;
-            document.getElementById('resPerformanceBand').textContent = `Band: ${calc.band}`;
-            
-            document.getElementById('resPenaltyLost').textContent = `-${calc.penaltyLost.toFixed(2)}`;
-            document.getElementById('resSkippedQuestions').textContent = `${calc.skipped} Skipped Qs`;
-
-            document.getElementById('computedTimestamp').textContent = calc.timestamp;
-
-            // Diagnostic feedback generator
-            let diagText = `Attempted ${calc.attempts} out of ${calc.totalQ} questions with an accuracy rate of ${calc.accuracy.toFixed(1)}%. `;
-            if (calc.incorrect > 0) {
-                diagText += `You lost ${calc.penaltyLost.toFixed(2)} marks due to negative penalties. Minimizing negative marks would raise your score to ${calc.grossScore.toFixed(2)}.`;
-            } else {
-                diagText += `Flawless accuracy! Zero negative penalties incurred.`;
-            }
-            document.getElementById('resDiagnosticText').textContent = diagText;
-
-            // Estimated Rank Range
-            const estPercentile = Math.min(99.9, Math.max(10, calc.efficiency * 1.15)).toFixed(2);
-            document.getElementById('resEstPercentile').textContent = `${estPercentile}%`;
-            document.getElementById('resEstRank').textContent = `AIR ~ ${Math.round((100 - estPercentile) * 1200 + 150)}`;
-
-            // Initialize Simulator Ranges
-            const simWrongSlider = document.getElementById('simWrongSlider');
-            simWrongSlider.max = calc.incorrect;
-            simWrongSlider.value = 0;
-            document.getElementById('simWrongVal').textContent = '0';
-
-            const simSkippedSlider = document.getElementById('simSkippedSlider');
-            simSkippedSlider.max = calc.skipped;
-            simSkippedSlider.value = 0;
-            document.getElementById('simSkippedVal').textContent = '0';
-
-            updateSimulator();
-
-            // Reveal Analytics Panel
-            const panel = document.getElementById('analyticsPanel');
-            panel.classList.add('visible');
-            panel.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function updateSimulator() {
-            if (!currentActiveCalculation) return;
-
-            const wrongToCorrect = parseInt(document.getElementById('simWrongSlider').value) || 0;
-            const skippedToCorrect = parseInt(document.getElementById('simSkippedSlider').value) || 0;
-
-            document.getElementById('simWrongVal').textContent = wrongToCorrect;
-            document.getElementById('simSkippedVal').textContent = skippedToCorrect;
-
-            // Calculate gain:
-            // Converting wrong to correct gains (+posWeight) and removes penalty (+negWeight)
-            const wrongGain = wrongToCorrect * (currentActiveCalculation.posWeight + currentActiveCalculation.negWeight);
-            // Converting skipped to correct gains (+posWeight)
-            const skippedGain = skippedToCorrect * currentActiveCalculation.posWeight;
-
-            const simScore = currentActiveCalculation.finalScore + wrongGain + skippedGain;
-            const delta = simScore - currentActiveCalculation.finalScore;
-
-            document.getElementById('simulatedScoreVal').textContent = `${simScore.toFixed(2)} (+${delta.toFixed(2)})`;
-        }
-
-        function resetCalculatorForm() {
-            document.getElementById('calculatorForm').reset();
-            applyPresetValues();
-            document.getElementById('analyticsPanel').classList.remove('visible');
-            currentActiveCalculation = null;
-        }
-
-        /* --------------------------------------------------------------------------
-           E. ASSESSMENT VAULT & STORAGE ENGINE (`image_00a34c.jpg` REDESIGN)
-           -------------------------------------------------------------------------- */
-        function toggleVaultDrawer() {
-            const overlay = document.getElementById('vaultOverlay');
-            overlay.classList.toggle('active');
-        }
-
-        function saveRecordToVault(record) {
-            vaultHistory.unshift(record);
-            updateVaultUI();
-            
-            if (currentUser) {
-                // Sync to Cloud
-                db.collection('users').doc(currentUser.uid).collection('history').doc(record.id).set(record);
-            } else {
-                localStorage.setItem('E7_VAULT_HISTORY', JSON.stringify(vaultHistory));
-            }
-        }
-
-        function loadVaultDataFromLocal() {
-            const stored = localStorage.getItem('E7_VAULT_HISTORY');
-            vaultHistory = stored ? JSON.parse(stored) : [];
-            updateVaultUI();
-        }
-
-        function loadVaultDataFromCloud() {
-            if (!currentUser) return;
-            db.collection('users').doc(currentUser.uid).collection('history').orderBy('timestamp', 'desc').get()
-                .then((snapshot) => {
-                    vaultHistory = snapshot.docs.map(doc => doc.data());
-                    updateVaultUI();
-                })
-                .catch(() => {
-                    loadVaultDataFromLocal();
-                });
-        }
-
-        function updateVaultUI(filterQuery = '') {
-            const container = document.getElementById('vaultListContainer');
-            const countBadge = document.getElementById('vaultItemCount');
-            
-            const filtered = vaultHistory.filter(item => 
-                item.testTitle.toLowerCase().includes(filterQuery.toLowerCase()) ||
-                item.studentName.toLowerCase().includes(filterQuery.toLowerCase())
-            );
-
-            countBadge.textContent = vaultHistory.length;
-
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; color: var(--text-muted); padding: 40px 10px;">
-                        <i class="fa-solid fa-box-open" style="font-size: 2rem; margin-bottom: 10px; color: var(--gold-primary);"></i>
-                        <p>No assessment records found in vault.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = filtered.map(item => `
-                <div class="vault-item-card">
-                    <div class="vault-item-header">
-                        <span class="vault-item-title">${escapeHtml(item.testTitle)}</span>
-                        <span class="vault-item-preset">${item.presetKey}</span>
-                    </div>
-                    <div class="vault-item-meta">
-                        <span><i class="fa-solid fa-user"></i> ${escapeHtml(item.studentName)}</span>
-                        <span>${item.timestamp}</span>
-                    </div>
-                    <div class="vault-item-stats">
-                        <div>
-                            <div class="v-stat-val">${item.finalScore.toFixed(1)} / ${item.maxM}</div>
-                            <div class="v-stat-lbl">Score</div>
-                        </div>
-                        <div>
-                            <div class="v-stat-val">${item.accuracy.toFixed(1)}%</div>
-                            <div class="v-stat-lbl">Accuracy</div>
-                        </div>
-                        <div>
-                            <div class="v-stat-val">${item.efficiency.toFixed(1)}%</div>
-                            <div class="v-stat-lbl">Efficiency</div>
-                        </div>
-                    </div>
-                    <div class="vault-item-actions">
-                        <button class="btn-v-item btn-v-restore" onclick="restoreVaultItem('${item.id}')">
-                            <i class="fa-solid fa-arrow-rotate-left"></i> Restore
-                        </button>
-                        <button class="btn-v-item btn-v-delete" onclick="deleteVaultItem('${item.id}')">
-                            <i class="fa-solid fa-trash"></i> Delete
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function filterVaultRecords() {
-            const q = document.getElementById('vaultSearchInput').value;
-            updateVaultUI(q);
-        }
-
-        function restoreVaultItem(id) {
-            const item = vaultHistory.find(x => x.id === id);
-            if (!item) return;
-
-            document.getElementById('studentName').value = item.studentName;
-            document.getElementById('testTitle').value = item.testTitle;
-            document.getElementById('examPreset').value = item.presetKey;
-            document.getElementById('totalQuestions').value = item.totalQ;
-            document.getElementById('maxMarks').value = item.maxM;
-            document.getElementById('totalAttempts').value = item.attempts;
-            document.getElementById('incorrectAttempts').value = item.incorrect;
-            document.getElementById('posMark').value = item.posWeight;
-            document.getElementById('negMark').value = item.negWeight;
-
-            currentActiveCalculation = item;
-            renderAnalyticsPanel(item);
-            toggleVaultDrawer();
-        }
-
-        function deleteVaultItem(id) {
-            vaultHistory = vaultHistory.filter(x => x.id !== id);
-            updateVaultUI();
-            
-            if (currentUser) {
-                db.collection('users').doc(currentUser.uid).collection('history').doc(id).delete();
-            } else {
-                localStorage.setItem('E7_VAULT_HISTORY', JSON.stringify(vaultHistory));
-            }
-        }
-
-        function clearAllVaultHistory() {
-            if (confirm("Purge all recorded assessment history? This action cannot be undone.")) {
-                vaultHistory = [];
-                updateVaultUI();
-                localStorage.removeItem('E7_VAULT_HISTORY');
-            }
-        }
-
-        function exportVaultJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(vaultHistory, null, 2));
-            triggerDownload(dataStr, "ECLIPSE7_Vault_Export.json");
-        }
-
-        function exportVaultCSV() {
-            if (vaultHistory.length === 0) return;
-            const headers = ["ID", "Timestamp", "Student", "Test", "Preset", "Score", "MaxMarks", "Accuracy", "Efficiency"];
-            const rows = vaultHistory.map(i => [
-                i.id, `"${i.timestamp}"`, `"${i.studentName}"`, `"${i.testTitle}"`, i.presetKey, i.finalScore, i.maxM, i.accuracy.toFixed(2), i.efficiency.toFixed(2)
-            ]);
-            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-            triggerDownload(csvContent, "ECLIPSE7_Vault_Export.csv");
-        }
-
-        function triggerDownload(url, filename) {
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", url);
-            dlAnchorElem.setAttribute("download", filename);
-            document.body.appendChild(dlAnchorElem);
-            dlAnchorElem.click();
-            dlAnchorElem.remove();
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        /* --------------------------------------------------------------------------
-           F. PRINTABLE PDF REPORT GENERATOR (`ECS_ECLIPSE7_METRIC_REPORT.pdf` FORMAT)
-           -------------------------------------------------------------------------- */
-        function generatePDFReport() {
-            if (!currentActiveCalculation) return;
-
-            const c = currentActiveCalculation;
-
-            // Populating PDF Template
-            document.getElementById('pdfDocId').innerHTML = `<strong>REPORT ID:</strong> ${c.id}`;
-            document.getElementById('pdfStudentName').textContent = c.studentName;
-            document.getElementById('pdfTestTitle').textContent = c.testTitle;
-            document.getElementById('pdfProfileName').textContent = c.presetKey;
-            document.getElementById('pdfTimestamp').textContent = c.timestamp;
-            document.getElementById('pdfTotalQuestions').textContent = `${c.totalQ} ITEMS`;
-            document.getElementById('pdfMaxMarks').textContent = `${c.maxM} MARKS`;
-
-            document.getElementById('pdfFinalScore').textContent = `${c.finalScore.toFixed(2)} / ${c.maxM}`;
-            document.getElementById('pdfAccuracy').textContent = `${c.accuracy.toFixed(2)}%`;
-            document.getElementById('pdfEfficiency').textContent = `${c.efficiency.toFixed(2)}%`;
-
-            document.getElementById('pdfAttempts').textContent = c.attempts;
-            document.getElementById('pdfCorrect').textContent = c.correct;
-            document.getElementById('pdfWrong').textContent = c.incorrect;
-            document.getElementById('pdfSkipped').textContent = c.skipped;
-            document.getElementById('pdfPenalty').textContent = `-${c.penaltyLost.toFixed(2)}`;
-
-            document.getElementById('pdfDiagnosticBody').innerHTML = `
-                <p><strong>Accuracy Analysis:</strong> Candidate maintained an accuracy rate of <strong>${c.accuracy.toFixed(2)}%</strong> across ${c.attempts} total attempted questions.</p>
-                <p><strong>Penalty Drag Analysis:</strong> Unnecessary negative penalties accounted for a loss of <strong>${c.penaltyLost.toFixed(2)} marks</strong>.</p>
-                <p><strong>System Diagnostic Status:</strong> Performance classification band evaluated as <strong>${c.band.toUpperCase()}</strong>.</p>
-            `;
-
-            const element = document.getElementById('pdfReportTemplate');
-            element.style.display = 'block';
-
-            const opt = {
-                margin:       0.3,
-                filename:     `${c.studentName.replace(/\s+/g, '_')}_ECLIPSE7_METRIC_REPORT.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.style.display = 'none';
-            });
-        }
-
-        // Initialize default preset on load
-        applyPresetValues();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
