@@ -1330,3 +1330,97 @@ input:focus {
 .subject-grid-row input::-webkit-outer-spin-button {
     opacity: 0.35;
 }
+
+/* Add/Replace these styles inside style.css */
+
+.subject-compact-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    margin-top: 10px;
+}
+
+.subject-compact-unit {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+}
+
+.subject-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 4px;
+}
+
+.sub-identity-lbl {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--accent-cyan);
+}
+
+.subject-score-chip {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+/* 2x2 Grid Layout on Mobile & Desktop for cohesive pill design */
+.subject-compact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+@media (min-width: 600px) {
+    .subject-compact-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.input-pill {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(18, 24, 38, 0.8);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    transition: var(--spring-transition);
+}
+
+.input-pill:focus-within {
+    border-color: var(--accent-violet);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+}
+
+.input-pill-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+.input-pill input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    width: 100%;
+    padding: 0;
+}
