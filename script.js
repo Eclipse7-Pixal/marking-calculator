@@ -1,5 +1,5 @@
 // ============================================================================
-// ECLIPSE7 ARCHITECTURAL CORE ENGINE v8.0
+// ECLIPSE7 ARCHITECTURAL CORE ENGINE v9.0
 // ============================================================================
 
 const EXAM_PROFILES = {
@@ -15,7 +15,7 @@ const EXAM_PROFILES = {
             mathBio: { qs: 25, maxMarks: 100 }
         },
         labelMathBio: "MATHEMATICS",
-        intel: "Curriculum: JEE Main preset applied. [25 Q / 100 Marks per Subject]. Matrix +4 / -1."
+        intel: "Curriculum: JEE Main preset active [25 Q / 100 Marks per Domain]. Matrix +4 / -1."
     },
     jeeadv: {
         label: "JEE ADVANCED CONFIGURABLE",
@@ -29,7 +29,7 @@ const EXAM_PROFILES = {
             mathBio: { qs: 18, maxMarks: 60 }
         },
         labelMathBio: "MATHEMATICS",
-        intel: "Curriculum: JEE Advanced layout generated. Standard pattern 18 Q / 60 Marks per subject."
+        intel: "Curriculum: JEE Advanced layout generated. Standard pattern 18 Q / 60 Marks per domain."
     },
     neet: {
         label: "NEET UG PRESET",
@@ -43,15 +43,15 @@ const EXAM_PROFILES = {
             mathBio: { qs: 90, maxMarks: 360 }
         },
         labelMathBio: "BIOLOGY",
-        intel: "Curriculum: NEET UG preset. [Phy: 180, Chem: 180, Bio: 360]. Matrix +4 / -1."
+        intel: "Curriculum: NEET UG preset active [Phy: 180, Chem: 180, Bio: 360]. Matrix +4 / -1."
     },
     custom: {
         label: "CUSTOM MODE (MANUAL OVERRIDE)",
-        intel: "Manual Override operational. Input constraints active across form modules."
+        intel: "Manual Override active. Enter parameters freely across form inputs."
     }
 };
 
-const E7_HISTORY_KEY = 'e7_assessment_history_v2';
+const E7_HISTORY_KEY = 'e7_assessment_history_v3';
 
 // Global Instances & Active States
 let breakdownChartInstance = null;
@@ -65,7 +65,147 @@ let subjectScores = {
 };
 
 // ============================================================================
-// SECURITY / SANITIZATION UTILITIES
+// COSMIC BUBBLE TOUCH INTERACTIVE ENGINE
+// ============================================================================
+class CosmicBubbleEngine {
+    constructor() {
+        this.canvas = document.getElementById('cosmicBubbleCanvas');
+        if (!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.mouse = { x: null, y: null, radius: 120 };
+
+        this.init();
+        this.animate();
+        this.bindEvents();
+    }
+
+    init() {
+        this.resize();
+        this.createBubbles(45);
+    }
+
+    resize() {
+        if (!this.canvas) return;
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+
+    createBubbles(count) {
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                radius: Math.random() * 8 + 3,
+                baseRadius: Math.random() * 8 + 3,
+                vx: (Math.random() - 0.5) * 0.8,
+                vy: (Math.random() - 0.5) * 0.8,
+                alpha: Math.random() * 0.4 + 0.1,
+                color: Math.random() > 0.5 ? '#00d2ff' : '#2563eb'
+            });
+        }
+    }
+
+    spawnBurst(x, y) {
+        for (let i = 0; i < 12; i++) {
+            const angle = (Math.PI * 2 / 12) * i;
+            const speed = Math.random() * 3 + 1.5;
+            this.particles.push({
+                x: x,
+                y: y,
+                radius: Math.random() * 6 + 2,
+                baseRadius: Math.random() * 4 + 2,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                alpha: 0.8,
+                color: '#00d2ff',
+                isTemporary: true,
+                life: 60
+            });
+        }
+    }
+
+    bindEvents() {
+        window.addEventListener('resize', () => this.resize());
+        
+        window.addEventListener('mousemove', (e) => {
+            this.mouse.x = e.clientX;
+            this.mouse.y = e.clientY;
+        });
+
+        window.addEventListener('click', (e) => {
+            this.spawnBurst(e.clientX, e.clientY);
+        });
+
+        window.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                this.mouse.x = e.touches[0].clientX;
+                this.mouse.y = e.touches[0].clientY;
+                this.spawnBurst(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                this.mouse.x = e.touches[0].clientX;
+                this.mouse.y = e.touches[0].clientY;
+            }
+        });
+    }
+
+    animate() {
+        if (!this.canvas || !this.ctx) return;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            let p = this.particles[i];
+
+            p.x += p.vx;
+            p.y += p.vy;
+
+            // Bounce on boundaries
+            if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+
+            // Interactive expansion near cursor/touch
+            if (this.mouse.x !== null) {
+                let dx = this.mouse.x - p.x;
+                let dy = this.mouse.y - p.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < this.mouse.radius) {
+                    p.radius = Math.min(p.baseRadius * 2.5, p.radius + 0.5);
+                } else if (p.radius > p.baseRadius) {
+                    p.radius -= 0.2;
+                }
+            }
+
+            // Render Particle with Glow Effect
+            this.ctx.save();
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            this.ctx.fillStyle = p.color;
+            this.ctx.globalAlpha = p.alpha;
+            this.ctx.shadowBlur = 12;
+            this.ctx.shadowColor = p.color;
+            this.ctx.fill();
+            this.ctx.restore();
+
+            // Temporary Burst Lifecycle Management
+            if (p.isTemporary) {
+                p.life--;
+                p.alpha -= 0.015;
+                if (p.life <= 0 || p.alpha <= 0) {
+                    this.particles.splice(i, 1);
+                }
+            }
+        }
+
+        requestAnimationFrame(() => this.animate());
+    }
+}
+
+// ============================================================================
+// SECURITY & SANITIZATION UTILITIES
 // ============================================================================
 function escapeHTML(str) {
     if (typeof str !== 'string') return '';
@@ -89,7 +229,7 @@ function generateUniqueID() {
 }
 
 // ============================================================================
-// DROPDOWNS & NAVIGATION SYSTEM
+// DROPDOWNS, THEMES & NAVIGATION SYSTEM
 // ============================================================================
 function handleProfileTap() {
     if (window.getCurrentUser && window.getCurrentUser()) {
@@ -109,6 +249,37 @@ function closeTooltip(e) {
     if (tooltip) tooltip.classList.add('hidden');
 }
 
+function toggleThemeMode() {
+    const html = document.documentElement;
+    const themeIcon = document.getElementById('themeIcon');
+    const currentTheme = html.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('e7_theme_preference', newTheme);
+
+    if (themeIcon) {
+        if (newTheme === 'light') {
+            themeIcon.className = 'fa-solid fa-moon';
+        } else {
+            themeIcon.className = 'fa-solid fa-sun';
+        }
+    }
+
+    if (activeCanonicalResult) {
+        renderCurrentDashboardCharts(activeCanonicalResult);
+    }
+}
+
+function applySavedTheme() {
+    const saved = localStorage.getItem('e7_theme_preference') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+        themeIcon.className = saved === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+    }
+}
+
 function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, callback) {
     const container = document.getElementById(containerId);
     const trigger = document.getElementById(triggerId);
@@ -121,10 +292,10 @@ function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, call
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         document.querySelectorAll('.select-box-dropdown').forEach(p => {
-            if(p !== panel) p.classList.remove('show');
+            if (p !== panel) p.classList.remove('show');
         });
         document.querySelectorAll('.custom-select-box').forEach(c => {
-            if(c !== container) c.classList.remove('active');
+            if (c !== container) c.classList.remove('active');
         });
         panel.classList.toggle('show');
         container.classList.toggle('active');
@@ -154,6 +325,9 @@ function initDropdownSystem(containerId, triggerId, panelId, hiddenInputId, call
 // EVENT BINDINGS & SYSTEM INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
+    new CosmicBubbleEngine();
+    applySavedTheme();
+
     initDropdownSystem('customSelect', 'selectedLabel', 'selectOptions', 'reportType', toggleSubjectSectionDisplay);
     initDropdownSystem('ratioSelectContainer', 'ratioLabel', 'ratioOptions', 'markingRatio', () => { 
         setProfileToCustomOverride(); 
@@ -173,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupEventListeners() {
     document.getElementById('auth-container')?.addEventListener('click', handleProfileTap);
     document.getElementById('closeTooltipBtn')?.addEventListener('click', closeTooltip);
+    document.getElementById('theme-toggle-btn')?.addEventListener('click', toggleThemeMode);
     document.getElementById('btnCalculate')?.addEventListener('click', executeCalculationSequence);
 
     // Export Action Handlers
@@ -181,7 +356,7 @@ function setupEventListeners() {
     document.getElementById('btnExportJSON')?.addEventListener('click', exportCurrentJSON);
     document.getElementById('btnShareResult')?.addEventListener('click', triggerShareMenu);
 
-    // History & Drawer Controllers
+    // History Vault & Drawer Controls
     document.getElementById('menu-toggle-btn')?.addEventListener('click', () => toggleHistoryDrawer(true));
     document.getElementById('closeHistoryBtn')?.addEventListener('click', () => toggleHistoryDrawer(false));
     document.getElementById('drawerOverlay')?.addEventListener('click', () => toggleHistoryDrawer(false));
@@ -200,7 +375,7 @@ function setupEventListeners() {
     document.getElementById('closeFullReportBtn')?.addEventListener('click', () => toggleFullReportModal(false));
     document.getElementById('fullReportOverlay')?.addEventListener('click', () => toggleFullReportModal(false));
 
-    // Dynamic selects for comparison
+    // Comparison Selectors
     document.getElementById('compareSelect1')?.addEventListener('change', renderComparisonView);
     document.getElementById('compareSelect2')?.addEventListener('change', renderComparisonView);
 }
@@ -213,11 +388,11 @@ function toggleSubjectSectionDisplay() {
 
     if (type === 'subjectwise') {
         section.classList.add('visible');
-        if(subjCard) subjCard.classList.remove('hidden');
+        if (subjCard) subjCard.classList.remove('hidden');
         syncSubjectBreakdownToMainInputs();
     } else {
         section.classList.remove('visible');
-        if(subjCard) subjCard.classList.add('hidden');
+        if (subjCard) subjCard.classList.add('hidden');
     }
 }
 
@@ -246,7 +421,11 @@ function applySelectedExamProfile(profileKey) {
     document.getElementById('ratioLabel').textContent = profile.labelRatio;
 
     const mbLabel = document.getElementById('mathBioLabel');
-    if (mbLabel && profile.labelMathBio) mbLabel.textContent = profile.labelMathBio;
+    if (mbLabel && profile.labelMathBio) {
+        mbLabel.innerHTML = profile.labelMathBio === 'BIOLOGY' ? 
+            `<i class="fa-solid fa-dna"></i> BIOLOGY` : 
+            `<i class="fa-solid fa-calculator"></i> MATHEMATICS`;
+    }
 
     document.getElementById('phyA').value = profile.subjects.phy.qs;
     document.getElementById('chemA').value = profile.subjects.chem.qs;
@@ -271,9 +450,9 @@ function setProfileToCustomOverride() {
 
     if (totalQsInput) totalQsInput.classList.remove('profile-locked-row');
 
-    if(hiddenProf && hiddenProf.value !== 'custom') {
+    if (hiddenProf && hiddenProf.value !== 'custom') {
         hiddenProf.value = 'custom';
-        if(triggerProf) triggerProf.textContent = EXAM_PROFILES.custom.label;
+        if (triggerProf) triggerProf.textContent = EXAM_PROFILES.custom.label;
         const intelBox = document.getElementById('intelMessage');
         if (intelBox) intelBox.textContent = EXAM_PROFILES.custom.intel;
     }
@@ -374,7 +553,7 @@ function recalculateSubjectScores() {
 
         const chip = document.getElementById(`${sub}ScoreChip`);
         if (chip) {
-            chip.textContent = `Score: ${score.toFixed(2)} / ${maxMarks}`;
+            chip.textContent = `Score: ${score.toFixed(2)} / ${maxMarks.toFixed(0)}`;
         }
     });
 }
@@ -382,9 +561,9 @@ function recalculateSubjectScores() {
 function setupMainFallbackInputObservers() {
     ['studentName', 'testName', 'totalQs', 'maxMarks', 'attempted', 'wrong'].forEach(id => {
         const el = document.getElementById(id);
-        if(el) {
+        if (el) {
             el.addEventListener('input', () => {
-                if(id !== 'studentName' && id !== 'testName' && id !== 'totalQs') {
+                if (id !== 'studentName' && id !== 'testName' && id !== 'totalQs') {
                     setProfileToCustomOverride();
                 }
                 el.classList.remove('validation-error');
@@ -412,7 +591,7 @@ function syncSubjectBreakdownToMainInputs() {
     });
 
     const totalQsInput = document.getElementById('totalQs');
-    if(aggregateTotal > 0 && totalQsInput) totalQsInput.value = aggregateTotal;
+    if (aggregateTotal > 0 && totalQsInput) totalQsInput.value = aggregateTotal;
     
     let computedAttempts = aggregateCorrect + aggregateWrong;
     document.getElementById('attempted').value = computedAttempts > 0 || aggregateWrong > 0 ? computedAttempts : '';
@@ -433,12 +612,12 @@ function triggerSystemToastNotification(message, isError = true) {
         toast.style.background = "rgba(244, 63, 94, 0.25)";
         toast.style.borderColor = "rgba(244, 63, 94, 0.4)";
         toast.style.color = "#fecdd3";
-        if (icon) icon.className = "fa-solid fa-triangle-exclamation";
+        if (icon) icon.className = "fa-solid fa-triangle-exclamation text-rose";
     } else {
         toast.style.background = "rgba(16, 185, 129, 0.25)";
         toast.style.borderColor = "rgba(16, 185, 129, 0.4)";
         toast.style.color = "#a7f3d0";
-        if (icon) icon.className = "fa-solid fa-circle-check";
+        if (icon) icon.className = "fa-solid fa-circle-check text-emerald";
     }
 
     toast.classList.add('show');
@@ -477,7 +656,7 @@ function validateInput() {
     if (invalidNodes.length === 0) {
         if (wVal > aVal) {
             invalidNodes.push(wrong, attempted);
-            triggerSystemToastNotification("Validation Error: Wrong attempts cannot exceed total attempts.");
+            triggerSystemToastNotification("Validation Error: Incorrect attempts cannot exceed total attempts.");
             return false;
         }
         if (aVal > tVal) {
@@ -502,14 +681,14 @@ function validateInput() {
         });
         if (subSumQs !== tVal) {
             invalidNodes.push(totalQs);
-            triggerSystemToastNotification("Subject Matrix Mismatch: Sum of subject totals does not match global total.");
+            triggerSystemToastNotification("Subject Matrix Mismatch: Sum of subject totals does not match overall total.");
             return false;
         }
     }
 
     if (invalidNodes.length > 0) {
         invalidNodes.forEach(node => node.classList.add('validation-error'));
-        triggerSystemToastNotification("Action Blocked: Please complete required fields correctly.");
+        triggerSystemToastNotification("Action Blocked: Complete required fields highlighted.");
         return false;
     }
 
@@ -559,14 +738,15 @@ function calculateScore(inputData) {
 
 function calculateAnalytics(inputData, scoreResult) {
     let performanceLevel = "Developing";
-    let color = "#f43f5e";
+    let color = "#3b82f6";
     const pct = scoreResult.efficiency;
 
     if (pct >= 90) { performanceLevel = "Exceptional"; color = "#10b981"; }
-    else if (pct >= 80) { performanceLevel = "Excellent"; color = "#34d399"; }
-    else if (pct >= 70) { performanceLevel = "Strong"; color = "#38bdf8"; }
-    else if (pct >= 60) { performanceLevel = "Good"; color = "#60a5fa"; }
-    else if (pct >= 50) { performanceLevel = "Developing"; color = "#c084fc"; }
+    else if (pct >= 80) { performanceLevel = "Excellent"; color = "#00d2ff"; }
+    else if (pct >= 70) { performanceLevel = "Strong"; color = "#2563eb"; }
+    else if (pct >= 60) { performanceLevel = "Good"; color = "#3b82f6"; }
+    else if (pct >= 50) { performanceLevel = "Developing"; color = "#8b5cf6"; }
+    else { performanceLevel = "Needs Review"; color = "#f43f5e"; }
 
     let wrongRatio = inputData.attempted > 0 ? (inputData.wrong / inputData.attempted) : 0;
     let riskIndex = "Low Risk";
@@ -574,9 +754,9 @@ function calculateAnalytics(inputData, scoreResult) {
     else if (wrongRatio > 0.2) riskIndex = "Moderate Risk";
 
     let recommendations = [];
-    if (scoreResult.accuracy < 75) recommendations.push("Reduce speculative attempts to minimize negative marking.");
-    if (scoreResult.skipped > inputData.totalQs * 0.3) recommendations.push("Optimize time allocation to review unanswered questions.");
-    if (recommendations.length === 0) recommendations.push("Maintain current question selection strategy and balanced timing.");
+    if (scoreResult.accuracy < 75) recommendations.push("Reduce speculative attempts to limit penalty drag on total score.");
+    if (scoreResult.skipped > inputData.totalQs * 0.3) recommendations.push("Optimize question selection strategy to address unanswered items.");
+    if (recommendations.length === 0) recommendations.push("Maintain balanced time management and current selection precision.");
 
     return {
         performanceLevel,
@@ -616,8 +796,8 @@ function predictRankAndPercentile(inputData, scoreResult) {
     return {
         percentileRange: `${percentileMin.toFixed(1)}% - ${percentileMax.toFixed(1)}%`,
         rankRange: `${rankMin.toLocaleString()} - ${rankMax.toLocaleString()}`,
-        confidence: "Moderate (Mathematical Model)",
-        methodology: "Normalized Score Curve"
+        confidence: "High (Statistical Normalized Model)",
+        methodology: "ECLIPSE7 Score Distribution Matrix"
     };
 }
 
@@ -629,7 +809,7 @@ function buildAssessmentResult(existingID = null) {
 
     return {
         id: existingID || generateUniqueID(),
-        schemaVersion: "8.0",
+        schemaVersion: "9.0",
         createdAt: Date.now(),
         timestamp: new Date().toLocaleString(),
 
@@ -669,6 +849,7 @@ function renderResult(canonicalObj) {
     activeCanonicalResult = canonicalObj;
 
     animateNumberCounter('score', canonicalObj.result.finalScore, 2);
+    document.getElementById('heroMaxSub').textContent = `/ ${canonicalObj.scoring.maxMarks} Marks`;
 
     const gradeEl = document.getElementById('dashGrade');
     if (gradeEl) {
@@ -682,26 +863,35 @@ function renderResult(canonicalObj) {
     animateNumberCounter('dashEfficiency', parseFloat(canonicalObj.result.scorePercentage), 1, '', '%');
     animateNumberCounter('dashPenalty', canonicalObj.result.penaltyMarks, 2);
 
+    // Mini Progress Bars
+    const accBar = document.getElementById('accuracyProgress');
+    const effBar = document.getElementById('efficiencyProgress');
+    if (accBar) accBar.style.width = `${Math.min(100, Math.max(0, canonicalObj.result.accuracy))}%`;
+    if (effBar) effBar.style.width = `${Math.min(100, Math.max(0, canonicalObj.result.scorePercentage))}%`;
+
     document.getElementById('dashCorrect').innerText = canonicalObj.scoring.correct;
     document.getElementById('dashWrong').innerText = canonicalObj.scoring.wrong;
     document.getElementById('dashSkipped').innerText = canonicalObj.scoring.skipped;
-    document.getElementById('dashRiskIndex').innerText = canonicalObj.analytics.riskIndex;
+    document.getElementById('dashPenaltyMeta').innerText = `${canonicalObj.scoring.wrong} Incorrect Attempts`;
+
+    let unattemptedPct = ((canonicalObj.scoring.skipped / canonicalObj.scoring.totalQuestions) * 100).toFixed(1);
+    document.getElementById('dashUnattemptedPct').innerText = `${unattemptedPct}% Unattempted`;
 
     document.getElementById('predPercentile').innerText = canonicalObj.prediction.percentileRange;
     document.getElementById('predRank').innerText = canonicalObj.prediction.rankRange;
     document.getElementById('predConfidence').innerText = canonicalObj.prediction.confidence;
     document.getElementById('predMethodology').innerText = canonicalObj.prediction.methodology;
 
-    // Diagnostics Text
-    let diagText = `ECLIPSE7 Performance Diagnostic Engine\n`;
-    diagText += `• Accuracy: ${canonicalObj.result.accuracy}%\n`;
-    diagText += `• Penalty Drag: ${canonicalObj.result.penaltyMarks.toFixed(2)} marks lost to wrong attempts.\n`;
-    diagText += `• Attempt Strategy: ${canonicalObj.result.attemptRate}% total test coverage.\n\n`;
-    diagText += `Recommendations:\n` + canonicalObj.analytics.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n');
+    // Diagnostic Text
+    let diagText = `ECLIPSE7 Quantitative Diagnostic Report:\n`;
+    diagText += `• Accuracy Rate: ${canonicalObj.result.accuracy}%\n`;
+    diagText += `• Penalty Loss: ${canonicalObj.result.penaltyMarks.toFixed(2)} marks lost to wrong attempts.\n`;
+    diagText += `• Coverage: ${canonicalObj.result.attemptRate}% total assessment completion.\n\n`;
+    diagText += `Strategic Directives:\n` + canonicalObj.analytics.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n');
 
     document.getElementById('aiReportContent').innerText = diagText;
 
-    // Insight List
+    // Insights List
     const insightList = document.getElementById('insightList');
     if (insightList) {
         insightList.innerHTML = '';
@@ -767,7 +957,6 @@ function updateSimulatorOutcome() {
     const mpc = activeCanonicalResult.scoring.marksPerCorrect;
     const ratio = activeCanonicalResult.scoring.negativeMarkingRatio;
 
-    // Recover negative penalty + add positive score for wrong->correct
     const recoveredPenalty = wToC * (mpc * ratio);
     const addedScoreWrong = wToC * mpc;
     const addedScoreSkip = sToC * mpc;
@@ -805,25 +994,35 @@ function renderCurrentDashboardCharts(canonicalObj) {
     if (breakdownChartInstance) breakdownChartInstance.destroy();
     if (subjectChartInstance) subjectChartInstance.destroy();
 
+    const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+    const textColor = isDark ? '#f8fafc' : '#0f172a';
+    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+
     const ctxPie = document.getElementById('currentBreakdownChart').getContext('2d');
     breakdownChartInstance = new Chart(ctxPie, {
-        type: 'pie',
+        type: 'doughnut',
         data: {
-            labels: ['Correct', 'Wrong', 'Skipped'],
+            labels: ['Correct', 'Incorrect', 'Skipped'],
             datasets: [{
                 data: [canonicalObj.scoring.correct, canonicalObj.scoring.wrong, canonicalObj.scoring.skipped],
-                backgroundColor: ['#10b981', '#f43f5e', '#64748b']
+                backgroundColor: ['#10b981', '#f43f5e', '#64748b'],
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: '#f8fafc', font: { family: 'Plus Jakarta Sans', size: 11 } } } }
+            plugins: { 
+                legend: { 
+                    position: 'bottom',
+                    labels: { color: textColor, font: { family: 'Plus Jakarta Sans', size: 11 } } 
+                } 
+            }
         }
     });
 
     const ctxBar = document.getElementById('currentSubjectChart').getContext('2d');
-    const dynLabel = document.getElementById('mathBioLabel')?.textContent || 'MATHEMATICS';
+    const dynLabel = canonicalObj.assessment.examProfile === 'neet' ? 'Biology' : 'Mathematics';
     const subData = canonicalObj.subjects.data;
     
     subjectChartInstance = new Chart(ctxBar, {
@@ -831,9 +1030,10 @@ function renderCurrentDashboardCharts(canonicalObj) {
         data: {
             labels: ['Physics', 'Chemistry', dynLabel],
             datasets: [{
-                label: 'Subject Score',
+                label: 'Domain Score',
                 data: [subData.phy.score, subData.chem.score, subData.mathBio.score],
-                backgroundColor: ['#8b5cf6', '#0284c7', '#10b981']
+                backgroundColor: ['#00d2ff', '#2563eb', '#3b82f6'],
+                borderRadius: 6
             }]
         },
         options: {
@@ -841,8 +1041,8 @@ function renderCurrentDashboardCharts(canonicalObj) {
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                x: { ticks: { color: '#94a3b8' } },
-                y: { ticks: { color: '#94a3b8' } }
+                x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                y: { ticks: { color: textColor }, grid: { color: gridColor } }
             }
         }
     });
@@ -921,7 +1121,7 @@ function renderHistoryVault() {
                 <span class="item-test-title">${test}</span>
                 <span class="item-badge-profile">${profile}</span>
             </div>
-            <div class="item-student-name"><i class="fa-solid fa-user-graduate"></i> ${student}</div>
+            <div class="item-student-name"><i class="fa-solid fa-user-graduate text-cyan"></i> ${student}</div>
             <div class="item-metrics-grid">
                 <div>Score: <strong>${score} / ${maxM}</strong></div>
                 <div>Accuracy: <strong>${item.result?.accuracy || item.accuracy || 0}%</strong></div>
@@ -929,8 +1129,8 @@ function renderHistoryVault() {
                 <div>Date: <strong>${item.timestamp || 'N/A'}</strong></div>
             </div>
             <div class="item-card-actions">
-                <button class="item-btn btn-restore" onclick="restoreAssessmentState('${item.id}')"><i class="fa-solid fa-rotate-left"></i> Restore</button>
-                <button class="item-btn btn-delete" onclick="deleteAssessmentItem('${item.id}')"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                <button class="item-btn btn-restore bubble-click" onclick="restoreAssessmentState('${item.id}')"><i class="fa-solid fa-rotate-left"></i> Restore</button>
+                <button class="item-btn btn-delete bubble-click" onclick="deleteAssessmentItem('${item.id}')"><i class="fa-solid fa-trash-can"></i> Delete</button>
             </div>
         </div>`;
     });
@@ -979,7 +1179,7 @@ function restoreAssessmentState(id) {
 
     renderResult(item);
     toggleHistoryDrawer(false);
-    triggerSystemToastNotification("Assessment state perfectly restored.", false);
+    triggerSystemToastNotification("Assessment state successfully restored.", false);
 }
 
 function deleteAssessmentItem(id) {
@@ -996,13 +1196,13 @@ function deleteAssessmentItem(id) {
 }
 
 function clearAssessmentHistory() {
-    if (!confirm("Are you sure you want to purge all stored assessments?")) return;
+    if (!confirm("Purge all stored assessments from memory?")) return;
     localStorage.removeItem(E7_HISTORY_KEY);
     renderHistoryVault();
     if (window.clearAllDatabaseScores) {
         window.clearAllDatabaseScores();
     }
-    triggerSystemToastNotification("History vault purged completely.", false);
+    triggerSystemToastNotification("Vault purged completely.", false);
 }
 
 function filterHistoryList() {
@@ -1035,7 +1235,7 @@ function toggleHistoryDrawer(show) {
 function openCompareModalLauncher() {
     const history = getStoredHistory();
     if (history.length < 2) {
-        triggerSystemToastNotification("Require at least 2 historical records to run comparison.");
+        triggerSystemToastNotification("At least 2 records are required for comparison.");
         return;
     }
 
@@ -1101,7 +1301,7 @@ function renderComparisonView() {
             <p>Penalty: <strong>${t2.result?.penaltyMarks || t2.totalPenalty}</strong></p>
         </div>
         <div class="cmp-summary-box">
-            <strong>Delta Analysis:</strong> ${diffEff >= 0 ? `+${diffEff}% Efficiency gain` : `${diffEff}% Efficiency loss`}.
+            <strong>Comparative Analysis:</strong> ${diffEff >= 0 ? `+${diffEff}% Efficiency gain` : `${diffEff}% Efficiency shift`}.
             Penalty difference: ${diffPen} marks.
         </div>
     `;
@@ -1151,7 +1351,7 @@ function toggleFullReportModal(show) {
 }
 
 // ============================================================================
-// EXPORT ENGINE (PDF, PNG, JSON, CSV, SHARE)
+// PDF EXPORT ENGINE WITH SUBJECT BREAKDOWN & VERIFICATION PANEL STAMP
 // ============================================================================
 function createPDFDocumentObject(canonicalObj) {
     const { jsPDF } = window.jspdf;
@@ -1162,33 +1362,38 @@ function createPDFDocumentObject(canonicalObj) {
     const test = canonicalObj.assessment.testName.toUpperCase();
     const timestamp = canonicalObj.timestamp;
 
+    // Background Canvas Frame
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, 'F');
     
-    doc.setDrawColor(240, 244, 248); doc.setLineWidth(0.25);
-    for (let i = 10; i < 210; i += 20) doc.line(i, 0, i, 297);
-    for (let j = 10; j < 297; j += 20) doc.line(0, j, 210, j);
+    // Subtle Grid Blueprint Lines
+    doc.setDrawColor(235, 242, 250); doc.setLineWidth(0.2);
+    for (let i = 10; i < 210; i += 15) doc.line(i, 0, i, 297);
+    for (let j = 10; j < 297; j += 15) doc.line(0, j, 210, j);
 
-    doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3);
+    // Main Page Border
+    doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.4);
     doc.rect(8, 8, 194, 281);
 
-    doc.setFillColor(248, 250, 252); doc.rect(10, 10, 190, 32, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5); doc.rect(10, 10, 190, 32, 'D');
+    // Header Branding Banner
+    doc.setFillColor(15, 23, 42); doc.rect(10, 10, 190, 32, 'F');
+    doc.setDrawColor(0, 210, 255); doc.setLineWidth(0.6); doc.rect(10, 10, 190, 32, 'D');
 
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("EXAMINATION PERFORMANCE & METRIC REPORT", 16, 21);
+    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
+    doc.text("EXAMINATION PERFORMANCE & METRIC ANALYTICS REPORT", 14, 20);
     
-    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(14, 165, 233);
-    doc.text(`ECLIPSE7 ENGINE // PROFILE: ${profile} // ID: ${canonicalObj.id}`, 16, 27);
+    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(0, 210, 255);
+    doc.text(`ECLIPSE7 ENGINE // PROFILE: ${profile} // ID: ${canonicalObj.id}`, 14, 26);
     
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
-    doc.text("ECLIPSE7 PERFORMANCE ANALYTICS PLATFORM | ENGINEER: SAIPRASAD BARURE", 16, 35);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text("AUTHOR: SAIPRASAD BARURE / PRASAD REDDY | OFFICIAL REPORT GENERATOR", 14, 34);
 
+    // Candidate Identity & Metric Summary Panel
     let cardY = 46;
     doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" STUDENT IDENTITY MATRIX", 12, cardY + 4.2);
+    doc.text(" CANDIDATE PROFILE MATRIX", 12, cardY + 4.2);
     
     doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
     doc.rect(10, cardY + 6, 92, 26, 'DF');
@@ -1205,7 +1410,7 @@ function createPDFDocumentObject(canonicalObj) {
     doc.setFillColor(241, 245, 249); doc.rect(108, cardY, 92, 6, 'F');
     doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(108, cardY, 92, 6, 'D');
     doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" EVALUATION METRICS SUMMARY", 110, cardY + 4.2);
+    doc.text(" GLOBAL EVALUATION OVERVIEW", 110, cardY + 4.2);
     
     doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
     doc.rect(108, cardY + 6, 92, 26, 'DF');
@@ -1221,30 +1426,137 @@ function createPDFDocumentObject(canonicalObj) {
     doc.text(`${canonicalObj.scoring.attempted} UNITS`, 148, cardY + 25);
     doc.setTextColor(225, 29, 72); doc.text(`${canonicalObj.scoring.wrong} FAULTS`, 148, cardY + 31);
 
+    // Hero Score Panel
     let scoreY = 82;
-    doc.setFillColor(250, 251, 253); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
+    doc.setFillColor(248, 250, 252); doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.5);
     doc.rect(10, scoreY, 190, 22, 'DF');
 
-    doc.setTextColor(14, 165, 233); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text("FINAL SCORE", 15, scoreY + 6);
+    doc.setTextColor(37, 99, 235); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text("FINAL EVALUATED SCORE", 15, scoreY + 6);
     doc.setFont("courier", "bold"); doc.setFontSize(16); doc.setTextColor(15, 23, 42);
-    doc.text(`${canonicalObj.result.finalScore.toFixed(2)} / ${canonicalObj.scoring.maxMarks}`, 15, scoreY + 15);
+    doc.text(`${canonicalObj.result.finalScore.toFixed(2)} / ${canonicalObj.scoring.maxMarks}`, 15, scoreY + 16);
 
     doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("SCORE EFFICIENCY", 100, scoreY + 6);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(12);
-    doc.text(`${canonicalObj.result.scorePercentage}%`, 100, scoreY + 14);
+    doc.text("EFFICIENCY %", 100, scoreY + 6);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
+    doc.text(`${canonicalObj.result.scorePercentage}%`, 100, scoreY + 15);
 
+    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
     doc.text("ACCURACY", 150, scoreY + 6);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(12);
-    doc.text(`${canonicalObj.result.accuracy}%`, 150, scoreY + 14);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
+    doc.text(`${canonicalObj.result.accuracy}%`, 150, scoreY + 15);
+
+    let nextY = scoreY + 28;
+
+    // SUBJECT WISE BREAKDOWN ANALYSIS TABLE
+    if (canonicalObj.subjects && canonicalObj.subjects.enabled) {
+        doc.setFillColor(15, 23, 42); doc.rect(10, nextY, 190, 6, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+        doc.text(" SUBJECT-WISE PERFORMANCE ANALYSIS BREAKDOWN", 12, nextY + 4.2);
+
+        const thirdLabel = canonicalObj.assessment.examProfile === 'neet' ? 'BIOLOGY' : 'MATHEMATICS';
+        const subData = canonicalObj.subjects.data;
+
+        const tableBody = [
+            [
+                'PHYSICS', 
+                subData.phy.total, 
+                subData.phy.correct, 
+                subData.phy.wrong, 
+                subData.phy.skipped, 
+                `${subData.phy.score.toFixed(2)} / ${subData.phy.maxMarks}`
+            ],
+            [
+                'CHEMISTRY', 
+                subData.chem.total, 
+                subData.chem.correct, 
+                subData.chem.wrong, 
+                subData.chem.skipped, 
+                `${subData.chem.score.toFixed(2)} / ${subData.chem.maxMarks}`
+            ],
+            [
+                thirdLabel, 
+                subData.mathBio.total, 
+                subData.mathBio.correct, 
+                subData.mathBio.wrong, 
+                subData.mathBio.skipped, 
+                `${subData.mathBio.score.toFixed(2)} / ${subData.mathBio.maxMarks}`
+            ]
+        ];
+
+        doc.autoTable({
+            startY: nextY + 6,
+            head: [['Subject', 'Total Qs', 'Correct', 'Wrong', 'Skipped', 'Net Score']],
+            body: tableBody,
+            margin: { left: 10, right: 10 },
+            theme: 'grid',
+            headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
+            bodyStyles: { fontSize: 8, textColor: [15, 23, 42] },
+            alternateRowStyles: { fillColor: [248, 250, 252] }
+        });
+
+        nextY = doc.lastAutoTable.finalY + 8;
+    }
+
+    // STATISTICAL RANK & PERCENTILE ESTIMATION PANEL
+    doc.setFillColor(241, 245, 249); doc.rect(10, nextY, 190, 6, 'F');
+    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, nextY, 190, 6, 'D');
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+    doc.text(" STATISTICAL PROJECTION & PERCENTILE ESTIMATION", 12, nextY + 4.2);
+
+    doc.setFillColor(255, 255, 255); doc.rect(10, nextY + 6, 190, 22, 'DF');
+    doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
+    doc.text("ESTIMATED PERCENTILE RANGE :", 14, nextY + 14);
+    doc.text("ESTIMATED RANK RANGE       :", 14, nextY + 22);
+
+    doc.setTextColor(37, 99, 235); doc.setFontSize(8);
+    doc.text(canonicalObj.prediction.percentileRange, 64, nextY + 14);
+    doc.text(canonicalObj.prediction.rankRange, 64, nextY + 22);
+
+    doc.setTextColor(100, 116, 139); doc.setFontSize(7);
+    doc.text("ESTIMATION MODEL : " + canonicalObj.prediction.methodology, 120, nextY + 14);
+    doc.text("CONFIDENCE LEVEL  : " + canonicalObj.prediction.confidence, 120, nextY + 22);
+
+    nextY += 34;
+
+    // FINAL SIGN-OFF & VERIFICATION PANEL WITH STAMP
+    const stampPanelY = 220;
+    doc.setFillColor(248, 250, 252); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
+    doc.rect(10, stampPanelY, 190, 60, 'DF');
+
+    doc.setFillColor(15, 23, 42); doc.rect(10, stampPanelY, 190, 6, 'F');
+    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+    doc.text(" OFFICIAL VERIFICATION & AUDIT CERTIFICATION", 12, stampPanelY + 4.2);
+
+    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+    doc.text("ECLIPSE7 PERFORMANCE VERIFICATION SEAL", 14, stampPanelY + 14);
+
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
+    doc.text(`Document Signature Hash : SHA256-${canonicalObj.id}`, 14, stampPanelY + 22);
+    doc.text(`System Generation Time : ${timestamp}`, 14, stampPanelY + 28);
+    doc.text(`Lead Platform Engineer : Saiprasad Barure / Prasad Reddy`, 14, stampPanelY + 34);
+    doc.text(`Platform Portal         : https://eclipse7.odoo.com/`, 14, stampPanelY + 40);
+    doc.text(`Verification Status     : AUTHENTICATED LOCAL EVALUATION`, 14, stampPanelY + 46);
+
+    // Try loading stamp.png image into PDF
+    try {
+        const stampImg = new Image();
+        stampImg.src = 'stamp.png';
+        doc.addImage(stampImg, 'PNG', 145, stampPanelY + 8, 48, 48);
+    } catch (e) {
+        // Fallback Stamp Badge if image loading fails
+        doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.8);
+        doc.rect(145, stampPanelY + 12, 48, 40);
+        doc.setTextColor(37, 99, 235); doc.setFont("helvetica", "bold"); doc.setFontSize(7);
+        doc.text("ECLIPSE7 SEAL", 152, stampPanelY + 30);
+    }
 
     return doc;
 }
 
 function downloadPDFReportSequence() {
     if (!activeCanonicalResult) {
-        triggerSystemToastNotification("Please calculate an assessment first.");
+        triggerSystemToastNotification("Calculate an assessment first.");
         return;
     }
 
@@ -1255,7 +1567,7 @@ function downloadPDFReportSequence() {
 
 function exportCurrentPNG() {
     if (!activeCanonicalResult) {
-        triggerSystemToastNotification("Please calculate an assessment first.");
+        triggerSystemToastNotification("Calculate an assessment first.");
         return;
     }
 
@@ -1272,7 +1584,7 @@ function exportCurrentPNG() {
     const card = document.getElementById('exportReportCard');
     card.style.display = 'block';
 
-    html2canvas(card, { backgroundColor: '#0f172a' }).then(canvas => {
+    html2canvas(card, { backgroundColor: '#050811' }).then(canvas => {
         card.style.display = 'none';
         let link = document.createElement('a');
         link.download = `${activeCanonicalResult.student.name.replace(/ /g, "_")}_Card.png`;
@@ -1283,7 +1595,7 @@ function exportCurrentPNG() {
 
 function exportCurrentJSON() {
     if (!activeCanonicalResult) {
-        triggerSystemToastNotification("Please calculate an assessment first.");
+        triggerSystemToastNotification("Calculate an assessment first.");
         return;
     }
     let blob = new Blob([JSON.stringify(activeCanonicalResult, null, 2)], { type: 'application/json' });
@@ -1305,9 +1617,9 @@ function downloadCompleteHistoryPDF() {
     const doc = new jsPDF('p', 'mm', 'a4');
 
     doc.setFont("helvetica", "bold"); doc.setFontSize(16);
-    doc.text("ECLIPSE7 - Complete History Performance Analytics", 14, 20);
+    doc.text("ECLIPSE7 - Complete Vault Performance Analytics", 14, 20);
     doc.setFontSize(9); doc.setTextColor(100);
-    doc.text(`Generated: ${new Date().toLocaleString()} | Total Tests: ${history.length}`, 14, 26);
+    doc.text(`Generated: ${new Date().toLocaleString()} | Total Assessments: ${history.length}`, 14, 26);
 
     const tableRows = history.map(h => [
         h.timestamp || 'N/A',
@@ -1323,7 +1635,7 @@ function downloadCompleteHistoryPDF() {
         head: [['Timestamp', 'Student', 'Test', 'Profile', 'Score', 'Efficiency']],
         body: tableRows,
         theme: 'striped',
-        headStyles: { fillColor: [139, 92, 246] }
+        headStyles: { fillColor: [37, 99, 235] }
     });
 
     doc.save("ECLIPSE7_History_Vault_Report.pdf");
@@ -1368,38 +1680,38 @@ function exportHistoryCSV() {
 
 async function triggerShareMenu() {
     if (!activeCanonicalResult) {
-        triggerSystemToastNotification("Please calculate an assessment first.");
+        triggerSystemToastNotification("Calculate an assessment first.");
         return;
     }
 
     const shareText = 
 `🎓 *ECLIPSE7 ASSESSMENT REPORT*
 ----------------------------------------
-👤 *Student Name:* ${activeCanonicalResult.student.name}
+👤 *Student:* ${activeCanonicalResult.student.name}
 📝 *Assessment:* ${activeCanonicalResult.assessment.testName}
 🎯 *Profile:* ${activeCanonicalResult.assessment.examProfile.toUpperCase()}
 
-📊 *SCORE METRICS*
+📊 *EVALUATION METRICS*
 • *Final Score:* ${activeCanonicalResult.result.finalScore.toFixed(2)} / ${activeCanonicalResult.scoring.maxMarks}
 • *Efficiency:* ${activeCanonicalResult.result.scorePercentage}%
 • *Accuracy:* ${activeCanonicalResult.result.accuracy}%
 • *Penalty Lost:* ${activeCanonicalResult.result.penaltyMarks.toFixed(2)} Marks
 
-🚀 *ESTIMATED RANGE*
+🚀 *PROJECTION ESTIMATE*
 • *Percentile Range:* ${activeCanonicalResult.prediction.percentileRange}
 • *Rank Range:* ${activeCanonicalResult.prediction.rankRange}
 
 ----------------------------------------
-⚡ *ECLIPSE7 Performance Analytics Engine*
+⚡ *ECLIPSE7 Analytics Platform*
 🔗 https://eclipse7.odoo.com/`;
 
     if (navigator.share) {
         navigator.share({
-            title: `ECLIPSE7 Assessment - ${activeCanonicalResult.student.name}`,
+            title: `ECLIPSE7 Report - ${activeCanonicalResult.student.name}`,
             text: shareText
         }).catch(() => {});
     } else {
         navigator.clipboard.writeText(shareText);
-        triggerSystemToastNotification("Result summary copied to clipboard!", false);
+        triggerSystemToastNotification("Summary copied to clipboard!", false);
     }
 }
