@@ -1170,3 +1170,163 @@ input:focus {
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================================
+   SUBJECT MATRIX — SEMANTIC INPUT COLORS
+   Correct = Royal Green
+   Wrong   = Royal Red
+   Skipped = Royal Yellow
+   Total   = Neutral Cyan
+   ========================================================= */
+
+/* TOTAL QUESTIONS — neutral/cyan */
+.subject-grid-row .sub-tot {
+    border-color: rgba(6, 182, 212, 0.28);
+    background: linear-gradient(
+        145deg,
+        rgba(6, 182, 212, 0.07),
+        rgba(15, 23, 42, 0.62)
+    );
+}
+
+/* CORRECT — Royal Green */
+.subject-grid-row .sub-cor {
+    border-color: rgba(34, 197, 94, 0.42);
+    background: linear-gradient(
+        145deg,
+        rgba(34, 197, 94, 0.13),
+        rgba(15, 23, 42, 0.62)
+    );
+    color: #86efac;
+    box-shadow:
+        inset 0 1px 0 rgba(134, 239, 172, 0.05),
+        0 0 0 rgba(34, 197, 94, 0);
+}
+
+/* WRONG — Royal Red */
+.subject-grid-row .sub-wro {
+    border-color: rgba(239, 68, 68, 0.42);
+    background: linear-gradient(
+        145deg,
+        rgba(239, 68, 68, 0.13),
+        rgba(15, 23, 42, 0.62)
+    );
+    color: #fca5a5;
+    box-shadow:
+        inset 0 1px 0 rgba(252, 165, 165, 0.05),
+        0 0 0 rgba(239, 68, 68, 0);
+}
+
+/* SKIPPED — Royal Yellow */
+.subject-grid-row .sub-not {
+    border-color: rgba(234, 179, 8, 0.45);
+    background: linear-gradient(
+        145deg,
+        rgba(234, 179, 8, 0.13),
+        rgba(15, 23, 42, 0.62)
+    );
+    color: #fde68a;
+    box-shadow:
+        inset 0 1px 0 rgba(253, 230, 138, 0.05),
+        0 0 0 rgba(234, 179, 8, 0);
+}
+
+/* =========================================================
+   HOVER EFFECTS
+   ========================================================= */
+
+.subject-grid-row .sub-tot:hover {
+    border-color: rgba(6, 182, 212, 0.65);
+    background: rgba(6, 182, 212, 0.11);
+}
+
+.subject-grid-row .sub-cor:hover {
+    border-color: rgba(34, 197, 94, 0.75);
+    background: rgba(34, 197, 94, 0.17);
+}
+
+.subject-grid-row .sub-wro:hover {
+    border-color: rgba(239, 68, 68, 0.75);
+    background: rgba(239, 68, 68, 0.17);
+}
+
+.subject-grid-row .sub-not:hover {
+    border-color: rgba(234, 179, 8, 0.78);
+    background: rgba(234, 179, 8, 0.17);
+}
+
+/* =========================================================
+   FOCUS — STRONG SEMANTIC GLOW
+   ========================================================= */
+
+.subject-grid-row .sub-tot:focus {
+    border-color: #22d3ee;
+    box-shadow:
+        0 0 0 2px rgba(6, 182, 212, 0.10),
+        0 0 20px rgba(6, 182, 212, 0.20);
+}
+
+.subject-grid-row .sub-cor:focus {
+    border-color: #22c55e;
+    box-shadow:
+        0 0 0 2px rgba(34, 197, 94, 0.10),
+        0 0 20px rgba(34, 197, 94, 0.22);
+}
+
+.subject-grid-row .sub-wro:focus {
+    border-color: #ef4444;
+    box-shadow:
+        0 0 0 2px rgba(239, 68, 68, 0.10),
+        0 0 20px rgba(239, 68, 68, 0.22);
+}
+
+.subject-grid-row .sub-not:focus {
+    border-color: #eab308;
+    box-shadow:
+        0 0 0 2px rgba(234, 179, 8, 0.10),
+        0 0 20px rgba(234, 179, 8, 0.22);
+}
+
+/* =========================================================
+   HEADER COLORS — MATCH THE INPUT SEMANTICS
+   ========================================================= */
+
+.subject-grid-layout-header span:nth-child(1) {
+    color: #67e8f9;
+}
+
+.subject-grid-layout-header span:nth-child(2) {
+    color: #4ade80;
+}
+
+.subject-grid-layout-header span:nth-child(3) {
+    color: #f87171;
+}
+
+.subject-grid-layout-header span:nth-child(4) {
+    color: #facc15;
+}
+
+/* =========================================================
+   INPUT VALUE TYPOGRAPHY
+   ========================================================= */
+
+.subject-grid-row .sub-cor,
+.subject-grid-row .sub-wro,
+.subject-grid-row .sub-not {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+}
+
+/* Placeholder should remain subtle */
+.subject-grid-row .sub-cor::placeholder,
+.subject-grid-row .sub-wro::placeholder,
+.subject-grid-row .sub-not::placeholder {
+    color: rgba(148, 163, 184, 0.55);
+}
+
+/* Remove browser number spinner visual distraction */
+.subject-grid-row input::-webkit-inner-spin-button,
+.subject-grid-row input::-webkit-outer-spin-button {
+    opacity: 0.35;
+}
