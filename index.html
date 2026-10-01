@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ECLIPSE7 — Universal Scoring & Performance Analytics Platform</title>
+    <meta name="description" content="Production-Grade Examination Scoring & Performance Analytics Platform by ECLIPSE7. Created by Saiprasad Barure.">
+    <meta name="color-scheme" content="dark light">
+    <link rel="icon" type="image/x-icon" href="logo.ico">
+
+    <!-- Theme bootstrap: apply saved / system theme before first paint -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('e7_theme_preference');
+                var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {}
+        })();
+    </script>
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-xp-step="0">
+
+<a class="xp-skip-link" href="#evaluationForm">Skip to calculator</a>
+
+<!-- Ambient starfield (dark) / light motes (light) -->
+<canvas id="cosmicBubbleCanvas" aria-hidden="true"></canvas>
+
+<!-- Universal Ambient Background Glows -->
+<div class="fluent-ambient-canvas" aria-hidden="true">
+    <div class="ambient-fluid-orb orb-alpha"></div>
+    <div class="ambient-fluid-orb orb-beta"></div>
+    <div class="ambient-fluid-orb orb-gamma"></div>
+    <div class="xp-grain"></div>
+</div>
+
+<nav class="top-nav-bar" aria-label="Primary">
+    <div class="nav-brand-title">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-glow">ECLIPSE7</span>
+        <span class="brand-sub">ANALYTICS</span>
+    </div>
+
+    <div class="nav-right-cluster">
+        <div class="nav-left-group">
+            <button id="menu-toggle-btn" class="nav-icon-btn" type="button" aria-label="Open History Vault" data-testid="nav-vault-btn">
+                <i class="fa-solid fa-box-archive" aria-hidden="true"></i>
+                <span class="nav-history-badge" id="navHistoryCounter">0</span>
+            </button>
+            <button id="theme-toggle-btn" class="nav-icon-btn" type="button" aria-label="Toggle light and dark theme" data-testid="nav-theme-toggle">
+                <i class="fa-solid fa-sun" id="themeIcon" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div class="profile-container-wrapper">
+            <div id="auth-container" class="profile-pill" role="button" tabindex="0" aria-label="Sign in or sign out" data-testid="nav-profile-pill">
+                <div id="default-profile" class="profile-state">
+                    <i class="fa-solid fa-circle-user profile-icon" aria-hidden="true"></i>
+                    <span class="auth-btn-lbl">Sign In</span>
+                </div>
+
+                <div id="user-profile" class="profile-state hidden">
+                    <img id="user-avatar" class="avatar-img" src="" alt="Profile" />
+                    <span id="user-name" class="user-display-name"></span>
+                </div>
+            </div>
+
+            <div id="signin-tooltip" class="signin-tooltip" role="note">
+                <i class="fa-solid fa-star text-cyan" aria-hidden="true"></i>
+                <span>Sign in with Google to sync history across devices securely.</span>
+                <button class="tooltip-close" id="closeTooltipBtn" type="button" aria-label="Dismiss sign-in tip"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="soft-glass-container" id="mainAppContainer">
+    <div id="systemNotification" class="fluent-toast" role="status" aria-live="polite" aria-atomic="true" data-testid="system-toast">
+        <i class="fa-solid fa-circle-info" id="toastIcon" aria-hidden="true"></i>
+        <span id="notificationMessage">System Initialized.</span>
+    </div>
+
+    <form id="evaluationForm" class="xp-form" onsubmit="event.preventDefault();" novalidate>
+
+        <div class="xp-stage" id="xpStage">
+
+            <!-- ============ STEP 0 — IGNITION ============ -->
+            <section class="xp-step xp-ignition is-active" data-step="0" aria-labelledby="xpT0" data-testid="step-ignition">
+                <div class="eclipse-scene" aria-hidden="true">
+                    <div class="eclipse-halo"></div>
+                    <div class="eclipse-corona"></div>
+                    <div class="eclipse-corona eclipse-corona--b"></div>
+                    <div class="eclipse-ring"></div>
+                    <div class="eclipse-moon"></div>
+                    <div class="eclipse-bead"></div>
+                </div>
+
+                <div class="xp-step-inner xp-ignition-inner">
+                    <header class="app-header">
+                        <div class="header-top-bar" data-stagger style="--s:0">
+                            <div class="fluent-badge"><i class="fa-solid fa-atom" aria-hidden="true"></i> ECLIPSE7 ENGINE v9.0</div>
+                        </div>
+                        <h1 id="xpT0" class="xp-display" data-stagger style="--s:1">
+                            <span class="xp-line">See every mark</span>
+                            <span class="xp-line xp-grad-text">in totality.</span>
+                        </h1>
+                        <p class="xp-tagline" data-stagger style="--s:2">Negative Marking &amp; Analytics Platform for JEE Main, JEE Advanced, NEET and any custom test. Six quiet moments, one honest score.</p>
+
+                        <div class="xp-ignition-cta" data-stagger style="--s:3">
+                            <button type="button" id="xpBegin" class="xp-btn xp-btn--hero" data-magnetic data-testid="begin-btn">
+                                <span>Begin</span>
+                                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                            </button>
+                            <span class="xp-kbd-hint" aria-hidden="true">or press <kbd>Enter</kbd></span>
+                        </div>
+
+                        <div class="meta-branding-container" data-stagger style="--s:4">
+                            <p class="platform-title-meta">ECLIPSE7 QUANTUM EVALUATION ENVIRONMENT</p>
+                            <p class="author-attribution-meta">Engineered by Saiprasad Barure / Prasad Reddy</p>
+                        </div>
+                    </header>
+                </div>
+            </section>
+
+            <!-- ============ STEP 1 — WHO & WHAT ============ -->
+            <section class="xp-step" data-step="1" aria-labelledby="xpT1" data-testid="step-identity">
+                <div class="xp-step-inner">
+                    <p class="xp-eyebrow" data-stagger style="--s:0"><span class="xp-eyebrow-num">01</span> Who &amp; what</p>
+                    <h2 class="xp-title" id="xpT1" tabindex="-1" data-stagger style="--s:1">Who's stepping<br>into the light?</h2>
+
+                    <div class="xp-field-stack xp-shake-target">
+                        <div class="input-field-group xp-field" data-stagger style="--s:2">
+                            <input type="text" id="studentName" placeholder=" " required autocomplete="off" aria-describedby="xpFb1" data-testid="student-name-input">
+                            <label class="soft-field-label" for="studentName">Student name <span class="req-star" aria-hidden="true">*</span></label>
+                            <span class="xp-field-line" aria-hidden="true"></span>
+                            <i class="fa-solid fa-user-graduate input-field-icon" aria-hidden="true"></i>
+                        </div>
+
+                        <div class="input-field-group xp-field" data-stagger style="--s:3">
+                            <input type="text" id="testName" placeholder=" " required autocomplete="off" aria-describedby="xpTestHint xpFb1" data-testid="test-name-input">
+                            <label class="soft-field-label" for="testName">Test name <span class="req-star" aria-hidden="true">*</span></label>
+                            <span class="xp-field-line" aria-hidden="true"></span>
+                            <i class="fa-solid fa-file-signature input-field-icon" aria-hidden="true"></i>
+                            <span class="xp-field-hint" id="xpTestHint">e.g. JEE Main Mock 05, NEET Phase 1</span>
+                        </div>
+                    </div>
+
+                    <p class="xp-feedback" id="xpFb1" aria-live="polite" data-testid="step1-feedback"></p>
+                </div>
+            </section>
+
+            <!-- ============ STEP 2 — CHOOSE YOUR EXAM ============ -->
+            <section class="xp-step" data-step="2" aria-labelledby="xpT2" data-testid="step-exam">
+                <div class="xp-step-inner">
+                    <p class="xp-eyebrow" data-stagger style="--s:0"><span class="xp-eyebrow-num">02</span> Choose your exam</p>
+                    <h2 class="xp-title" id="xpT2" tabindex="-1" data-stagger style="--s:1">Which sky are<br>you under?</h2>
+
+                    <div class="xp-cards xp-cards--exam" role="radiogroup" aria-labelledby="xpT2">
+                        <label class="xp-card" data-accent="violet" data-stagger style="--s:2" data-testid="exam-card-custom">
+                            <input type="radio" name="xpExam" value="custom" checked>
+                            <span class="xp-card-spot" aria-hidden="true"></span>
+                            <span class="xp-card-icon" aria-hidden="true"><i class="fa-solid fa-sliders"></i></span>
+                            <span class="xp-card-name">Custom</span>
+                            <span class="xp-card-meta">Your rules, your numbers</span>
+                            <span class="xp-card-spec">Any Q · Any marks</span>
+                            <span class="xp-card-lock" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                        </label>
+                        <label class="xp-card" data-accent="cyan" data-stagger style="--s:3" data-testid="exam-card-jeemain">
+                            <input type="radio" name="xpExam" value="jeemain">
+                            <span class="xp-card-spot" aria-hidden="true"></span>
+                            <span class="xp-card-icon" aria-hidden="true"><i class="fa-solid fa-atom"></i></span>
+                            <span class="xp-card-name">JEE Main</span>
+                            <span class="xp-card-meta">Physics · Chemistry · Maths</span>
+                            <span class="xp-card-spec">75 Q · 300 marks · +4/−1</span>
+                            <span class="xp-card-lock" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                        </label>
+                        <label class="xp-card" data-accent="blue" data-stagger style="--s:4" data-testid="exam-card-jeeadv">
+                            <input type="radio" name="xpExam" value="jeeadv">
+                            <span class="xp-card-spot" aria-hidden="true"></span>
+                            <span class="xp-card-icon" aria-hidden="true"><i class="fa-solid fa-mountain"></i></span>
+                            <span class="xp-card-name">JEE Advanced</span>
+                            <span class="xp-card-meta">The summit paper</span>
+                            <span class="xp-card-spec">54 Q · 180 marks · 1/4 penalty</span>
+                            <span class="xp-card-lock" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                        </label>
+                        <label class="xp-card" data-accent="emerald" data-stagger style="--s:5" data-testid="exam-card-neet">
+                            <input type="radio" name="xpExam" value="neet">
+                            <span class="xp-card-spot" aria-hidden="true"></span>
+                            <span class="xp-card-icon" aria-hidden="true"><i class="fa-solid fa-dna"></i></span>
+                            <span class="xp-card-name">NEET UG</span>
+                            <span class="xp-card-meta">Physics · Chemistry · Biology</span>
+                            <span class="xp-card-spec">180 Q · 720 marks · +4/−1</span>
+                            <span class="xp-card-lock" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                        </label>
+                    </div>
+
+                    <p class="xp-note" id="xpExamNote" aria-live="polite" data-testid="exam-note">Manual Override active. Enter parameters freely across form inputs.</p>
+
+                    <!-- Legacy dropdown (kept for script.js + no-JS-experience fallback) -->
+                    <div class="input-field-group xp-legacy">
+                        <label class="soft-field-label">Curriculum Profile Preset <span class="req-star">*</span></label>
+                        <div class="custom-select-box" id="examProfileSelectContainer">
+                            <div class="select-box-trigger" id="examProfileLabel">CUSTOM MODE (MANUAL OVERRIDE)</div>
+                            <div class="select-box-dropdown" id="examProfileOptions">
+                                <div class="select-box-option" data-value="custom">CUSTOM MODE (MANUAL OVERRIDE)</div>
+                                <div class="select-box-option" data-value="jeemain">JEE MAIN PRESET</div>
+                                <div class="select-box-option" data-value="jeeadv">JEE ADVANCED CONFIGURABLE</div>
+                                <div class="select-box-option" data-value="neet">NEET UG PRESET</div>
+                            </div>
+                            <input type="hidden" id="examProfile" value="custom">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ STEP 3 — THE NUMBERS ============ -->
+            <section class="xp-step" data-step="3" aria-labelledby="xpT3" data-testid="step-numbers">
+                <div class="xp-step-inner">
+                    <p class="xp-eyebrow" data-stagger style="--s:0"><span class="xp-eyebrow-num">03</span> The numbers</p>
+                    <h2 class="xp-title xp-title--sm" id="xpT3" tabindex="-1" data-stagger style="--s:1">Count the light<br>and the shadow.</h2>
+
+                    <div class="xp-num-grid xp-shake-target" data-stagger style="--s:2">
+                        <div class="input-field-group xp-num">
+                            <label class="soft-field-label xp-num-cap" for="totalQs">Total questions <span class="req-star" aria-hidden="true">*</span></label>
+                            <div class="xp-num-row">
+                                <button type="button" class="xp-stepper" data-target="totalQs" data-delta="-1" aria-label="Decrease total questions" data-testid="totalqs-minus"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                                <input type="number" id="totalQs" placeholder="0" min="1" inputmode="numeric" data-testid="totalqs-input">
+                                <button type="button" class="xp-stepper" data-target="totalQs" data-delta="1" aria-label="Increase total questions" data-testid="totalqs-plus"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                        <div class="input-field-group xp-num">
+                            <label class="soft-field-label xp-num-cap" for="maxMarks">Max marks <span class="req-star" aria-hidden="true">*</span></label>
+                            <div class="xp-num-row">
+                                <button type="button" class="xp-stepper" data-target="maxMarks" data-delta="-1" aria-label="Decrease max marks" data-testid="maxmarks-minus"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                                <input type="number" id="maxMarks" placeholder="0" min="1" inputmode="numeric" data-testid="maxmarks-input">
+                                <button type="button" class="xp-stepper" data-target="maxMarks" data-delta="1" aria-label="Increase max marks" data-testid="maxmarks-plus"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                        <div class="input-field-group xp-num">
+                            <label class="soft-field-label xp-num-cap" for="attempted">Attempted <span class="req-star" aria-hidden="true">*</span></label>
+                            <div class="xp-num-row">
+                                <button type="button" class="xp-stepper" data-target="attempted" data-delta="-1" aria-label="Decrease attempts" data-testid="attempted-minus"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                                <input type="number" id="attempted" placeholder="0" min="0" inputmode="numeric" data-testid="attempted-input">
+                                <button type="button" class="xp-stepper" data-target="attempted" data-delta="1" aria-label="Increase attempts" data-testid="attempted-plus"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                        <div class="input-field-group xp-num xp-num--bad">
+                            <label class="soft-field-label xp-num-cap" for="wrong">Incorrect <span class="req-star" aria-hidden="true">*</span></label>
+                            <div class="xp-num-row">
+                                <button type="button" class="xp-stepper" data-target="wrong" data-delta="-1" aria-label="Decrease incorrect attempts" data-testid="wrong-minus"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                                <input type="number" id="wrong" placeholder="0" min="0" inputmode="numeric" data-testid="wrong-input">
+                                <button type="button" class="xp-stepper" data-target="wrong" data-delta="1" aria-label="Increase incorrect attempts" data-testid="wrong-plus"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="xp-strip-wrap" data-stagger style="--s:3">
+                        <div class="xp-strip" id="xpStrip" role="img" aria-label="Question strip" data-testid="question-strip"></div>
+                        <div class="xp-strip-legend">
+                            <span class="xp-leg xp-leg--ok"><i aria-hidden="true"></i> Correct <b id="xpLegCorrect" data-testid="legend-correct">0</b></span>
+                            <span class="xp-leg xp-leg--bad"><i aria-hidden="true"></i> Wrong <b id="xpLegWrong" data-testid="legend-wrong">0</b></span>
+                            <span class="xp-leg xp-leg--skip"><i aria-hidden="true"></i> Skipped <b id="xpLegSkipped" data-testid="legend-skipped">0</b></span>
+                            <span class="xp-leg xp-leg--mpq">Marks / Q <b id="xpMpq">—</b></span>
+                        </div>
+                        <p class="xp-hint-line">Breaking down by subject later? You can leave attempts empty, they'll be computed for you.</p>
+                    </div>
+
+                    <p class="xp-feedback" id="xpFb3" aria-live="polite" data-testid="step3-feedback"></p>
+                </div>
+            </section>
+
+            <!-- ============ STEP 4 — THE PENALTY ============ -->
+            <section class="xp-step" data-step="4" aria-labelledby="xpT4" data-testid="step-penalty">
+                <div class="xp-step-inner">
+                    <p class="xp-eyebrow" data-stagger style="--s:0"><span class="xp-eyebrow-num">04</span> The penalty</p>
+                    <h2 class="xp-title xp-title--sm" id="xpT4" tabindex="-1" data-stagger style="--s:1">How hard does<br>a wrong answer bite?</h2>
+
+                    <div class="xp-pills" role="radiogroup" aria-label="Negative marking ratio" id="xpRatioPills" data-stagger style="--s:2">
+                        <span class="xp-pills-glider" aria-hidden="true"></span>
+                        <label class="xp-pill" data-testid="ratio-pill-quarter"><input type="radio" name="xpRatio" value="0.25" checked><span class="xp-pill-main">1/4</span><span class="xp-pill-sub">−25%</span></label>
+                        <label class="xp-pill" data-testid="ratio-pill-third"><input type="radio" name="xpRatio" value="0.333333"><span class="xp-pill-main">1/3</span><span class="xp-pill-sub">−33.3%</span></label>
+                        <label class="xp-pill" data-testid="ratio-pill-half"><input type="radio" name="xpRatio" value="0.5"><span class="xp-pill-main">1/2</span><span class="xp-pill-sub">−50%</span></label>
+                        <label class="xp-pill" data-testid="ratio-pill-none"><input type="radio" name="xpRatio" value="0"><span class="xp-pill-main">None</span><span class="xp-pill-sub">0%</span></label>
+                    </div>
+
+                    <p class="xp-sublabel" data-stagger style="--s:3">How should we read your paper?</p>
+                    <div class="xp-cards xp-cards--mode xp-shake-target" role="radiogroup" aria-label="Report mode" data-stagger style="--s:4">
+                        <label class="xp-card xp-card--wide" data-accent="cyan" data-testid="mode-card-overall">
+                            <input type="radio" name="xpMode" value="overall" checked>
+                            <span class="xp-card-spot" aria-hidden="true"></span>
+                            <span class="xp-card-icon" aria-hidden="true"><i class="fa-solid fa-circle-half-stroke"></i></span>
+                            <span class="xp-card-name">Overall</span>
+                            <span class="xp-card-meta">One total, straight to the reveal</span>
+                            <span class="xp-card-lock" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                        </label>
+                        <label class="xp-card xp-card--wide" data-accent="violet" data-testid="mode-card-subjectwise">
+                            <input type="radio" name="xpMode" value="subjectwise">
+                            <span class="xp-card-spot" aria-hidden="true"></span>
+                            <span class="xp-card-icon" aria-hidden="true"><i class="fa-solid fa-layer-group"></i></span>
+                            <span class="xp-card-name">Subject breakdown</span>
+                            <span class="xp-card-meta">Physics, Chemistry and Maths / Biology</span>
+                            <span class="xp-card-lock" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                        </label>
+                    </div>
+
+                    <p class="xp-feedback" id="xpFb4" aria-live="polite" data-testid="step4-feedback"></p>
+
+                    <!-- Legacy dropdowns (kept for script.js + fallback) -->
+                    <div class="fluent-layout-row dropdown-adjustment xp-legacy">
+                        <div class="custom-select-box" id="ratioSelectContainer">
+                            <label class="soft-field-label">Negative Penalty Ratio <span class="req-star">*</span></label>
+                            <div class="select-box-trigger" id="ratioLabel">Ratio: 1/4 (-25%)</div>
+                            <div class="select-box-dropdown" id="ratioOptions">
+                                <div class="select-box-option" data-value="0.25">Ratio: 1/4 (-25%)</div>
+                                <div class="select-box-option" data-value="0.333333">Ratio: 1/3 (-33.3%)</div>
+                                <div class="select-box-option" data-value="0.5">Ratio: 1/2 (-50%)</div>
+                                <div class="select-box-option" data-value="0">No Penalty (0%)</div>
+                            </div>
+                            <input type="hidden" id="markingRatio" value="0.25">
+                        </div>
+
+                        <div class="custom-select-box" id="customSelect">
+                            <label class="soft-field-label">Subject Breakdown Mode <span class="req-star">*</span></label>
+                            <div class="select-box-trigger" id="selectedLabel">OVERALL MODE</div>
+                            <div class="select-box-dropdown" id="selectOptions">
+                                <div class="select-box-option" data-value="overall">OVERALL MODE</div>
+                                <div class="select-box-option" data-value="subjectwise">SUBJECT BREAKDOWN</div>
+                            </div>
+                            <input type="hidden" id="reportType" value="overall">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ STEP 5 — SUBJECTS ============ -->
+            <section class="xp-step" data-step="5" aria-labelledby="xpT5" data-testid="step-subjects">
+                <div class="xp-step-inner xp-step-inner--wide">
+                    <p class="xp-eyebrow" data-stagger style="--s:0"><span class="xp-eyebrow-num">05</span> Subjects</p>
+                    <h2 class="xp-title xp-title--sm" id="xpT5" tabindex="-1" data-stagger style="--s:1">Three bodies,<br>one orbit.</h2>
+
+                    <div id="subjectSection" class="subject-breakdown-wrapper xp-shake-target">
+                        <div class="mandatory-input-notice-bar" data-stagger style="--s:2">
+                            <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                            <span><strong>Subject Matrix Mode:</strong> fill any two of correct / wrong / skipped and the third solves itself.</span>
+                        </div>
+
+                        <div class="subject-grid-layout-header" aria-hidden="true">
+                            <span>TOTAL Q.</span>
+                            <span>CORRECT</span>
+                            <span>WRONG</span>
+                            <span>SKIPPED</span>
+                        </div>
+
+                        <div class="xp-subjects">
+                            <!-- Physics -->
+                            <div class="xp-subject" data-accent="cyan" data-stagger style="--s:3" data-testid="subject-panel-phy">
+                                <div class="subject-header-bar">
+                                    <span class="sub-identity-lbl"><i class="fa-solid fa-atom" aria-hidden="true"></i> PHYSICS</span>
+                                    <span class="subject-score-chip" id="phyScoreChip" aria-live="polite" data-testid="phy-score-chip">Score: 0.00 / 100</span>
+                                </div>
+                                <div class="subject-grid-row" data-subject="phy">
+                                    <label class="xp-sub-cell"><span>Total</span><input type="number" id="phyA" placeholder="0" class="sub-input sub-tot" min="0" inputmode="numeric" data-testid="phyA-input"></label>
+                                    <label class="xp-sub-cell xp-sub-cell--ok"><span>Correct</span><input type="number" id="phyC" placeholder="0" class="sub-input sub-cor" min="0" inputmode="numeric" data-testid="phyC-input"></label>
+                                    <label class="xp-sub-cell xp-sub-cell--bad"><span>Wrong</span><input type="number" id="phyW" placeholder="0" class="sub-input sub-wro" min="0" inputmode="numeric" data-testid="phyW-input"></label>
+                                    <label class="xp-sub-cell xp-sub-cell--skip"><span>Skipped</span><input type="number" id="phyN" placeholder="0" class="sub-input sub-not" min="0" inputmode="numeric" data-testid="phyN-input"></label>
+                                </div>
+                                <div class="xp-sub-bar" data-bar="phy" aria-hidden="true"><i class="ok"></i><i class="bad"></i><i class="skip"></i></div>
+                            </div>
+
+                            <!-- Chemistry -->
+                            <div class="xp-subject" data-accent="amber" data-stagger style="--s:4" data-testid="subject-panel-chem">
+                                <div class="subject-header-bar">
+                                    <span class="sub-identity-lbl"><i class="fa-solid fa-flask" aria-hidden="true"></i> CHEMISTRY</span>
+                                    <span class="subject-score-chip" id="chemScoreChip" aria-live="polite" data-testid="chem-score-chip">Score: 0.00 / 100</span>
+                                </div>
+                                <div class="subject-grid-row" data-subject="chem">
+                                    <label class="xp-sub-cell"><span>Total</span><input type="number" id="chemA" placeholder="0" class="sub-input sub-tot" min="0" inputmode="numeric" data-testid="chemA-input"></label>
+                                    <label class="xp-sub-cell xp-sub-cell--ok"><span>Correct</span><input type="number" id="chemC" placeholder="0" class="sub-input sub-cor" min="0" inputmode="numeric" data-testid="chemC-input"></label>
+                                    <label class="xp-sub-cell xp-sub-cell--bad"><span>Wrong</span><input type="number" id="chemW" placeholder="0" class="sub-input sub-wro" min="0" inputmode="numeric" data-testid="chemW-input"></label>
+                                    <label class="xp-sub-cell xp-sub-cell--skip"><span>Skipped</span><input type="number" id="chemN" placeholder="0" class="sub-input sub-not" min="0" inputmode="numeric" data-testid="chemN-input"></label>
+                                </div>
+                                <div class="xp-sub-bar" data-bar="chem" aria-hidden="true"><i class="ok"></i><i class="bad"></i><i class="skip"></i></div>
+                            </div>
+
+                            <!-- Math / Bio -->
+                            <div class="xp-subject" data-accent="violet" data-stagger style="--s:5" data-testid="subject-panel-mathbio">
+                                <div class="subject-header-bar">
+                                    <span class="sub-identity-lbl" id="mathBioLabel"><i class="fa-solid fa-calculator"></i> MATHEMATICS</span>
+                                    <span class="subject-score-chip" id="mathBioScoreChip" aria-live="polite" data-testid="mathbio-score-chip">Score: 0.00 / 100</span>
+                                </div>
+                                <div class="subject-grid-row" data-subject="mathBio">
+                                    <label class="xp-sub-cell"><span>Total</span><input type="number" id="mathBioA" placeholder="0" class="sub-input sub-tot" min="0" inputmode="numeric" data-testid="mathBioA-input"></label>
+                                    <label class="xp-sub-cell xp-sub-cell--ok"><span>Correct</span><input type="number" id="mathBioC" placeholder="0" class="sub-input sub-cor" min="0" inputmode="numeric" data-testid="mathBioC-input"></label>
+                                    <label class="xp-sub-cell xp-sub-cell--bad"><span>Wrong</span><input type="number" id="mathBioW" placeholder="0" class="sub-input sub-wro" min="0" inputmode="numeric" data-testid="mathBioW-input"></label>
+                                    <label class="xp-sub-cell xp-sub-cell--skip"><span>Skipped</span><input type="number" id="mathBioN" placeholder="0" class="sub-input sub-not" min="0" inputmode="numeric" data-testid="mathBioN-input"></label>
+                                </div>
+                                <div class="xp-sub-bar" data-bar="mathBio" aria-hidden="true"><i class="ok"></i><i class="bad"></i><i class="skip"></i></div>
+                            </div>
+                        </div>
+
+                        <div class="quantum-intel-status" data-stagger style="--s:6">
+                            <i class="fa-solid fa-microchip" aria-hidden="true"></i>
+                            <span id="intelMessage">Subject sync layer active.</span>
+                        </div>
+                    </div>
+
+                    <p class="xp-feedback" id="xpFb5" aria-live="polite" data-testid="step5-feedback"></p>
+                </div>
+            </section>
+
+            <!-- ============ STEP 6 — THE REVEAL ============ -->
+            <section class="xp-step xp-reveal-step" data-step="6" aria-labelledby="xpT6" data-testid="step-reveal">
+                <div class="xp-step-inner xp-reveal-inner">
+                    <div class="xp-reveal-copy">
+                        <p class="xp-eyebrow" data-stagger style="--s:0"><span class="xp-eyebrow-num">06</span> The reveal</p>
+                        <h2 class="xp-title xp-title--sm" id="xpT6" tabindex="-1" data-stagger style="--s:1">Ready for<br>totality?</h2>
+                        <div class="xp-summary" id="xpSummary" data-stagger style="--s:2" data-testid="reveal-summary"></div>
+
+                        <div class="xp-reveal-actions" data-stagger style="--s:3">
+                            <button type="button" id="btnCalculate" class="fluent-btn btn-primary-gradient bubble-click xp-cta" data-magnetic data-testid="calculate-btn">
+                                <span>Calculate Score &amp; Analytics</span>
+                                <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+                            </button>
+                            <div class="xp-after-actions">
+                                <button type="button" id="xpReadStory" class="xp-btn xp-btn--glass" data-testid="read-story-btn"><span>Read your story</span> <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></button>
+                                <button type="button" id="xpEditInputs" class="xp-btn xp-btn--ghost" data-testid="edit-inputs-btn"><i class="fa-solid fa-pen" aria-hidden="true"></i> <span>Edit inputs</span></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="xp-reveal-visual" data-stagger style="--s:2">
+                        <div class="fluent-score-hero-display xp-orb" data-testid="score-orb">
+                            <div class="xp-orb-corona" aria-hidden="true"></div>
+                            <svg class="xp-ring" viewBox="0 0 120 120" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="xpRingGrad" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" class="xp-stop-a"/>
+                                        <stop offset="100%" class="xp-stop-b"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle class="xp-ring-track" cx="60" cy="60" r="52"/>
+                                <circle class="xp-ring-fill" id="xpRingFill" cx="60" cy="60" r="52"/>
+                            </svg>
+                            <div class="xp-orb-core">
+                                <span class="score-hero-title">FINAL SCORE</span>
+                                <div id="score" class="score-hero-val" data-testid="final-score">0.00</div>
+                                <div class="score-max-sub" id="heroMaxSub">/ 0 Marks</div>
+                            </div>
+                            <div class="fluent-wave-shimmer" aria-hidden="true"></div>
+                        </div>
+                        <span id="xpRevealBand" class="xp-band" data-testid="reveal-band"></span>
+                        <span id="xpScoreAnnounce" class="xp-sr-only" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= THE STORY (results as chapters) ================= -->
+        <div id="analyticsDashboardContainer" class="analytics-dashboard-wrap hidden xp-story" data-testid="analytics-story">
+
+            <div class="dash-section-title xp-reveal">
+                <i class="fa-solid fa-chart-pie text-cyan" aria-hidden="true"></i>
+                <span>Evaluation &amp; Performance Diagnostics</span>
+            </div>
+
+            <!-- CHAPTER 1 -->
+            <section class="xp-chapter" id="xpChapter1" data-chapter="1" aria-labelledby="xpC1">
+                <p class="xp-chapter-num xp-reveal">Chapter 01</p>
+                <h3 class="xp-chapter-title xp-reveal" id="xpC1">The score</h3>
+                <div class="xp-ch1-grid">
+                    <div class="xp-glass xp-ch1-hero xp-reveal" style="--d:1">
+                        <span class="dash-lbl">Final score</span>
+                        <div class="xp-story-score"><span id="xpStoryScore" data-testid="story-score">0.00</span><span class="xp-story-max" id="xpStoryMax">/ 0</span></div>
+                        <div class="dash-card card-accent-blue xp-band-row">
+                            <span class="dash-lbl">Performance Band</span>
+                            <span class="dash-val grade-badge" id="dashGrade" data-testid="dash-grade">--</span>
+                            <span class="dash-foot-meta" id="dashGradeMeta">Overall Rating</span>
+                        </div>
+                    </div>
+                    <div class="xp-glass xp-meter xp-reveal" style="--d:2">
+                        <svg class="xp-meter-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="xp-ring-track" cx="60" cy="60" r="52"/><circle class="xp-ring-fill xp-ring-fill--cyan" id="xpAccRing" cx="60" cy="60" r="52"/></svg>
+                        <div class="xp-meter-core">
+                            <span class="dash-lbl"><i class="fa-solid fa-bullseye" aria-hidden="true"></i> Accuracy</span>
+                            <span class="dash-val text-cyan" id="dashAccuracy" data-testid="dash-accuracy">0%</span>
+                        </div>
+                        <div class="mini-progress-bar"><div class="mini-progress-fill" id="accuracyProgress"></div></div>
+                    </div>
+                    <div class="xp-glass xp-meter xp-reveal" style="--d:3">
+                        <svg class="xp-meter-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="xp-ring-track" cx="60" cy="60" r="52"/><circle class="xp-ring-fill xp-ring-fill--violet" id="xpEffRing" cx="60" cy="60" r="52"/></svg>
+                        <div class="xp-meter-core">
+                            <span class="dash-lbl"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Efficiency</span>
+                            <span class="dash-val text-blue" id="dashEfficiency" data-testid="dash-efficiency">0%</span>
+                        </div>
+                        <div class="mini-progress-bar"><div class="mini-progress-fill" id="efficiencyProgress"></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHAPTER 2 -->
+            <section class="xp-chapter" id="xpChapter2" data-chapter="2" aria-labelledby="xpC2">
+                <p class="xp-chapter-num xp-reveal">Chapter 02</p>
+                <h3 class="xp-chapter-title xp-reveal" id="xpC2">What the shadow took</h3>
+                <div class="xp-ch2-grid">
+                    <div class="xp-glass xp-penalty xp-reveal" style="--d:1">
+                        <span class="dash-lbl"><i class="fa-solid fa-circle-minus" aria-hidden="true"></i> Penalty marks lost</span>
+                        <span class="dash-val text-rose xp-penalty-val" id="dashPenalty" data-testid="dash-penalty">0.00</span>
+                        <span class="dash-foot-meta" id="dashPenaltyMeta">0 Wrong Attempts</span>
+                    </div>
+                    <div class="xp-tri">
+                        <div class="xp-glass xp-tri-item xp-tri--ok xp-reveal" style="--d:2">
+                            <span class="dash-lbl"><i class="fa-solid fa-check" aria-hidden="true"></i> Correct</span>
+                            <span id="dashCorrect" class="text-emerald xp-tri-val" data-testid="dash-correct">0</span>
+                        </div>
+                        <div class="xp-glass xp-tri-item xp-tri--bad xp-reveal" style="--d:3">
+                            <span class="dash-lbl"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Incorrect</span>
+                            <span id="dashWrong" class="text-rose xp-tri-val" data-testid="dash-wrong">0</span>
+                        </div>
+                        <div class="xp-glass xp-tri-item xp-tri--skip xp-reveal" style="--d:4">
+                            <span class="dash-lbl"><i class="fa-solid fa-forward" aria-hidden="true"></i> Skipped</span>
+                            <span class="dash-val xp-tri-val" id="dashSkipped" data-testid="dash-skipped">0</span>
+                            <span class="dash-foot-meta" id="dashUnattemptedPct">0% Unattempted</span>
+                        </div>
+                    </div>
+                    <div class="xp-prop-bar xp-reveal" id="xpPropBar" style="--d:5" aria-hidden="true"><i class="ok"></i><i class="bad"></i><i class="skip"></i></div>
+                </div>
+            </section>
+
+            <!-- CHAPTER 3 — WHAT-IF SIMULATOR -->
+            <section class="xp-chapter" id="xpChapter3" data-chapter="3" aria-labelledby="xpC3">
+                <p class="xp-chapter-num xp-reveal">Chapter 03</p>
+                <h3 class="xp-chapter-title xp-reveal" id="xpC3">What if?</h3>
+                <div class="simulator-card xp-glass xp-sim xp-reveal" style="--d:1">
+                    <div class="sim-header">
+                        <i class="fa-solid fa-sliders text-cyan" aria-hidden="true"></i> Score Scenario Simulator
+                    </div>
+                    <div class="xp-sim-layout">
+                        <div class="sim-result-box">
+                            <span class="dash-lbl">Projected score</span>
+                            <strong id="simProjectedScore" class="xp-sim-score" data-testid="sim-projected-score">0.00</strong>
+                            <span id="simScoreDelta" class="sim-delta" data-testid="sim-score-delta">+0.00</span>
+                        </div>
+                        <div class="sim-controls">
+                            <div class="sim-item">
+                                <label for="simWrongToCorrect">Turn incorrect into correct</label>
+                                <div class="xp-range-row">
+                                    <input type="range" id="simWrongToCorrect" min="0" max="10" value="0" data-testid="sim-wrong-slider">
+                                    <span id="simValWrongToCorrect" class="sim-num">0</span>
+                                </div>
+                            </div>
+                            <div class="sim-item">
+                                <label for="simSkipToCorrect">Turn skipped into correct</label>
+                                <div class="xp-range-row">
+                                    <input type="range" id="simSkipToCorrect" min="0" max="10" value="0" data-testid="sim-skip-slider">
+                                    <span id="simValSkipToCorrect" class="sim-num">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHAPTER 4 — RANK & PERCENTILE -->
+            <section class="xp-chapter" id="xpChapter4" data-chapter="4" aria-labelledby="xpC4">
+                <p class="xp-chapter-num xp-reveal">Chapter 04</p>
+                <h3 class="xp-chapter-title xp-reveal" id="xpC4">Where you stand</h3>
+                <div class="prediction-card xp-glass xp-reveal" style="--d:1">
+                    <div class="prediction-header">
+                        <i class="fa-solid fa-chart-line text-blue" aria-hidden="true"></i> Rank &amp; Percentile Range Estimator
+                        <span class="experimental-tag">Mathematical Model</span>
+                    </div>
+                    <div class="xp-range" aria-hidden="true">
+                        <div class="xp-range-track"><div class="xp-range-fill" id="xpRangeFill"></div></div>
+                        <div class="xp-range-scale"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+                    </div>
+                    <div class="prediction-grid">
+                        <div class="pred-item">
+                            <span class="pred-label">Est. Percentile Range</span>
+                            <span class="pred-value text-cyan" id="predPercentile" data-testid="pred-percentile">--</span>
+                        </div>
+                        <div class="pred-item">
+                            <span class="pred-label">Est. Rank Range</span>
+                            <span class="pred-value text-blue" id="predRank" data-testid="pred-rank">--</span>
+                        </div>
+                        <div class="pred-item">
+                            <span class="pred-label">Estimation Confidence</span>
+                            <span class="pred-value" id="predConfidence">Moderate</span>
+                        </div>
+                        <div class="pred-item">
+                            <span class="pred-label">Methodology</span>
+                            <span class="pred-value" id="predMethodology">Statistical Curve</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHAPTER 5 — DIAGNOSTICS -->
+            <section class="xp-chapter" id="xpChapter5" data-chapter="5" aria-labelledby="xpC5">
+                <p class="xp-chapter-num xp-reveal">Chapter 05</p>
+                <h3 class="xp-chapter-title xp-reveal" id="xpC5">The diagnosis</h3>
+                <div class="xp-ch5-grid">
+                    <div class="ai-report-box xp-glass xp-reveal" style="--d:1">
+                        <div class="ai-report-header">
+                            <i class="fa-solid fa-microchip text-cyan" aria-hidden="true"></i> ECLIPSE7 Performance Diagnostic Engine
+                        </div>
+                        <div class="ai-report-content" id="aiReportContent" data-testid="ai-report-content">
+                            Calculate an assessment to view deep diagnostic breakdown.
+                        </div>
+                    </div>
+                    <div class="insight-engine-box xp-reveal" style="--d:2">
+                        <div class="insight-header"><i class="fa-solid fa-lightbulb text-gold" aria-hidden="true"></i> Strategic Recommendations</div>
+                        <ul class="insight-list" id="insightList" data-testid="insight-list">
+                            <li>Log multiple assessments to activate historical cross-referencing.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHAPTER 6 — CHARTS -->
+            <section class="xp-chapter" id="xpChapter6" data-chapter="6" aria-labelledby="xpC6">
+                <p class="xp-chapter-num xp-reveal">Chapter 06</p>
+                <h3 class="xp-chapter-title xp-reveal" id="xpC6">The shape of it</h3>
+                <div class="charts-wrapper">
+                    <div class="chart-card xp-glass xp-reveal" style="--d:1">
+                        <div class="chart-title">Attempt Distribution</div>
+                        <div class="xp-chart-box"><canvas id="currentBreakdownChart" aria-label="Attempt distribution chart" role="img"></canvas></div>
+                    </div>
+                    <div class="chart-card xp-glass xp-reveal" id="subjectChartCard" style="--d:2">
+                        <div class="chart-title">Domain Score Distribution</div>
+                        <div class="xp-chart-box"><canvas id="currentSubjectChart" aria-label="Subject score chart" role="img"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EXPORT DOCK -->
+            <div class="export-actions-grid xp-dock" role="toolbar" aria-label="Export and share">
+                <button type="button" id="btnExportPDF" class="fluent-btn btn-secondary-frosted bubble-click" data-testid="export-pdf-btn">
+                    <i class="fa-solid fa-file-pdf text-rose" aria-hidden="true"></i> <span>PDF Report</span>
+                </button>
+                <button type="button" id="btnExportPNG" class="fluent-btn btn-secondary-frosted bubble-click" data-testid="export-png-btn">
+                    <i class="fa-solid fa-file-image text-emerald" aria-hidden="true"></i> <span>PNG Card</span>
+                </button>
+                <button type="button" id="btnExportJSON" class="fluent-btn btn-secondary-frosted bubble-click" data-testid="export-json-btn">
+                    <i class="fa-solid fa-code text-cyan" aria-hidden="true"></i> <span>JSON</span>
+                </button>
+                <button type="button" id="btnShareResult" class="fluent-btn btn-primary-gradient bubble-click" data-testid="share-result-btn">
+                    <i class="fa-solid fa-share-nodes" aria-hidden="true"></i> <span>Share</span>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <footer class="fluent-footer">
+        <span class="secure-badge">
+            <i class="fa-solid fa-shield-halved text-cyan" aria-hidden="true"></i> PRIVACY VERIFIED:
+        </span>
+        Assessment data processed locally. When signed in, assessments auto-sync with your ECLIPSE7 Cloud Vault. Built by <b>Saiprasad Barure / Prasad Reddy</b>.
+    </footer>
+</div>
+
+<!-- STEP CONTROLS & PROGRESS RAIL (experience layer) -->
+<div class="xp-controls" id="xpControls">
+    <button type="button" class="xp-btn xp-btn--ghost xp-nav-btn" id="xpBack" aria-label="Previous step" data-testid="step-back-btn">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span>Back</span>
+    </button>
+    <ol class="xp-rail" id="xpRail" aria-label="Progress">
+        <li><button type="button" class="xp-rail-dot" data-go="1" aria-label="Step 1: Identity" data-testid="rail-dot-1"><span>Identity</span></button></li>
+        <li><button type="button" class="xp-rail-dot" data-go="2" aria-label="Step 2: Exam" data-testid="rail-dot-2"><span>Exam</span></button></li>
+        <li><button type="button" class="xp-rail-dot" data-go="3" aria-label="Step 3: Numbers" data-testid="rail-dot-3"><span>Numbers</span></button></li>
+        <li><button type="button" class="xp-rail-dot" data-go="4" aria-label="Step 4: Penalty" data-testid="rail-dot-4"><span>Penalty</span></button></li>
+        <li><button type="button" class="xp-rail-dot xp-rail-dot--sub" data-go="5" aria-label="Step 5: Subjects" data-testid="rail-dot-5"><span>Subjects</span></button></li>
+        <li><button type="button" class="xp-rail-dot" data-go="6" aria-label="Step 6: Reveal" data-testid="rail-dot-6"><span>Reveal</span></button></li>
+        <li class="xp-rail-line" aria-hidden="true"><span class="xp-rail-fill"></span></li>
+    </ol>
+    <button type="button" class="xp-btn xp-btn--solid xp-nav-btn" id="xpNext" aria-label="Next step" data-magnetic data-testid="step-next-btn">
+        <span>Next</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+    </button>
+</div>
+
+<!-- ECLIPSE VEIL + PARTICLE BURST (experience layer) -->
+<div class="xp-veil" id="xpVeil" aria-hidden="true"><div class="xp-veil-disc"></div></div>
+<canvas id="xpBurstCanvas" class="xp-burst" aria-hidden="true"></canvas>
+
+<!-- COMPACT OFF-SCREEN CARD FOR PNG EXPORT -->
+<div id="exportReportCard" class="export-report-card">
+    <div class="export-card-header">
+        <div class="export-card-brand"><i class="fa-solid fa-atom"></i> ECLIPSE7</div>
+        <div class="export-card-badge" id="exportProfileTag">JEE MAIN</div>
+    </div>
+    <div class="export-card-body">
+        <div class="export-card-name" id="exportStudentName">STUDENT NAME</div>
+        <div class="export-card-test" id="exportTestName">TEST NAME</div>
+        <div class="export-card-score-box">
+            <span class="export-score-lbl">FINAL SCORE</span>
+            <span class="export-score-val" id="exportScoreVal">0.00</span>
+            <span class="export-score-sub" id="exportScoreSub">0.00% | Band: S</span>
+        </div>
+        <div class="export-metrics-row">
+            <div>Accuracy: <strong id="exportAcc">0%</strong></div>
+            <div>Attempts: <strong id="exportAtt">0</strong></div>
+            <div>Penalty: <strong id="exportPen">0</strong></div>
+        </div>
+    </div>
+    <div class="export-card-footer">
+        <span id="exportDocId">ID: E7-0000</span>
+        <span>https://eclipse7.odoo.com/</span>
+    </div>
+</div>
+
+<!-- COMPARISON MODAL -->
+<div class="drawer-overlay" id="compareModalOverlay"></div>
+<div class="compare-modal" id="compareModal" role="dialog" aria-modal="true" aria-labelledby="xpCompareTitle" data-testid="compare-modal">
+    <div class="drawer-header">
+        <div class="drawer-title">
+            <i class="fa-solid fa-code-compare text-cyan" aria-hidden="true"></i>
+            <h3 id="xpCompareTitle">Assessment Comparison Engine</h3>
+        </div>
+        <button class="drawer-close-btn" id="closeCompareBtn" type="button" aria-label="Close comparison" data-testid="close-compare-btn">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div class="compare-selection-row">
+        <select id="compareSelect1" class="compare-dropdown" aria-label="First assessment"></select>
+        <span class="vs-badge">VS</span>
+        <select id="compareSelect2" class="compare-dropdown" aria-label="Second assessment"></select>
+    </div>
+    <div id="comparisonGrid" class="comparison-grid-container"></div>
+</div>
+
+<!-- HISTORY DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<aside class="history-drawer" id="historyDrawer" role="dialog" aria-modal="true" aria-labelledby="xpVaultTitle" data-testid="history-drawer">
+    <div class="drawer-header">
+        <div class="drawer-title">
+            <i class="fa-solid fa-box-archive text-cyan" aria-hidden="true"></i>
+            <h3 id="xpVaultTitle">Assessment Vault</h3>
+        </div>
+        <button class="drawer-close-btn" id="closeHistoryBtn" type="button" aria-label="Close vault" data-testid="close-vault-btn">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <div id="history-onboarding-banner" class="history-onboarding-banner">
+        <i class="fa-solid fa-lightbulb text-cyan" aria-hidden="true"></i>
+        <span>Track performance trends, compare test instances, and export standardized analytics reports.</span>
+    </div>
+
+    <div class="drawer-search-bar">
+        <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+        <input type="text" id="historySearchInput" placeholder="Filter student or test name..." aria-label="Filter history" data-testid="history-search-input">
+    </div>
+
+    <div class="drawer-actions-stack">
+        <button type="button" class="fluent-btn btn-primary-gradient drawer-action-btn bubble-click" id="btnGenerateFullReport" data-testid="vault-full-report-btn">
+            <i class="fa-solid fa-chart-line" aria-hidden="true"></i> View Complete Vault Report
+        </button>
+        <div class="drawer-sub-actions">
+            <button type="button" class="history-ctrl-btn" id="btnHistoryPDF" data-testid="vault-pdf-btn">
+                <i class="fa-solid fa-file-pdf text-rose" aria-hidden="true"></i> PDF
+            </button>
+            <button type="button" class="history-ctrl-btn" id="btnHistoryJSON" data-testid="vault-json-btn">
+                <i class="fa-solid fa-file-code text-cyan" aria-hidden="true"></i> JSON
+            </button>
+            <button type="button" class="history-ctrl-btn" id="btnHistoryCSV" data-testid="vault-csv-btn">
+                <i class="fa-solid fa-file-csv text-emerald" aria-hidden="true"></i> CSV
+            </button>
+            <button type="button" class="history-ctrl-btn" id="btnHistoryCompare" data-testid="vault-compare-btn">
+                <i class="fa-solid fa-code-compare text-blue" aria-hidden="true"></i> Compare
+            </button>
+        </div>
+    </div>
+
+    <div class="drawer-actions">
+        <span class="history-total-lbl" id="historyTotalText">0 Records Stored</span>
+        <button type="button" class="clear-all-btn" id="btnClearHistory" data-testid="vault-purge-btn">
+            <i class="fa-solid fa-trash-can" aria-hidden="true"></i> Purge Vault
+        </button>
+    </div>
+
+    <div class="history-list-scroll" id="historyListContainer" data-testid="history-list"></div>
+</aside>
+
+<!-- FULL REPORT MODAL -->
+<div class="drawer-overlay" id="fullReportOverlay"></div>
+<div class="full-report-modal" id="fullReportModal" role="dialog" aria-modal="true" aria-labelledby="xpReportTitle" data-testid="full-report-modal">
+    <div class="drawer-header">
+        <div class="drawer-title">
+            <i class="fa-solid fa-graduation-cap text-cyan" aria-hidden="true"></i>
+            <h3 id="xpReportTitle">ECLIPSE7 Vault Performance Report</h3>
+        </div>
+        <button class="drawer-close-btn" id="closeFullReportBtn" type="button" aria-label="Close report" data-testid="close-report-btn">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <div id="fullReportContent" class="full-report-scroll-body"></div>
+</div>
+
+<!-- Firebase SDKs & Auth Integration -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getAuth, 
+    GoogleAuthProvider, 
+    signInWithPopup, 
+    signOut, 
+    onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { 
+    getDatabase, 
+    ref, 
+    push, 
+    set, 
+    remove,
+    onValue 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBO9gwXMF789rIhNUktZdmzFXzD-ZAlXLw",
+    authDomain: "eclipse7-calculator.firebaseapp.com",
+    databaseURL: "https://eclipse7-calculator-default-rtdb.firebaseio.com",
+    projectId: "eclipse7-calculator",
+    storageBucket: "eclipse7-calculator.firebasestorage.app",
+    messagingSenderId: "336437169450",
+    appId: "1:336437169450:web:0f136e5a7497d16e746253",
+    measurementId: "G-H5H3LPQBPC"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const database = getDatabase(app);
+  const provider = new GoogleAuthProvider();
+
+  let currentUser = null;
+  let dbScoresUnsubscribe = null;
+
+  onAuthStateChanged(auth, (user) => {
+    const defaultProf = document.getElementById("default-profile");
+    const userProfile = document.getElementById("user-profile");
+    const tooltip = document.getElementById("signin-tooltip");
+    const studentNameInput = document.getElementById("studentName");
+
+    if (user) {
+      currentUser = user;
+      if (defaultProf) defaultProf.classList.add("hidden");
+      if (userProfile) {
+        userProfile.classList.remove("hidden");
+        document.getElementById("user-name").innerText = user.displayName || "User";
+        document.getElementById("user-avatar").src = user.photoURL || "https://lh3.googleusercontent.com/a/default-user";
+      }
+      if (tooltip) tooltip.classList.add("hidden");
+
+      if (studentNameInput && !studentNameInput.value.trim() && user.displayName) {
+        studentNameInput.value = user.displayName;
+      }
+
+      const userScoresRef = ref(database, 'users/' + user.uid + '/scores');
+      dbScoresUnsubscribe = onValue(userScoresRef, (snapshot) => {
+        const data = snapshot.val();
+        const cloudHistory = [];
+        if (data) {
+          Object.keys(data).forEach(key => {
+            cloudHistory.unshift({ id: key, firebaseKey: key, ...data[key] });
+          });
+        }
+        
+        if (window.mergeCloudAndLocalHistory) {
+          window.mergeCloudAndLocalHistory(cloudHistory);
+        }
+      });
+
+    } else {
+      currentUser = null;
+      if (dbScoresUnsubscribe) {
+        dbScoresUnsubscribe();
+        dbScoresUnsubscribe = null;
+      }
+      if (defaultProf) defaultProf.classList.remove("hidden");
+      if (userProfile) userProfile.classList.add("hidden");
+    }
+  });
+
+  window.loginWithGoogle = async function() {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Sign-in error:", error);
+      if (window.triggerSystemToastNotification) {
+        window.triggerSystemToastNotification("Sign-In canceled or popup blocked.", true);
+      }
+    }
+  };
+
+  window.logout = async function() {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Sign-out error:", error);
+    }
+  };
+
+  window.saveScoreToDatabase = function(recordData) {
+    if (!currentUser) return;
+
+    const userScoresRef = ref(database, 'users/' + currentUser.uid + '/scores');
+    const newScoreRef = push(userScoresRef);
+    const cleanPayload = JSON.parse(JSON.stringify(recordData));
+
+    set(newScoreRef, {
+      ...cleanPayload,
+      createdAt: Date.now()
+    }).then(() => {
+      if (window.triggerSystemToastNotification) {
+        window.triggerSystemToastNotification("Synced with ECLIPSE7 Cloud Vault", false);
+      }
+    }).catch((error) => {
+      console.error("Error saving score to Firebase:", error);
+    });
+  };
+
+  window.deleteScoreFromDatabase = function(firebaseKey) {
+    if (!currentUser || !firebaseKey) return;
+    const scoreRef = ref(database, `users/${currentUser.uid}/scores/${firebaseKey}`);
+    remove(scoreRef).catch(err => console.error("Cloud item deletion failed:", err));
+  };
+
+  window.clearAllDatabaseScores = function() {
+    if (!currentUser) return;
+    const userScoresRef = ref(database, `users/${currentUser.uid}/scores`);
+    remove(userScoresRef).catch(err => console.error("Cloud purge failed:", err));
+  };
+
+  window.getCurrentUser = function() {
+    return currentUser;
+  };
+</script>
+<script src="script.js"></script>
+</body>
+</html>
