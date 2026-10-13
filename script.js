@@ -1362,213 +1362,225 @@ function toggleFullReportModal(show) {
 // PDF EXPORT ENGINE WITH SUBJECT BREAKDOWN & VERIFICATION PANEL STAMP
 // ============================================================================
 function createPDFDocumentObject(canonicalObj) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
-    
-    const profile = (canonicalObj.assessment.examProfile).toUpperCase();
-    const student = canonicalObj.student.name.toUpperCase();
-    const test = canonicalObj.assessment.testName.toUpperCase();
-    const timestamp = canonicalObj.timestamp;
+    return new Promise((resolve) => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        
+        const profile = (canonicalObj.assessment.examProfile).toUpperCase();
+        const student = canonicalObj.student.name.toUpperCase();
+        const test = canonicalObj.assessment.testName.toUpperCase();
+        const timestamp = canonicalObj.timestamp;
 
-    // Background Canvas Frame
-    doc.setFillColor(255, 255, 255);
-    doc.rect(0, 0, 210, 297, 'F');
-    
-    // Subtle Grid Blueprint Lines
-    doc.setDrawColor(235, 242, 250); doc.setLineWidth(0.2);
-    for (let i = 10; i < 210; i += 15) doc.line(i, 0, i, 297);
-    for (let j = 10; j < 297; j += 15) doc.line(0, j, 210, j);
+        // Background Canvas Frame
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, 210, 297, 'F');
+        
+        // Subtle Grid Blueprint Lines
+        doc.setDrawColor(235, 242, 250); doc.setLineWidth(0.2);
+        for (let i = 10; i < 210; i += 15) doc.line(i, 0, i, 297);
+        for (let j = 10; j < 297; j += 15) doc.line(0, j, 210, j);
 
-    // Main Page Border
-    doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.4);
-    doc.rect(8, 8, 194, 281);
+        // Main Page Border
+        doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.4);
+        doc.rect(8, 8, 194, 281);
 
-    // Header Branding Banner
-    doc.setFillColor(15, 23, 42); doc.rect(10, 10, 190, 32, 'F');
-    doc.setDrawColor(0, 210, 255); doc.setLineWidth(0.6); doc.rect(10, 10, 190, 32, 'D');
+        // Header Branding Banner
+        doc.setFillColor(15, 23, 42); doc.rect(10, 10, 190, 32, 'F');
+        doc.setDrawColor(0, 210, 255); doc.setLineWidth(0.6); doc.rect(10, 10, 190, 32, 'D');
 
-    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("EXAMINATION PERFORMANCE & METRIC ANALYTICS REPORT", 14, 20);
-    
-    doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(0, 210, 255);
-    doc.text(`ECLIPSE7 ENGINE // PROFILE: ${profile} // ID: ${canonicalObj.id}`, 14, 26);
-    
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
-    doc.text("AUTHOR: SAIPRASAD BARURE / PRASAD REDDY | OFFICIAL REPORT GENERATOR", 14, 34);
+        doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(14);
+        doc.text("EXAMINATION PERFORMANCE & METRIC ANALYTICS REPORT", 14, 20);
+        
+        doc.setFont("courier", "bold"); doc.setFontSize(8); doc.setTextColor(0, 210, 255);
+        doc.text(`ECLIPSE7 ENGINE // PROFILE: ${profile} // ID: ${canonicalObj.id}`, 14, 26);
+        
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+        doc.text("AUTHOR: SAIPRASAD BARURE / PRASAD REDDY | OFFICIAL REPORT GENERATOR", 14, 34);
 
-    // Candidate Identity & Metric Summary Panel
-    let cardY = 46;
-    doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" CANDIDATE PROFILE MATRIX", 12, cardY + 4.2);
-    
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
-    doc.rect(10, cardY + 6, 92, 26, 'DF');
-    doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
-    doc.text("CANDIDATE NAME    :", 14, cardY + 14);
-    doc.text("TARGET ASSESSMENT  :", 14, cardY + 20);
-    doc.text("TIMESTAMP           :", 14, cardY + 26);
-    
-    doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
-    doc.text(student.length > 20 ? student.substring(0, 20) + "..." : student, 44, cardY + 14);
-    doc.text(test.length > 20 ? test.substring(0, 20) + "..." : test, 44, cardY + 20);
-    doc.setFont("courier", "bold"); doc.setFontSize(6.5); doc.text(timestamp, 44, cardY + 26);
+        // Candidate Identity & Metric Summary Panel
+        let cardY = 46;
+        doc.setFillColor(241, 245, 249); doc.rect(10, cardY, 92, 6, 'F');
+        doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, cardY, 92, 6, 'D');
+        doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+        doc.text(" CANDIDATE PROFILE MATRIX", 12, cardY + 4.2);
+        
+        doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
+        doc.rect(10, cardY + 6, 92, 26, 'DF');
+        doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
+        doc.text("CANDIDATE NAME    :", 14, cardY + 14);
+        doc.text("TARGET ASSESSMENT  :", 14, cardY + 20);
+        doc.text("TIMESTAMP           :", 14, cardY + 26);
+        
+        doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
+        doc.text(student.length > 20 ? student.substring(0, 20) + "..." : student, 44, cardY + 14);
+        doc.text(test.length > 20 ? test.substring(0, 20) + "..." : test, 44, cardY + 20);
+        doc.setFont("courier", "bold"); doc.setFontSize(6.5); doc.text(timestamp, 44, cardY + 26);
 
-    doc.setFillColor(241, 245, 249); doc.rect(108, cardY, 92, 6, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(108, cardY, 92, 6, 'D');
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text(" GLOBAL EVALUATION OVERVIEW", 110, cardY + 4.2);
-    
-    doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
-    doc.rect(108, cardY + 6, 92, 26, 'DF');
-    doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
-    doc.text("TOTAL QUESTIONS    :", 112, cardY + 13);
-    doc.text("MAX EVAL MARKS      :", 112, cardY + 19);
-    doc.text("TOTAL ATTEMPTS      :", 112, cardY + 25);
-    doc.text("INCORRECT FAULTS    :", 112, cardY + 31);
-    
-    doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
-    doc.text(`${canonicalObj.scoring.totalQuestions} ITEMS`, 148, cardY + 13);
-    doc.text(`${canonicalObj.scoring.maxMarks} MARKS`, 148, cardY + 19);
-    doc.text(`${canonicalObj.scoring.attempted} UNITS`, 148, cardY + 25);
-    doc.setTextColor(225, 29, 72); doc.text(`${canonicalObj.scoring.wrong} FAULTS`, 148, cardY + 31);
+        doc.setFillColor(241, 245, 249); doc.rect(108, cardY, 92, 6, 'F');
+        doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(108, cardY, 92, 6, 'D');
+        doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+        doc.text(" GLOBAL EVALUATION OVERVIEW", 110, cardY + 4.2);
+        
+        doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225);
+        doc.rect(108, cardY + 6, 92, 26, 'DF');
+        doc.setFont("helvetica", "bold"); doc.setTextColor(100, 116, 139); doc.setFontSize(7);
+        doc.text("TOTAL QUESTIONS    :", 112, cardY + 13);
+        doc.text("MAX EVAL MARKS      :", 112, cardY + 19);
+        doc.text("TOTAL ATTEMPTS      :", 112, cardY + 25);
+        doc.text("INCORRECT FAULTS    :", 112, cardY + 31);
+        
+        doc.setTextColor(15, 23, 42); doc.setFontSize(7.5);
+        doc.text(`${canonicalObj.scoring.totalQuestions} ITEMS`, 148, cardY + 13);
+        doc.text(`${canonicalObj.scoring.maxMarks} MARKS`, 148, cardY + 19);
+        doc.text(`${canonicalObj.scoring.attempted} UNITS`, 148, cardY + 25);
+        doc.setTextColor(225, 29, 72); doc.text(`${canonicalObj.scoring.wrong} FAULTS`, 148, cardY + 31);
 
-    // Hero Score Panel
-    let scoreY = 82;
-    doc.setFillColor(248, 250, 252); doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.5);
-    doc.rect(10, scoreY, 190, 22, 'DF');
+        // Hero Score Panel
+        let scoreY = 82;
+        doc.setFillColor(248, 250, 252); doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.5);
+        doc.rect(10, scoreY, 190, 22, 'DF');
 
-    doc.setTextColor(37, 99, 235); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-    doc.text("FINAL EVALUATED SCORE", 15, scoreY + 6);
-    doc.setFont("courier", "bold"); doc.setFontSize(16); doc.setTextColor(15, 23, 42);
-    doc.text(`${canonicalObj.result.finalScore.toFixed(2)} / ${canonicalObj.scoring.maxMarks}`, 15, scoreY + 16);
+        doc.setTextColor(37, 99, 235); doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+        doc.text("FINAL EVALUATED SCORE", 15, scoreY + 6);
+        doc.setFont("courier", "bold"); doc.setFontSize(16); doc.setTextColor(15, 23, 42);
+        doc.text(`${canonicalObj.result.finalScore.toFixed(2)} / ${canonicalObj.scoring.maxMarks}`, 15, scoreY + 16);
 
-    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("EFFICIENCY %", 100, scoreY + 6);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
-    doc.text(`${canonicalObj.result.scorePercentage}%`, 100, scoreY + 15);
+        doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
+        doc.text("EFFICIENCY %", 100, scoreY + 6);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
+        doc.text(`${canonicalObj.result.scorePercentage}%`, 100, scoreY + 15);
 
-    doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-    doc.text("ACCURACY", 150, scoreY + 6);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
-    doc.text(`${canonicalObj.result.accuracy}%`, 150, scoreY + 15);
+        doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal"); doc.setFontSize(7);
+        doc.text("ACCURACY", 150, scoreY + 6);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
+        doc.text(`${canonicalObj.result.accuracy}%`, 150, scoreY + 15);
 
-    let nextY = scoreY + 28;
+        let nextY = scoreY + 28;
 
-    // SUBJECT WISE BREAKDOWN ANALYSIS TABLE
-    if (canonicalObj.subjects && canonicalObj.subjects.enabled) {
-        doc.setFillColor(15, 23, 42); doc.rect(10, nextY, 190, 6, 'F');
+        // SUBJECT WISE BREAKDOWN ANALYSIS TABLE
+        if (canonicalObj.subjects && canonicalObj.subjects.enabled) {
+            doc.setFillColor(15, 23, 42); doc.rect(10, nextY, 190, 6, 'F');
+            doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+            doc.text(" SUBJECT-WISE PERFORMANCE ANALYSIS BREAKDOWN", 12, nextY + 4.2);
+
+            const thirdLabel = canonicalObj.assessment.examProfile === 'neet' ? 'BIOLOGY' : 'MATHEMATICS';
+            const subData = canonicalObj.subjects.data;
+
+            const tableBody = [
+                [
+                    'PHYSICS', 
+                    subData.phy.total, 
+                    subData.phy.correct, 
+                    subData.phy.wrong, 
+                    subData.phy.skipped, 
+                    `${subData.phy.score.toFixed(2)} / ${subData.phy.maxMarks}`
+                ],
+                [
+                    'CHEMISTRY', 
+                    subData.chem.total, 
+                    subData.chem.correct, 
+                    subData.chem.wrong, 
+                    subData.chem.skipped, 
+                    `${subData.chem.score.toFixed(2)} / ${subData.chem.maxMarks}`
+                ],
+                [
+                    thirdLabel, 
+                    subData.mathBio.total, 
+                    subData.mathBio.correct, 
+                    subData.mathBio.wrong, 
+                    subData.mathBio.skipped, 
+                    `${subData.mathBio.score.toFixed(2)} / ${subData.mathBio.maxMarks}`
+                ]
+            ];
+
+            doc.autoTable({
+                startY: nextY + 6,
+                head: [['Subject', 'Total Qs', 'Correct', 'Wrong', 'Skipped', 'Net Score']],
+                body: tableBody,
+                margin: { left: 10, right: 10 },
+                theme: 'grid',
+                headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
+                bodyStyles: { fontSize: 8, textColor: [15, 23, 42] },
+                alternateRowStyles: { fillColor: [248, 250, 252] }
+            });
+
+            nextY = doc.lastAutoTable.finalY + 8;
+        }
+
+        // STATISTICAL RANK & PERCENTILE ESTIMATION PANEL
+        doc.setFillColor(241, 245, 249); doc.rect(10, nextY, 190, 6, 'F');
+        doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, nextY, 190, 6, 'D');
+        doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+        doc.text(" STATISTICAL PROJECTION & PERCENTILE ESTIMATION", 12, nextY + 4.2);
+
+        doc.setFillColor(255, 255, 255); doc.rect(10, nextY + 6, 190, 22, 'DF');
+        doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
+        doc.text("ESTIMATED PERCENTILE RANGE :", 14, nextY + 14);
+        doc.text("ESTIMATED RANK RANGE       :", 14, nextY + 22);
+
+        doc.setTextColor(37, 99, 235); doc.setFontSize(8);
+        doc.text(canonicalObj.prediction.percentileRange, 64, nextY + 14);
+        doc.text(canonicalObj.prediction.rankRange, 64, nextY + 22);
+
+        doc.setTextColor(100, 116, 139); doc.setFontSize(7);
+        doc.text("ESTIMATION MODEL : " + canonicalObj.prediction.methodology, 120, nextY + 14);
+        doc.text("CONFIDENCE LEVEL  : " + canonicalObj.prediction.confidence, 120, nextY + 22);
+
+        nextY += 34;
+
+        // FINAL SIGN-OFF & VERIFICATION PANEL WITH STAMP
+        const stampPanelY = 220;
+        doc.setFillColor(248, 250, 252); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
+        doc.rect(10, stampPanelY, 190, 60, 'DF');
+
+        doc.setFillColor(15, 23, 42); doc.rect(10, stampPanelY, 190, 6, 'F');
         doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
-        doc.text(" SUBJECT-WISE PERFORMANCE ANALYSIS BREAKDOWN", 12, nextY + 4.2);
+        doc.text(" OFFICIAL VERIFICATION & AUDIT CERTIFICATION", 12, stampPanelY + 4.2);
 
-        const thirdLabel = canonicalObj.assessment.examProfile === 'neet' ? 'BIOLOGY' : 'MATHEMATICS';
-        const subData = canonicalObj.subjects.data;
+        doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+        doc.text("ECLIPSE7 PERFORMANCE VERIFICATION SEAL", 14, stampPanelY + 14);
 
-        const tableBody = [
-            [
-                'PHYSICS', 
-                subData.phy.total, 
-                subData.phy.correct, 
-                subData.phy.wrong, 
-                subData.phy.skipped, 
-                `${subData.phy.score.toFixed(2)} / ${subData.phy.maxMarks}`
-            ],
-            [
-                'CHEMISTRY', 
-                subData.chem.total, 
-                subData.chem.correct, 
-                subData.chem.wrong, 
-                subData.chem.skipped, 
-                `${subData.chem.score.toFixed(2)} / ${subData.chem.maxMarks}`
-            ],
-            [
-                thirdLabel, 
-                subData.mathBio.total, 
-                subData.mathBio.correct, 
-                subData.mathBio.wrong, 
-                subData.mathBio.skipped, 
-                `${subData.mathBio.score.toFixed(2)} / ${subData.mathBio.maxMarks}`
-            ]
-        ];
+        doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
+        doc.text(`Document Signature Hash : SHA256-${canonicalObj.id}`, 14, stampPanelY + 22);
+        doc.text(`System Generation Time : ${timestamp}`, 14, stampPanelY + 28);
+        doc.text(`Lead Platform Engineer : Saiprasad Barure / Prasad Reddy`, 14, stampPanelY + 34);
+        doc.text(`Platform Portal         : https://eclipse7.odoo.com/`, 14, stampPanelY + 40);
+        doc.text(`Verification Status     : AUTHENTICATED LOCAL EVALUATION`, 14, stampPanelY + 46);
 
-        doc.autoTable({
-            startY: nextY + 6,
-            head: [['Subject', 'Total Qs', 'Correct', 'Wrong', 'Skipped', 'Net Score']],
-            body: tableBody,
-            margin: { left: 10, right: 10 },
-            theme: 'grid',
-            headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
-            bodyStyles: { fontSize: 8, textColor: [15, 23, 42] },
-            alternateRowStyles: { fillColor: [248, 250, 252] }
-        });
-
-        nextY = doc.lastAutoTable.finalY + 8;
-    }
-
-    // STATISTICAL RANK & PERCENTILE ESTIMATION PANEL
-    doc.setFillColor(241, 245, 249); doc.rect(10, nextY, 190, 6, 'F');
-    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.3); doc.rect(10, nextY, 190, 6, 'D');
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
-    doc.text(" STATISTICAL PROJECTION & PERCENTILE ESTIMATION", 12, nextY + 4.2);
-
-    doc.setFillColor(255, 255, 255); doc.rect(10, nextY + 6, 190, 22, 'DF');
-    doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
-    doc.text("ESTIMATED PERCENTILE RANGE :", 14, nextY + 14);
-    doc.text("ESTIMATED RANK RANGE       :", 14, nextY + 22);
-
-    doc.setTextColor(37, 99, 235); doc.setFontSize(8);
-    doc.text(canonicalObj.prediction.percentileRange, 64, nextY + 14);
-    doc.text(canonicalObj.prediction.rankRange, 64, nextY + 22);
-
-    doc.setTextColor(100, 116, 139); doc.setFontSize(7);
-    doc.text("ESTIMATION MODEL : " + canonicalObj.prediction.methodology, 120, nextY + 14);
-    doc.text("CONFIDENCE LEVEL  : " + canonicalObj.prediction.confidence, 120, nextY + 22);
-
-    nextY += 34;
-
-    // FINAL SIGN-OFF & VERIFICATION PANEL WITH STAMP
-    const stampPanelY = 220;
-    doc.setFillColor(248, 250, 252); doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.4);
-    doc.rect(10, stampPanelY, 190, 60, 'DF');
-
-    doc.setFillColor(15, 23, 42); doc.rect(10, stampPanelY, 190, 6, 'F');
-    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
-    doc.text(" OFFICIAL VERIFICATION & AUDIT CERTIFICATION", 12, stampPanelY + 4.2);
-
-    doc.setTextColor(15, 23, 42); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
-    doc.text("ECLIPSE7 PERFORMANCE VERIFICATION SEAL", 14, stampPanelY + 14);
-
-    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
-    doc.text(`Document Signature Hash : SHA256-${canonicalObj.id}`, 14, stampPanelY + 22);
-    doc.text(`System Generation Time : ${timestamp}`, 14, stampPanelY + 28);
-    doc.text(`Lead Platform Engineer : Saiprasad Barure / Prasad Reddy`, 14, stampPanelY + 34);
-    doc.text(`Platform Portal         : https://eclipse7.odoo.com/`, 14, stampPanelY + 40);
-    doc.text(`Verification Status     : AUTHENTICATED LOCAL EVALUATION`, 14, stampPanelY + 46);
-
-    // Try loading stamp.png image into PDF
-    try {
+        // Preload stamp.png before adding to PDF
         const stampImg = new Image();
         stampImg.src = 'stamp.png';
-        doc.addImage(stampImg, 'PNG', 145, stampPanelY + 8, 48, 48);
-    } catch (e) {
-        // Fallback Stamp Badge if image loading fails
-        doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.8);
-        doc.rect(145, stampPanelY + 12, 48, 40);
-        doc.setTextColor(37, 99, 235); doc.setFont("helvetica", "bold"); doc.setFontSize(7);
-        doc.text("ECLIPSE7 SEAL", 152, stampPanelY + 30);
-    }
 
-    return doc;
+        stampImg.onload = () => {
+            try {
+                doc.addImage(stampImg, 'PNG', 145, stampPanelY + 8, 48, 48);
+            } catch (err) {
+                drawFallbackSeal();
+            }
+            resolve(doc);
+        };
+
+        stampImg.onerror = () => {
+            drawFallbackSeal();
+            resolve(doc);
+        };
+
+        function drawFallbackSeal() {
+            doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.8);
+            doc.rect(145, stampPanelY + 12, 48, 40);
+            doc.setTextColor(37, 99, 235); doc.setFont("helvetica", "bold"); doc.setFontSize(7);
+            doc.text("ECLIPSE7 SEAL", 152, stampPanelY + 30);
+        }
+    });
 }
 
-function downloadPDFReportSequence() {
+async function downloadPDFReportSequence() {
     if (!activeCanonicalResult) {
         triggerSystemToastNotification("Calculate an assessment first.");
         return;
     }
 
-    const doc = createPDFDocumentObject(activeCanonicalResult);
+    const doc = await createPDFDocumentObject(activeCanonicalResult);
     const fileName = `${activeCanonicalResult.student.name.replace(/ /g, "_")}_ECLIPSE7_Report.pdf`;
     doc.save(fileName);
 }
