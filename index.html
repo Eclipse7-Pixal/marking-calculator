@@ -792,6 +792,36 @@
     <div class="history-list-scroll" id="historyListContainer" data-testid="history-list"></div>
 </aside>
 
+    <!-- KCC SYNC MODAL -->
+<div class="drawer-overlay" id="kccModalOverlay"></div>
+<div class="compare-modal" id="kccModal" role="dialog" aria-modal="true" aria-labelledby="kccModalTitle" data-testid="kcc-modal">
+    <div class="drawer-header">
+        <div class="drawer-title">
+            <i class="fa-solid fa-cloud-arrow-down text-cyan" aria-hidden="true"></i>
+            <h3 id="kccModalTitle">Konale IIT Centre (KCC) Portal Sync</h3>
+        </div>
+        <button class="drawer-close-btn" id="closeKccBtn" type="button" aria-label="Close KCC Sync" data-testid="close-kcc-btn">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div class="drawer-search-bar" style="margin-top: 10px;">
+        <p style="font-size: 0.85rem; color: var(--text-2); margin-bottom: 14px;">
+            Enter your KCC portal credentials to securely fetch your test marks and sync them directly into ECLIPSE7.
+        </p>
+        <div class="input-field-group xp-field" style="margin-bottom: 14px; padding-top: 0;">
+            <input type="text" id="kccUsername" placeholder=" " autocomplete="off" style="font-size: 1.1rem; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface);">
+            <label class="soft-field-label" for="kccUsername" style="position: static; transform: none; font-size: 0.75rem; margin-bottom: 4px; display: block;">KCC Username / Roll No</label>
+        </div>
+        <div class="input-field-group xp-field" style="margin-bottom: 18px; padding-top: 0;">
+            <input type="password" id="kccPassword" placeholder=" " autocomplete="current-password" style="font-size: 1.1rem; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface);">
+            <label class="soft-field-label" for="kccPassword" style="position: static; transform: none; font-size: 0.75rem; margin-bottom: 4px; display: block;">Portal Password</label>
+        </div>
+        <button type="button" id="btnExecuteKccSync" class="fluent-btn btn-primary-gradient drawer-action-btn bubble-click" style="width: 100%;">
+            <i class="fa-solid fa-sync" aria-hidden="true"></i> Authenticate &amp; Sync Scores
+        </button>
+    </div>
+</div>
+
 <!-- FULL REPORT MODAL -->
 <div class="drawer-overlay" id="fullReportOverlay"></div>
 <div class="full-report-modal" id="fullReportModal" role="dialog" aria-modal="true" aria-labelledby="xpReportTitle" data-testid="full-report-modal">
