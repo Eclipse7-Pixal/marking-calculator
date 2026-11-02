@@ -353,6 +353,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
+    // KCC Modal Event Handlers
+    document.getElementById('closeKccBtn')?.addEventListener('click', closeKccModal);
+    document.getElementById('kccModalOverlay')?.addEventListener('click', closeKccModal);
+    document.getElementById('btnExecuteKccSync')?.addEventListener('click', executeKccSync);
+    
     document.getElementById('auth-container')?.addEventListener('click', handleProfileTap);
     document.getElementById('closeTooltipBtn')?.addEventListener('click', closeTooltip);
     document.getElementById('theme-toggle-btn')?.addEventListener('click', toggleThemeWithReveal);
@@ -1744,6 +1749,82 @@ async function triggerShareMenu() {
 // above; no calculation logic is duplicated or altered.
 // ============================================================================
 // ============================================================================
+// ============================================================================
+// KCC PORTAL SYNC & VERCEL BACKEND INTEGRATION
+// ============================================================================
+
+function openKccModal() {
+    const modal = document.getElementById('kccModal');
+    const overlay = document.getElementById('kccModalOverlay');
+    if (modal && overlay) {
+        modal.classList.add('active');
+        overlay.classList.add('active');
+    }
+}
+
+function closeKccModal() {
+    const modal = document.getElementById('kccModal');
+    const overlay = document.getElementById('kccModalOverlay');
+    if (modal && overlay) {
+        modal.classList.remove('active');
+        overlay.classList.remove('active');
+    }
+}
+
+async function executeKccSync() {
+    const usernameInput = document.getElementById('kccUsername');
+    const passwordInput = document.getElementById('kccPassword');
+    
+    const username = usernameInput ? usernameInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value.trim() : '';
+
+    if (!username || !password) {
+        triggerSystemToastNotification("Please enter both KCC username and password.");
+        return;
+    }
+
+    triggerSystemToastNotification("Connecting to Konale IIT Centre portal...", false);
+
+    try {
+        // Replace with your exact Vercel deployment URL + /api/kcc-login
+        const vercelApiUrl = 'https://marking-calculator.vercel.app/api/kcc-login';
+
+        const response = await fetch(vercelApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'KCC authentication failed.');
+        }
+
+        triggerSystemToastNotification("Successfully synced with KCC Portal!", false);
+        closeKccModal();
+
+        if (data.studentName) document.getElementById('studentName').value = data.studentName;
+        if (data.testName) document.getElementById('testName').value = data.testName;
+        if (data.totalQs) document.getElementById('totalQs').value = data.totalQs;
+        if (data.maxMarks) document.getElementById('maxMarks').value = data.maxMarks;
+        if (data.attempted) document.getElementById('attempted').value = data.attempted;
+        if (data.wrong) document.getElementById('wrong').value = data.wrong;
+
+        executeCalculationSequence();
+
+    } catch (error) {
+        console.error("KCC Sync Error:", error);
+        triggerSystemToastNotification(`Sync Error: ${error.message}`);
+    }
+}
+
+// Bind KCC Modal Listeners on DOM Load
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('closeKccBtn')?.addEventListener('click', closeKccModal);
+    document.getElementById('kccModalOverlay')?.addEventListener('click', closeKccModal);
+    document.getElementById('btnExecuteKccSync')?.addEventListener('click', executeKccSync);
+};
 
 const XP = {
     step: 0,
